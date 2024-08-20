@@ -9,7 +9,7 @@ import time
 import numpy as np
 import cv2 as cv
 from KalmanFilter import KalmanFilter
-from pseyepy import Camera
+# from pseyepy import Camera
 from Singleton import Singleton
 
 
@@ -21,10 +21,17 @@ class Cameras:
         f = open(filename)
         self.camera_params = json.load(f)
 
-        self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
-        self.num_cameras = len(self.cameras.exposure)
-        print(self.num_cameras)
+        self.cameras = []
+        # todo have default to specific resolution of cameras 
+        # self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
 
+        self.num_cameras = len(self.camera_params) # number of cameras based on camera-params.json
+        print("num cameras",self.num_cameras )
+        for camera_data in self.camera_params: #use opencv instead of pseyepy
+            self.cameras.append(cv.VideoCapture(camera_data["id"]))
+
+        # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
+        print(self.num_cameras)
         self.is_capturing_points = False
 
         self.is_triangulating_points = False
@@ -61,14 +68,19 @@ class Cameras:
         self.num_objects = num_objects
         self.drone_armed = [False for i in range(0, self.num_objects)]
     
-    def edit_settings(self, exposure, gain):
-        self.cameras.exposure = [exposure] * self.num_cameras
-        self.cameras.gain = [gain] * self.num_cameras
+    def edit_settings(self, exposure, gain): #updated to work with opencv
+        for i in self.num_cameras:
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
+            self.cameras[i].set(cv.CV_CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
 
     def _camera_read(self):
-        frames, _ = self.cameras.read()
-
+        frames = []
         for i in range(0, self.num_cameras):
+            ret, frame  = self.cameras[i].read()
+            frames.append(frame)
+            print( self.camera_params[i])
+        for i in range(0, self.num_cameras):
+            # frames, _ = self.cameras[i].read()
             frames[i] = np.rot90(frames[i], k=self.camera_params[i]["rotation"])
             frames[i] = make_square(frames[i])
             frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
@@ -136,6 +148,7 @@ class Cameras:
 
     def get_frames(self):
         frames = self._camera_read()
+        # todo add check that ensures all cameras are of same resolution
         #frames = [add_white_border(frame, 5) for frame in frames]
 
         return np.hstack(frames)
@@ -212,7 +225,7 @@ def calculate_reprojection_errors(image_points, object_points, camera_poses):
 
 
 def calculate_reprojection_error(image_points, object_point, camera_poses):
-    cameras = Cameras.instance()
+    cameras = Cameras.instance() 
 
     image_points = np.array(image_points)
     none_indicies = np.where(np.all(image_points == None, axis=1))[0]
@@ -351,6 +364,8 @@ def find_point_correspondance_and_object_points(image_points, camera_poses, fram
     Ps = [] # projection matricies
     for i, camera_pose in enumerate(camera_poses):
         RT = np.c_[camera_pose["R"], camera_pose["t"]]
+        # print("debug",i,cameras.camera_params)
+        # print("debug",i,cameras.camera_params[i])
         P = cameras.camera_params[i]["intrinsic_matrix"] @ RT
         Ps.append(P)
 
@@ -536,3 +551,4 @@ def add_white_border(image, border_size):
     height, width = image.shape[:2]
     bordered_image = cv.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv.BORDER_CONSTANT, value=[255, 255, 255])
     return bordered_image
+
