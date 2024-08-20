@@ -1,4 +1,3 @@
-from typing import List, Tuple
 import numpy as np
 from scipy import linalg, optimize, signal
 import cv2 as cv
@@ -10,7 +9,7 @@ import time
 import numpy as np
 import cv2 as cv
 from KalmanFilter import KalmanFilter
-from pseyepy import Camera
+# from pseyepy import Camera
 from Singleton import Singleton
 
 
@@ -22,10 +21,20 @@ class Cameras:
         f = open(filename)
         self.camera_params = json.load(f)
 
-        self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
-        self.num_cameras = len(self.cameras.exposure)
-        print(self.num_cameras)
+        self.cameras = []
+        # todo have default to specific resolution of cameras 
+        # self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
 
+        self.num_cameras = len(self.camera_params) # number of cameras based on camera-params.json
+        # print("num cameras",self.num_cameras )
+        for camera_data in self.camera_params: #use opencv instead of pseyepy
+            cap =cv.VideoCapture(camera_data["id"])
+            # cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
+            # cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
+            self.cameras.append(cap)
+
+        # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
+        # print(self.num_cameras)
         self.is_capturing_points = False
 
         self.is_triangulating_points = False
@@ -62,14 +71,19 @@ class Cameras:
         self.num_objects = num_objects
         self.drone_armed = [False for i in range(0, self.num_objects)]
     
-    def edit_settings(self, exposure, gain):
-        self.cameras.exposure = [exposure] * self.num_cameras
-        self.cameras.gain = [gain] * self.num_cameras
+    def edit_settings(self, exposure, gain): #updated to work with opencv
+        for i in range (0,self.num_cameras):
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
+            self.cameras[i].set(cv.CV_CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
 
     def _camera_read(self):
-        frames, _ = self.cameras.read()
-
+        frames = []
         for i in range(0, self.num_cameras):
+            ret, frame  = self.cameras[i].read()
+            frames.append(frame)
+            # print( self.camera_params[i])
+        for i in range(0, self.num_cameras):
+            # frames, _ = self.cameras[i].read()
             frames[i] = np.rot90(frames[i], k=self.camera_params[i]["rotation"])
             frames[i] = make_square(frames[i])
             frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
@@ -320,15 +334,15 @@ def fundamental_from_projections(P1: np.ndarray, P2: np.ndarray) -> np.ndarray:
 
     return F
 
-def motion_from_essential(E: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+def motion_from_essential(E: np.ndarray) -> tuple[list[np.ndarray], list[np.ndarray]]:
     """
     Calculate the possible rotations and translations from the essential matrix (E).
 
     Adapted and modified from OpenCV's motionFromEssential function in the opencv_sfm module
     """
     assert E.shape == (3, 3), "Essential matrix must be 3x3."
-
-    _, R1, R2, t = cv.decomposeEssentialMat(E)
+    print(cv.decomposeEssentialMat(E))
+    R1, R2, t = cv.decomposeEssentialMat(E)
 
     rotations_matrices = [R1, R1, R2, R2]
     translations = [t, -t, t, -t]
