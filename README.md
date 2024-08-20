@@ -1,6 +1,6 @@
-# Low Cost Mocap (for drones)
+# Low Cost Mocap (FORK!)
 
-### A general purpose motion capture system built from the ground up, used to autonomously fly multiple drones indoors
+### A fork of the origional Low-Cost-Mocap project but changed to use normal usb webcams and no drones 
 
 ## YouTube Video
 Watch this for information about the project & a demo!
