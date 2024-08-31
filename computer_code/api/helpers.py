@@ -12,6 +12,7 @@ from KalmanFilter import KalmanFilter
 # from pseyepy import Camera
 from Singleton import Singleton
 
+from subprocess import PIPE, run
 
 @Singleton
 class Cameras:
@@ -27,8 +28,15 @@ class Cameras:
 
         self.num_cameras = len(self.camera_params) # number of cameras based on camera-params.json
         # print("num cameras",self.num_cameras )
+        camera_list = []
         for camera_data in self.camera_params: #use opencv instead of pseyepy
-            cap =cv.VideoCapture(camera_data["id"])
+            camera_list.extend(find_camera_id(camera_data["name"]))
+        camera_list = list(set(camera_list)) #remove duplicates 
+        for cameras in camera_list:
+
+            cap =cv.VideoCapture(cameras)
+            cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
+
             # cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
             # cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
             self.cameras.append(cap)
@@ -73,7 +81,9 @@ class Cameras:
     
     def edit_settings(self, exposure, gain): #updated to work with opencv
         for i in range (0,self.num_cameras):
-            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
+
+            self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
             self.cameras[i].set(cv.CV_CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
 
     def _camera_read(self):
@@ -214,6 +224,22 @@ class Cameras:
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
 
+def find_camera_id(camera_name):
+    """_summary_ use with macos to ensure proper camera selection 
+
+    Args:
+        camera_name (_string_): camera name as listed by lsusb 
+    """
+    # camera_name = "Arducam OV9281 USB Camera"
+    command = ["ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", '""']
+    result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    cam_id = []
+    # print(result)
+    for item in result.stderr.splitlines():
+        if camera_name in item:
+            cam_id.append(int(item.split("[")[2].split("]")[0]))
+    # print("cam id", cam_id)
+    return cam_id
 
 def calculate_reprojection_errors(image_points, object_points, camera_poses):
     errors = np.array([])

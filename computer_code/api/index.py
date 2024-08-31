@@ -6,6 +6,7 @@ import cv2 as cv
 import numpy as np
 import json
 from scipy import linalg
+from scipy.spatial.transform import Rotation as ROTTT
 
 from flask_socketio import SocketIO
 import copy
@@ -160,6 +161,7 @@ def arm_drone(data):
 def acquire_floor(data):
     cameras = Cameras.instance()
     object_points = data["objectPoints"]
+    print("object_points",object_points)
     object_points = np.array([item for sublist in object_points for item in sublist])
 
     tmp_A = []
@@ -176,9 +178,9 @@ def acquire_floor(data):
     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
     plane_normal = plane_normal / linalg.norm(plane_normal)
     up_normal = np.array([[0],[0],[1]], dtype=np.float32)
-
+    # up_normal = np.array([[0],[1],[0]], dtype=np.float32)
     plane = np.array([fit[0], fit[1], -1, fit[2]])
-
+    print("plane_normal ",plane_normal," \n up_normal ",up_normal)
     # https://math.stackexchange.com/a/897677/1012327
     G = np.array([
         [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
@@ -186,12 +188,75 @@ def acquire_floor(data):
         [0, 0, 1]
     ])
     F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
+    
     R = F @ G @ linalg.inv(F)
-
+    rotationMatrixX = np.array([
+        [1, 0, 0],
+        [0, 0, -1],
+        [0, 1, 0]
+    ])
+    # R = R @ rotationMatrixX # i dont fucking know why
     R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
+    # v = np.cross(plane_normal.T[0], up_normal.T[0])
+    # c = np.dot(plane_normal.T, up_normal)[0][0]
+    # s = linalg.norm(v)
+    # k_mat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    # R = np.eye(3) + k_mat + k_mat @ k_mat * ((1 - c) / (s ** 2))
+    T1 = np.array([
+    [1, 0, 0],
+    [0, 0, 1],
+    [0, -1, 0]
+    ])
+    T2 = np.array([
+        [1, 0, 0],
+        [0, 0, -1],
+        [0, 1, 0]
+    ])
+    T3 = np.array([
+        [0, 1, 0],
+        [-1, 0, 0],
+        [0, 0, 1]
+    ])
+    T4 = np.array([
+        [0, 0, 1],
+        [0, 1, 0],
+        [-1, 0, 0]
+    ])#close
+    T5 = np.array([
+        [0, 0, -1],
+        [0, 1, 0],
+        [1, 0, 0]
+    ])
+    T6 = np.array([
+        [-1, 0, 0],
+        [0, -1, 0],
+        [0, 0, -1]
+    ])
 
+#     T =np.array([
+#    [0, 0, 1],
+#     [0, 1, 0],
+#     [-1, 0, 0]
+#     ])
+    T6_corrected_A = np.array([
+    [-1, 0, 0],
+    [0, 1, 0],  # Invert Y-axis (change -1 to 1)
+    [0, 0, -1]
+    ])
+    T6_corrected_B = np.array([
+    [-1, 0, 0],
+    [0, -1, 0],
+    [0, 0, 1]  # Invert Z-axis (change -1 to 1)
+])
+#     # # Apply the transformation to your rotation matrix
+    R = T6_corrected_A @ R
+    # R = ROTTT.from_euler("xyz",[0,0,0]).as_matrix()
     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
-
+    print(cameras.to_world_coords_matrix)
+    # r = ROTTT.from_matrix([[0.9743824417799364,-0.21115100127976608,0.07742164948850694],
+    # [-0.07742164948850692,-0.6381427406077226,-0.7660154899218055],
+    # [-0.21115100127976608,-0.7403979317017417,0.6381427406077228]])
+    # print(r.as_euler("xyz", degrees = True))
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
 
