@@ -41,8 +41,8 @@ export default function App() {
 
   const [fps, setFps] = useState(0);
 
-  const [cameraPoses, setCameraPoses] = useState<Array<object>>([{ "R": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "t": [0, 0, 0] }, { "R": [[-0.0008290000610233772, -0.7947131755287576, 0.6069845808584402], [0.7624444396180684, 0.3922492478955913, 0.5146056781855716], [-0.6470531579819294, 0.46321862674804054, 0.6055994671226776]], "t": [-2.6049886186449047, -2.173986915510569, 0.7303458563542193] }, { "R": [[-0.9985541623963866, -0.028079891357569067, -0.045837806036037466], [-0.043210651917521686, -0.08793122558361385, 0.9951888962042462], [-0.03197537054848707, 0.995730696156702, 0.0865907408997996]], "t": [0.8953888630067902, -3.4302652822708373, 3.70967106300893] }, { "R": [[-0.4499864100408215, 0.6855400696798954, -0.5723172578577878], [-0.7145273934510732, 0.10804105689305427, 0.6912146801345055], [0.5356891214002657, 0.7199735709654319, 0.4412201517663212]], "t": [2.50141072072536, -2.313616767292231, 1.8529907514099284] }])
-  const [toWorldCoordsMatrix, setToWorldCoordsMatrix] = useState<number[][]>([[0.9941338485260931, 0.0986512964608827, -0.04433748889242502, 0.9938296704767513], [-0.0986512964608827, 0.659022672138982, -0.7456252673517598, 2.593331619023365], [0.04433748889242498, -0.7456252673517594, -0.6648888236128887, 2.9576262456228286], [0, 0, 0, 1]])
+  const [cameraPoses, setCameraPoses] = useState<Array<object>>([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
+  const [toWorldCoordsMatrix, setToWorldCoordsMatrix] = useState<number[][]>([[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]])
 
   const [currentDroneIndex, setCurrentDroneIndex] = useState(0)
   const [droneArmed, setDroneArmed] = useState(Array.apply(null, Array(NUM_DRONES)).map(() => (false)))
@@ -551,6 +551,109 @@ export default function App() {
                   value={JSON.stringify(toWorldCoordsMatrix)}
                   onChange={(event) => setToWorldCoordsMatrix(JSON.parse(event.target.value))}
                 />
+              </Col>
+            </Row>
+            <Row>
+              
+              <Col xs={12} className="pt-2">
+                <div className="d-flex align-items-center">
+                  <span className="me-2">Rotate:</span>
+                  <Button
+                    size="sm"
+                    className="me-1"
+                    onClick={() => {
+                      // Rotate +45 deg around X
+                      const angle = Math.PI / 4;
+                      const rotX = [
+                        [1, 0, 0, 0],
+                        [0, Math.cos(angle), -Math.sin(angle), 0],
+                        [0, Math.sin(angle), Math.cos(angle), 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotX, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >+X</Button>
+                  <Button
+                    size="sm"
+                    className="me-3"
+                    onClick={() => {
+                      // Rotate -45 deg around X
+                      const angle = -Math.PI / 4;
+                      const rotX = [
+                        [1, 0, 0, 0],
+                        [0, Math.cos(angle), -Math.sin(angle), 0],
+                        [0, Math.sin(angle), Math.cos(angle), 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotX, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >-X</Button>
+                  <Button
+                    size="sm"
+                    className="me-1"
+                    onClick={() => {
+                      // Rotate +45 deg around Y
+                      const angle = Math.PI / 4;
+                      const rotY = [
+                        [Math.cos(angle), 0, Math.sin(angle), 0],
+                        [0, 1, 0, 0],
+                        [-Math.sin(angle), 0, Math.cos(angle), 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotY, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >+Y</Button>
+                  <Button
+                    size="sm"
+                    className="me-3"
+                    onClick={() => {
+                      // Rotate -45 deg around Y
+                      const angle = -Math.PI / 4;
+                      const rotY = [
+                        [Math.cos(angle), 0, Math.sin(angle), 0],
+                        [0, 1, 0, 0],
+                        [-Math.sin(angle), 0, Math.cos(angle), 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotY, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >-Y</Button>
+                  <Button
+                    size="sm"
+                    className="me-1"
+                    onClick={() => {
+                      // Rotate +45 deg around Z
+                      const angle = Math.PI / 4;
+                      const rotZ = [
+                        [Math.cos(angle), -Math.sin(angle), 0, 0],
+                        [Math.sin(angle), Math.cos(angle), 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotZ, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >+Z</Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      // Rotate -45 deg around Z
+                      const angle = -Math.PI / 4;
+                      const rotZ = [
+                        [Math.cos(angle), -Math.sin(angle), 0, 0],
+                        [Math.sin(angle), Math.cos(angle), 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]
+                      ];
+                      const newMatrix = multiply(rotZ, toWorldCoordsMatrix);
+                      setToWorldCoordsMatrix(newMatrix.map(row => row.map(Number)));
+                    }}
+                  >-Z</Button>
+                </div>
               </Col>
             </Row>
           </Card>

@@ -34,3 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 __pycache__
+computer_code/bin/*
+computer_code/lib/*
+computer_code/include/*
+computer_code/lib64/*
+computer_code/venv/*
