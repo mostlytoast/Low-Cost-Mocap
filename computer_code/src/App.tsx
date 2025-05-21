@@ -372,9 +372,13 @@ export default function App() {
                 FPS: {fps}
               </Col>
             </Row>
-            <Row className='mt-2 mb-1' style={{ height: "1280px" }}>
-              <Col>
-                <img src={cameraStreamRunning ? "http://localhost:3001/api/camera-stream" : ""} />
+            <Row className='mt-2 mb-1' style={{ height: "400px" }}>
+              <Col className="h-100">
+              <img
+                src={cameraStreamRunning ? "http://localhost:3001/api/camera-stream" : ""}
+                style={{ height: "100%", width: "auto", display: "block", objectFit: "contain" }}
+                alt="Camera Stream"
+              />
               </Col>
             </Row>
           </Card>
@@ -388,7 +392,7 @@ export default function App() {
                 <h4>Camera Settings</h4>
               </Col>
             </Row>
-            <Row className='pt-3'>
+            <Row className='pt-3' >
               <Col xs="4">
                 <Form onChange={updateCameraSettings} className='ps-3'>
                   <Form.Group className="mb-1">

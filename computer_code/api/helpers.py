@@ -237,6 +237,7 @@ class Cameras:
 def find_camera_id(camera_name):
     """_summary_ use with macos to ensure proper camera selection 
 
+            <Row className='mt-2 mb-1' style={{ height: "400px" }}>
     Args:
         camera_name (_string_): camera name as listed by lsusb 
     """

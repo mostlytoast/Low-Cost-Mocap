@@ -17,6 +17,7 @@ import threading
 from ruckig import InputParameter, OutputParameter, Result, Ruckig
 from flask_cors import CORS
 import json
+from scipy.stats import zscore
 
 serialLock = threading.Lock()
 
@@ -168,7 +169,13 @@ def acquire_floor(data):
     #     object_points = np.array(json.load(f))
     # print("object_points", object_points)
     object_points = np.array([item for sublist in object_points for item in sublist])
+    # Remove outliers using z-score method
 
+    # Compute z-scores for each coordinate
+    z_scores = np.abs(zscore(object_points, axis=0, nan_policy='omit'))
+    # Keep points where all coordinates are within 2.5 standard deviations
+    inliers = np.all(z_scores < 2.5, axis=1)
+    object_points = object_points[inliers]
     # Fit plane z = ax + by + c
     tmp_A = []
     tmp_b = []
@@ -179,7 +186,7 @@ def acquire_floor(data):
     A = np.matrix(tmp_A)
     fit = nplinalg.lstsq(A, b, rcond=None)[0]
     fit = np.array(fit).flatten()  # Ensure fit is a 1D array with 3 elements: [a, b, c]
-
+    
     # Plane normal
     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
     plane_normal = plane_normal / nplinalg.norm(plane_normal)
@@ -204,10 +211,10 @@ def acquire_floor(data):
     #                        [0, 0, 1]])
     # R = rot_flip_y @ R
     # Swap z and x axis in the rotation matrix R
-    # swap_zx = np.array([[0, 0, 1],
-    #                     [0, 1, 0],
-    #                     [1, 0, 0]])
-    # R = swap_zx @ R
+    swap_zx = np.array([[0, 0, 1],
+                        [0, 1, 0],
+                        [1, 0, 0]])
+    R = swap_zx @ R
     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0, 0, 0]], [[0, 0, 0, 1]])))
     print(cameras.to_world_coords_matrix)
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
