@@ -163,62 +163,40 @@ def arm_drone(data):
 def acquire_floor(data):
     cameras = Cameras.instance()
     object_points = data["objectPoints"]
-    print("object_points",object_points)
-    # Load object_points from file
-    # with open("object_points.json", "r") as f:
-    #     object_points = np.array(json.load(f))
-    # print("object_points", object_points)
     object_points = np.array([item for sublist in object_points for item in sublist])
-    # Remove outliers using z-score method
 
-    # Compute z-scores for each coordinate
-    z_scores = np.abs(zscore(object_points, axis=0, nan_policy='omit'))
-    # Keep points where all coordinates are within 2.5 standard deviations
-    inliers = np.all(z_scores < 2.5, axis=1)
-    object_points = object_points[inliers]
-    # Fit plane z = ax + by + c
     tmp_A = []
     tmp_b = []
     for i in range(len(object_points)):
-        tmp_A.append([object_points[i, 0], object_points[i, 1], 1])
-        tmp_b.append(object_points[i, 2])
+        tmp_A.append([object_points[i,0], object_points[i,1], 1])
+        tmp_b.append(object_points[i,2])
     b = np.matrix(tmp_b).T
     A = np.matrix(tmp_A)
-    fit = nplinalg.lstsq(A, b, rcond=None)[0]
-    fit = np.array(fit).flatten()  # Ensure fit is a 1D array with 3 elements: [a, b, c]
-    
-    # Plane normal
+
+    fit, residual, rnk, s = linalg.lstsq(A, b)
+    fit = fit.T[0]
+
     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
-    plane_normal = plane_normal / nplinalg.norm(plane_normal)
-    up_normal = np.array([[0], [0], [1]], dtype=np.float32)
-    print("plane_normal ", plane_normal, " \n up_normal ", up_normal)
+    plane_normal = plane_normal / linalg.norm(plane_normal)
+    up_normal = np.array([[0],[0],[1]], dtype=np.float32)
 
-    # Find rotation matrix to align plane_normal to up_normal
-    v = np.cross(plane_normal.T[0], up_normal.T[0])
-    c = np.dot(plane_normal.T[0], up_normal.T[0])
-    if nplinalg.norm(v) < 1e-8:
-        R = np.eye(3)
-    else:
-        s = nplinalg.norm(v)
-        k_mat = np.array([[0, -v[2], v[1]],
-                          [v[2], 0, -v[0]],
-                          [-v[1], v[0], 0]])
-        R = np.eye(3) + k_mat + k_mat @ k_mat * ((1 - c) / (s ** 2))
+    plane = np.array([fit[0], fit[1], -1, fit[2]])
 
-    # Fix 90-degree misalignment by rotating around the X axis
-    # rot_flip_y = np.array([[-1, 0, 0],
-    #                        [0, 1, 0],
-    #                        [0, 0, 1]])
-    # R = rot_flip_y @ R
-    # Swap z and x axis in the rotation matrix R
-    swap_zx = np.array([[0, 0, 1],
-                        [0, 1, 0],
-                        [1, 0, 0]])
-    R = swap_zx @ R
-    cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0, 0, 0]], [[0, 0, 0, 1]])))
-    print(cameras.to_world_coords_matrix)
+    # https://math.stackexchange.com/a/897677/1012327
+    G = np.array([
+        [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
+        [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
+        [0, 0, 1]
+    ])
+    F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
+    R = F @ G @ linalg.inv(F)
+
+    R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
+
+    cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
+
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-    socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+
 
 
 @socketio.on("set-origin")

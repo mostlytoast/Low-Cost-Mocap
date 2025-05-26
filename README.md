@@ -18,21 +18,21 @@ Low-Cost-Mocap$ source computer_code/bin/activate
 
 cd into `computer_code`
 
-run install script 
+run install script
 
 `bash install.sh`
 
-open python virtual enviroment 
+open python virtual enviroment
 
 `source venv/bin/activate`
 
-install ffmpeg 
+install ffmpeg
 
 From the computer_code directory Run `yarn install` to install node dependencies
 
 Then run `yarn run dev` to start the webserver. You will be given a url view the frontend interface.
 
-In another terminal window, run `python3 api/index.py` to start the backend server. This is what receives the camera streams and does motion capture computations.
+In another terminal window, run `./computer_code/venv/bin/python3 computer_code/api/index.py` to start the backend server. This is what receives the camera streams and does motion capture computations.
 
 ## Documentation
 

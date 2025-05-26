@@ -1,4 +1,4 @@
-
+from helpers import find_camera_id
 import cv2
 import numpy as np
 import os
@@ -11,6 +11,8 @@ import json
 #todo document 
 
 # todo enable ability to get id from device id 
+res_width = 320
+res_height = 240
 def lsusb():
 
     result = subprocess.run("lsusb", shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
@@ -91,6 +93,17 @@ def get_calibration_images(camera_id, path):
     # todo check if theres already images in file if so error out or clear them?
 
     cap = cv2.VideoCapture(camera_id) 
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, res_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, res_height)
+    # TODO have to get this working 
+
+    # Check if resolution was set successfully
+    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    print(f"Resolution: {width} x {height}")
+    if(width != res_width or height != res_height):
+        print("error resolution cant be changed to whats specified")
+        
     # todo have default to specific resolution of cameras 
     count = 0
     while True:
@@ -199,11 +212,19 @@ def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
    
     return(mtx, dist)
 
-
+def create_dir():
+    """_summary_ creates /calib_img/ directory if it does not exist already 
+    """
+    calib_img_dir = os.path.join(os.getcwd(), 'calib_img')
+    if not os.path.exists(calib_img_dir):
+        os.makedirs(calib_img_dir)
+# def remove_dir():
+#     #TODO remove the image files (maybe find way to store them in memory not in a file)
 
 def default_setup(): 
     cwd = os.getcwd()
     calib_folder = cwd+'/calib_img/' #todo have way for user to change calib_folder 
+
     checkerboard_size = (6,5) #todo have way for user to change checkerboard_size 
     num_cameras = 0
     camera_id= []
@@ -237,8 +258,11 @@ def default_setup():
             print("invalid number of cameras")
             continue
         for i in range(0, num_cameras):
-            find_device_id(find_camera_prod_vend()) #?should i find prod_vend of all cameras first then do calib for each or just do entire setup for each?
-
+            camera_index = find_device_id(find_camera_prod_vend())[0]
+            print("found camera at index ", camera_index)
+            # find_device_id(find_camera_prod_vend()) #?should i find prod_vend of all cameras first then do calib for each or just do entire setup for each?
+            get_calibration_images(camera_index,cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
+            generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
         break
 
             
@@ -247,15 +271,18 @@ def default_setup():
     while option == 3: #recalibrate existing camera in existing setup
         None
    
-    # cameras = find_device_id(find_camera_prod_vend())
+    # 
     # print(f"USB cameras: {cameras}")
     # 0c45:6366 
 
 if __name__ == '__main__':
     cwd = os.getcwd()
-    print(find_device_id("0c45:6366"))
-    # get_calibration_images(0,cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
-    # generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
+    # default_setup()
+    create_dir()
+    get_calibration_images(find_camera_id("Arducam OV9281 USB Camera")[0],cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
+    generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
+    # print(find_device_id("0c45:6366"))/\
+    
     # print(find_device_id(find_camera_prod_vend()))
     # default_setup() 
 # ffmpeg -f  avfoundation -list_devices true -i

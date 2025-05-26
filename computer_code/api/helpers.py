@@ -85,7 +85,7 @@ class Cameras:
             self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
 
             self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
-            self.cameras[i].set(cv.CV_CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
+            self.cameras[i].set(cv.CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
 
     def _camera_read(self):
         frames = []
@@ -235,9 +235,7 @@ class Cameras:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
 
 def find_camera_id(camera_name):
-    """_summary_ use with macos to ensure proper camera selection 
-
-            <Row className='mt-2 mb-1' style={{ height: "400px" }}>
+    """_summary_ used to find correct cameras based on what usb ports they are connected to 
     Args:
         camera_name (_string_): camera name as listed by lsusb 
     """
