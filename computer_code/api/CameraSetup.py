@@ -119,7 +119,7 @@ def find_device_id(name):
 # code based on https://github.com/jyjblrd/Low-Cost-Mocap/discussions/11#discussioncomment-9380283
 
 
-def get_calibration_images(camera_id, path,width, height):
+def get_calibration_images(camera_id,width, height):
 
     """_summary_ takes and saves images to path
     """
@@ -141,34 +141,31 @@ def get_calibration_images(camera_id, path,width, height):
     # todo have default to specific resolution of cameras 
     count = 0
     while True:
-        name = path + str(count)+".jpg" 
+        
         ret, img = cap.read()
         cv2.imshow("img", img)
         if cv2.waitKey(20) & 0xFF == ord('c'):
-            images.append[img]
-            cv2.imwrite(name, img)
+            images.append(img)
+            # cv2.imwrite(name, img)
             cv2.imshow("img", img)
             count += 1
             # todo make it so you can quit whenever not just after you take a capture 
             if cv2.waitKey(0) & 0xFF == ord('q'):
                 break
     cap.release()
+    return images
 
-
-def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
+def generate_calibration_data(images,checkerboard,dimension):
     # dimension = width of block in mm
 
-    
-    # cam_images_folder_name = 'cam_1'
-    cam_images_folder_name_calibrated = f'{cam_images_folder_name}_c'
 
     # Defining the dimensions of checkerboard
     # CHECKERBOARD = (6,9)
     # CHECKERBOARD = (5,6)
 
-    # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, dimension, 0.001)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, dimension, 0.001)
     CHECKERBOARD = checkerboard
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+    # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     
     # Creating vector to store vectors of 3D points for each checkerboard image
     objpoints = []
@@ -182,15 +179,15 @@ def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
     prev_img_shape = None
     
     # Extracting path of individual image stored in a given directory
-    images = glob.glob(f'{cam_images_folder_name}/*.jpg')
+    # images = glob.glob(f'{cam_images_folder_name}/*.jpg')
     print(len(images))
     if len(images) < 9:
         print("Not enough images were found: at least 9 shall be provided!!!")
         exit(-1)
-
-    for fname in images:
-        print(fname)
-        img = cv2.imread(fname)
+    
+    for index, img in enumerate(images):
+        print("image: " , index)
+        # img = cv2.imread(fname)
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         # Find the chess board corners
         # If desired number of corners are found in the image then ret = true
@@ -219,13 +216,13 @@ def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
             k = cv2.waitKey(0) & 0xFF
             if k == 27: #-- ESC Button
                 print("Image Skipped")
-                imgNotGood = fname
+                imgNotGood = index
                 continue
 
         
-        new_frame_name = cam_images_folder_name_calibrated + '/' + os.path.basename(fname)
-        # print(new_frame_name)
-        cv2.imwrite(new_frame_name, img)
+        # new_frame_name = cam_images_folder_name_calibrated + '/' + os.path.basename(fname)
+        # # print(new_frame_name)
+        # cv2.imwrite(new_frame_name, img)
 
     
     # cv2.destroyAllWindows()
@@ -247,30 +244,30 @@ def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
    
     return(mtx, dist)
 
-def create_dir():
-    """_summary_ creates /calib_img/ directory if it does not exist already 
-    """
+# def create_dir():
+#     """_summary_ creates /calib_img/ directory if it does not exist already 
+#     """
     
-    if not os.path.exists(calib_img_dir):
-        os.makedirs(calib_img_dir)
-# def remove_dir():
-#     """Removes the /calib_img/ directory after listing its contents and confirming with the user."""
-#     if os.path.exists(calib_img_dir):
-#         files = os.listdir(calib_img_dir)
-#         print("Contents of calib_img_dir:")
-#         for f in files:
-#             print(f"  {f}")
-#         confirm = input("Are you sure you want to delete the calib_img_dir and all its contents? (y/n): ")
-#         if confirm.lower() == 'y':
-#             shutil.rmtree(calib_img_dir)
-#             print("calib_img_dir removed.")
-#         else:
-#             print("Operation cancelled.")
-#     else:
-#         print("calib_img_dir does not exist.")
-def detect_dir():
-    return os.path.exists(calib_img_dir)
-#     #TODO remove the image files (maybe find way to store them in memory not in a file)
+#     if not os.path.exists(calib_img_dir):
+#         os.makedirs(calib_img_dir)
+# # def remove_dir():
+# #     """Removes the /calib_img/ directory after listing its contents and confirming with the user."""
+# #     if os.path.exists(calib_img_dir):
+# #         files = os.listdir(calib_img_dir)
+# #         print("Contents of calib_img_dir:")
+# #         for f in files:
+# #             print(f"  {f}")
+# #         confirm = input("Are you sure you want to delete the calib_img_dir and all its contents? (y/n): ")
+# #         if confirm.lower() == 'y':
+# #             shutil.rmtree(calib_img_dir)
+# #             print("calib_img_dir removed.")
+# #         else:
+# #             print("Operation cancelled.")
+# #     else:
+# #         print("calib_img_dir does not exist.")
+# def detect_dir():
+#     return os.path.exists(calib_img_dir)
+
 
 def default_setup(): 
     cwd = os.getcwd()
@@ -304,16 +301,32 @@ def default_setup():
 
     option = int(input("chose option\n 1. setup from scratch \n 2. add camera to existing setup \n 3. recalibrate existing camera in existing setup\n"))
     while option == 1: #scratch
+        output = []
         num_cameras = int(input("how many cameras are there?\n"))
         if num_cameras <= 0:
             print("invalid number of cameras")
             continue
         for i in range(0, num_cameras):
-            camera_index = find_device_id(find_camera())[0]
-            print("found camera at index ", camera_index)
-            # find_device_id(find_camera_prod_vend()) #?should i find prod_vend of all cameras first then do calib for each or just do entire setup for each?
-            get_calibration_images(camera_index,cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
-            generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
+            rotation = 0 
+            camera_number = int(input("what id is labeled on the side of this camera?\n"))
+            camera_name, camera_index  = getCameraID()
+            width, height = getResolution(camera_name)
+            images =  get_calibration_images(camera_index,width, height) #todo have this work regardless if on windows mac linux 
+            mtx, dist = generate_calibration_data(images, (5,6),31.69)
+            # print(find_device_id(find_camera_prod_vend()))
+            # default_setup() 
+            data = {
+                "intrinsic_matrix": mtx,
+                "distortion_coef": dist,
+                "rotation": rotation,
+                "id": camera_number, #general id associated with camera for human use 
+                "name": camera_name,
+                "width": width,
+                "height":height 
+            }
+            output.append(data)
+            with open("computer_code/api/camera-params.json", "w") as f:
+                json.dump(output, f, indent=4)
         break
 
             
@@ -322,9 +335,7 @@ def default_setup():
     while option == 3: #recalibrate existing camera in existing setup
         None
    
-    # 
-    # print(f"USB cameras: {cameras}")
-    # 0c45:6366 
+
 
 def getCameraID():
     while (True):
@@ -344,36 +355,14 @@ def getResolution(camera_name):
     # command to use v4l2-ctl -d /dev/video4 --list-formats-ext
     return 1280, 800
 if __name__ == '__main__':
-    cwd = os.getcwd()
-
-    # default_setup()
-    create_dir()
-
     camera_name, camera_index = ["Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):"
         ,4]
-    # camera_name, camera_index  = getCameraID()
-    width, height = getResolution(camera_name)
-    get_calibration_images(camera_index,cwd+'/calib_img/',width, height) #todo have this work regardless if on windows mac linux 
-    generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
-    # print(find_device_id(find_camera_prod_vend()))
-    # default_setup() 
+    camera_number = 0
+    rotation = 0 
+    
 
-
-    data = {
-        "intrinsic_matrix": [
-            [903.15174004, 0.0, 660.017663279 ],
-            [0.0, 894.18054275, 403.93314412],
-            [0.0,0.0,1.0]
-        ],
-        "distortion_coef": [
-            0.01396426, -0.00322745,  0.00653061 , 0.01614453, -0.04478135
-        ],
-        "rotation": 0,
-        "id": 0, #general id associated with camera for human use 
-        "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):",
-        "width": 1280,
-        "height":800 
-    }
-
-    with open("data.json", "w") as f:
-        json.dump(data, f, indent=4)
+  
+    
+    output = []
+    output.append(data)
+    
