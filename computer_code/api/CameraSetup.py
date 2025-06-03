@@ -8,7 +8,11 @@ import os
 import cv2  # OpenCV for image handling
 import time
 import json
+import shutil
+calib_img_dir = os.path.join(os.getcwd(), 'calib_img')
+
 #todo document 
+
 
 # todo enable ability to get id from device id 
 res_width = 320
@@ -20,7 +24,12 @@ def lsusb():
         result.pop()
     return result
 
-def find_camera_prod_vend():
+def listWebcams(): 
+    result = subprocess.run("v4l2-ctl --list-devices", shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
+    if result[-1] == '':
+        result.pop()
+    return result
+def find_camera():
     """_summary_
 
     Returns:
@@ -28,40 +37,63 @@ def find_camera_prod_vend():
     """
     # print()
     input("remove camera and press enter to continue") 
-    result_no_cam = lsusb()
-    # todo make easier to use by having it wait for connect and disconnect instead of waiting for prompt
+    result_no_cam = listWebcams()
+  
     input("connect the camera and press enter to continue") 
-    result_with_cam = lsusb()
-    lsusb_diff = []
+    result_with_cam = listWebcams()
+    # todo make easier to use by having it wait for connect and disconnect instead of waiting for prompt
+    # result_with_cam = listWebcams()
+    # result_no_cam = []
+    # input("remove camera") 
+    # while(True):
+    #     result_no_cam = listWebcams()
+    #     if result_no_cam != result_with_cam:
+    #         break
+    #     time.sleep(0.5)
+    # input("reconnect camera camera")                   
+    # while(True):
+    #     third_result = listWebcams()
+    #     if result_no_cam != third_result:
+    #         break
+    #     time.sleep(0.5)
+
+    diff = []
     # print("result_no_cam", result_no_cam)
 
     # print("result_with_cam", result_with_cam)
     s = set(result_no_cam)
-    lsusb_diff = [x for x in result_with_cam if x not in s]
+    diff = [x for x in result_with_cam if x not in s]
     # for element in result_no_cam: #https://www.geeksforgeeks.org/python-difference-two-lists/
     #     if element not in result_with_cam:
-    #         lsusb_diff.append(element)
-
+    #         diff.append(element)
+    output = []#list of cameras and their name and id (id will change after this program so done use it for long )
     
-    if len(lsusb_diff) > 1:
-        print("error to many devices were disconnected try again")
-        exit(-1)
-    if len(lsusb_diff) <= 0:
-        print("no devices were disconnected try again")
-        exit(-1)
-    # print(lsusb_diff[0].split(' ')[5])
-    return lsusb_diff[0].split(' ')[5]
+    for i,line in enumerate(diff):
+        if "\t" not in line:
+            #camera name found 
+            #todo get error checking working 
+            # Extract the last number from the next line (device id)
+            device_line = diff[i+1]
+            # Extract the device id from a line like '\t/dev/video4'
+            device_id_str = device_line.strip().split('/')[-1].replace('video', '')
+            device_id = int(device_id_str)
+            output.append([line, device_id])
+            #should this include the id of the camera? this could change immediately after running this code 
+    
+  
 
-def find_device_id(prod_vend_id):
-    """_summary_ find the device id for a given usb product and vendor id which can be found with lsusb or find_camera_prod_vend() used to determine the opencv id for cv.VideoCapture(id)
+    return output
+
+def find_device_id(name):
+    """_summary_ find the device id for a given usb product and vendor id which can be found with v4l2-ctl --list-devices or listWebcams() used to determine the opencv id for cv.VideoCapture(id)
     Args:
-        prod_vend_id (_str_): the product and vendor id separated by a ':'
+        name (_str_): the name of camera with id info given by v4l2-ctl --list-devices or listWebcams()
     Example: 
-        find_device_id("0c45:6366")
+        find_device_id("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4)")
     """
      #
     # 
-    lines = lsusb()
+    lines = find_camera()
     # print(result)
     # output = result.stdout.decode('utf-8').strip()
     # lines = output.split('\n')
@@ -72,7 +104,7 @@ def find_device_id(prod_vend_id):
         # print(line)
         # print(line.split(' ')[3].strip(":"))
         Device_id = int(line.split(' ')[3].strip(":"))
-        if prod_vend_id in line:
+        if name in line:
             cameras.append(Device_id)
         # if 'Webcam' in line:
         # vendor_id = line.split(' ')[5].split(':')[0]
@@ -87,21 +119,23 @@ def find_device_id(prod_vend_id):
 # code based on https://github.com/jyjblrd/Low-Cost-Mocap/discussions/11#discussioncomment-9380283
 
 
-def get_calibration_images(camera_id, path):
+def get_calibration_images(camera_id, path,width, height):
+
     """_summary_ takes and saves images to path
     """
+    images = []
     # todo check if theres already images in file if so error out or clear them?
 
     cap = cv2.VideoCapture(camera_id) 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, res_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, res_height)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     # TODO have to get this working 
 
     # Check if resolution was set successfully
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    cap_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    cap_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     print(f"Resolution: {width} x {height}")
-    if(width != res_width or height != res_height):
+    if(cap_width != width or cap_height != height):
         print("error resolution cant be changed to whats specified")
         
     # todo have default to specific resolution of cameras 
@@ -111,6 +145,7 @@ def get_calibration_images(camera_id, path):
         ret, img = cap.read()
         cv2.imshow("img", img)
         if cv2.waitKey(20) & 0xFF == ord('c'):
+            images.append[img]
             cv2.imwrite(name, img)
             cv2.imshow("img", img)
             count += 1
@@ -215,10 +250,26 @@ def generate_calibration_data(cam_images_folder_name,checkerboard,dimension):
 def create_dir():
     """_summary_ creates /calib_img/ directory if it does not exist already 
     """
-    calib_img_dir = os.path.join(os.getcwd(), 'calib_img')
+    
     if not os.path.exists(calib_img_dir):
         os.makedirs(calib_img_dir)
 # def remove_dir():
+#     """Removes the /calib_img/ directory after listing its contents and confirming with the user."""
+#     if os.path.exists(calib_img_dir):
+#         files = os.listdir(calib_img_dir)
+#         print("Contents of calib_img_dir:")
+#         for f in files:
+#             print(f"  {f}")
+#         confirm = input("Are you sure you want to delete the calib_img_dir and all its contents? (y/n): ")
+#         if confirm.lower() == 'y':
+#             shutil.rmtree(calib_img_dir)
+#             print("calib_img_dir removed.")
+#         else:
+#             print("Operation cancelled.")
+#     else:
+#         print("calib_img_dir does not exist.")
+def detect_dir():
+    return os.path.exists(calib_img_dir)
 #     #TODO remove the image files (maybe find way to store them in memory not in a file)
 
 def default_setup(): 
@@ -258,7 +309,7 @@ def default_setup():
             print("invalid number of cameras")
             continue
         for i in range(0, num_cameras):
-            camera_index = find_device_id(find_camera_prod_vend())[0]
+            camera_index = find_device_id(find_camera())[0]
             print("found camera at index ", camera_index)
             # find_device_id(find_camera_prod_vend()) #?should i find prod_vend of all cameras first then do calib for each or just do entire setup for each?
             get_calibration_images(camera_index,cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
@@ -275,21 +326,54 @@ def default_setup():
     # print(f"USB cameras: {cameras}")
     # 0c45:6366 
 
+def getCameraID():
+    while (True):
+
+        output = find_camera()
+        if len(output) > 1:
+            print("error to many devices were disconnected try again")
+            
+        elif len(output) <= 0:
+            print("no devices were disconnected try again")
+        else:
+            
+            break
+    return output[0]
+def getResolution(camera_name):
+    # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height 
+    # command to use v4l2-ctl -d /dev/video4 --list-formats-ext
+    return 1280, 800
 if __name__ == '__main__':
     cwd = os.getcwd()
+
     # default_setup()
     create_dir()
-    get_calibration_images(find_camera_id("Arducam OV9281 USB Camera")[0],cwd+'/calib_img/') #todo have this work regardless if on windows mac linux 
+
+    camera_name, camera_index = ["Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):"
+        ,4]
+    # camera_name, camera_index  = getCameraID()
+    width, height = getResolution(camera_name)
+    get_calibration_images(camera_index,cwd+'/calib_img/',width, height) #todo have this work regardless if on windows mac linux 
     generate_calibration_data(cwd+'/calib_img/', (5,6),31.69)
-    # print(find_device_id("0c45:6366"))/\
-    
     # print(find_device_id(find_camera_prod_vend()))
     # default_setup() 
-# ffmpeg -f  avfoundation -list_devices true -i
-# 
-# [[903.15174004   0.         660.17663279]
-#  [  0.         894.18054275 403.93314412]
-#  [  0.           0.           1.        ]]
-# dist : 
 
-# [[ 0.01396426 -0.00322745  0.00653061  0.01614453 -0.04478135]]
+
+    data = {
+        "intrinsic_matrix": [
+            [903.15174004, 0.0, 660.017663279 ],
+            [0.0, 894.18054275, 403.93314412],
+            [0.0,0.0,1.0]
+        ],
+        "distortion_coef": [
+            0.01396426, -0.00322745,  0.00653061 , 0.01614453, -0.04478135
+        ],
+        "rotation": 0,
+        "id": 0, #general id associated with camera for human use 
+        "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):",
+        "width": 1280,
+        "height":800 
+    }
+
+    with open("data.json", "w") as f:
+        json.dump(data, f, indent=4)
