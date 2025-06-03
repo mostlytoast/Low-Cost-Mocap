@@ -355,14 +355,10 @@ def getResolution(camera_name):
     # command to use v4l2-ctl -d /dev/video4 --list-formats-ext
     return 1280, 800
 if __name__ == '__main__':
-    camera_name, camera_index = ["Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):"
-        ,4]
-    camera_number = 0
-    rotation = 0 
-    
+    # camera_name, camera_index = ["Arducam OV9281 USB Camera: Ardu (usb-0000:02:00.0-1.1.1):"
+    #     ,4]
+    # camera_number = 0
+    # rotation = 0 
+    default_setup()
 
   
-    
-    output = []
-    output.append(data)
-    
