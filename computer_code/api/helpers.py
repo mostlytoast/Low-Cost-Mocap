@@ -11,11 +11,13 @@ import cv2 as cv
 from KalmanFilter import KalmanFilter
 from Singleton import Singleton
 import videoSubSystem 
-
+from time import sleep
+from line_profiler import profile
 
 
 @Singleton
 class Cameras:
+    @profile
     def __init__(self):
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "camera-params.json")
@@ -32,11 +34,12 @@ class Cameras:
         for camera_data in self.camera_params: #use opencv instead of pseyepy
             camera_id = videoSubSystem.get_id_from_name(camera_data["name"])
             
-            camera_list.extend(camera_id)
+            camera_list.append(camera_id)
         # camera_list = list(set(camera_list)) #remove duplicates 
         # for cameras in camera_list:
 
             cap =cv.VideoCapture(camera_id)
+            # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all
             cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
             cap.set(cv.CAP_PROP_FRAME_WIDTH, float(camera_data["width"]))
             cap.set(cv.CAP_PROP_FRAME_HEIGHT, float(camera_data["height"]))
@@ -82,11 +85,15 @@ class Cameras:
     
     def edit_settings(self, exposure, gain): #updated to work with opencv
         for i in range (0,self.num_cameras):
-            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
-
-            self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)# = [exposure] * self.num_cameras 
+            # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all (via json folder maybe)
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 1)
+            print("Auto-exposure disabled:", self.cameras[i].get(cv.CAP_PROP_AUTO_EXPOSURE))
+            print(exposure)
+            success = self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)
+            
+            print("Exposure set:", success, "Current exposure:", self.cameras[i].get(cv.CAP_PROP_EXPOSURE))
             self.cameras[i].set(cv.CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
-
+    @profile
     def _camera_read(self):
         frames = []
         # todo find better place for this check 
@@ -104,7 +111,9 @@ class Cameras:
             # print( self.camera_params[i])
         # for i in range(0, self.num_cameras):
             # frames, _ = self.cameras[i].read()
+            # TODO seams to be errors here when cameras disconnect 
             frames[i] = np.rot90(frames[i], k=self.camera_params[i]["rotation"])
+            # TODO should we be squaring images? might be causing issues 
             frames[i] = make_square(frames[i])
             frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
             frames[i] = cv.GaussianBlur(frames[i],(9,9),0)
@@ -168,13 +177,13 @@ class Cameras:
                     })
         
         return frames
-
+    @profile
     def get_frames(self):
         frames = self._camera_read()
         #frames = [add_white_border(frame, 5) for frame in frames]
 
         return np.hstack(frames)
-
+    @profile
     def _find_dot(self, img):
         # img = cv.GaussianBlur(img,(5,5),0)
         grey = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
@@ -196,37 +205,37 @@ class Cameras:
             image_points = [[None, None]]
 
         return img, image_points
-
+    @profile
     def start_capturing_points(self):
         self.is_capturing_points = True
-
+    @profile
     def stop_capturing_points(self):
         self.is_capturing_points = False
-
+    @profile
     def start_trangulating_points(self, camera_poses):
         self.is_capturing_points = True
         self.is_triangulating_points = True
         self.camera_poses = camera_poses
         self.kalman_filter = KalmanFilter(self.num_objects)
-
+    @profile
     def stop_trangulating_points(self):
         self.is_capturing_points = False
         self.is_triangulating_points = False
         self.camera_poses = None
-
+    @profile
     def start_locating_objects(self):
         self.is_locating_objects = True
-
+    @profile
     def stop_locating_objects(self):
         self.is_locating_objects = False
-    
+    @profile
     def get_camera_params(self, camera_num):
         return {
             "intrinsic_matrix": np.array(self.camera_params[camera_num]["intrinsic_matrix"]),
             "distortion_coef": np.array(self.camera_params[camera_num]["distortion_coef"]),
             "rotation": self.camera_params[camera_num]["rotation"]
         }
-    
+    @profile   
     def set_camera_params(self, camera_num, intrinsic_matrix=None, distortion_coef=None):
         if intrinsic_matrix is not None:
             self.camera_params[camera_num]["intrinsic_matrix"] = intrinsic_matrix
@@ -234,7 +243,7 @@ class Cameras:
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
 
-
+@profile
 def calculate_reprojection_errors(image_points, object_points, camera_poses):
     errors = np.array([])
     for image_points_i, object_point in zip(image_points, object_points):
@@ -245,7 +254,7 @@ def calculate_reprojection_errors(image_points, object_points, camera_poses):
 
     return errors
 
-
+@profile
 def calculate_reprojection_error(image_points, object_point, camera_poses):
     cameras = Cameras.instance()
 
@@ -308,7 +317,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
+@profile
 def essential_from_fundamental(F: np.ndarray, K1: np.ndarray, K2: np.ndarray) -> np.ndarray:
     """
     Calculate the essential matrix from the fundamental matrix (F) and camera matrices (K1, K2).
@@ -322,7 +331,7 @@ def essential_from_fundamental(F: np.ndarray, K1: np.ndarray, K2: np.ndarray) ->
 
     E = np.dot(np.dot(K2.T, F), K1)
     return E
-
+@profile
 def fundamental_from_projections(P1: np.ndarray, P2: np.ndarray) -> np.ndarray:
     """
     Calculate the fundamental matrix from the projection matrices (P1, P2).
@@ -353,7 +362,7 @@ def fundamental_from_projections(P1: np.ndarray, P2: np.ndarray) -> np.ndarray:
             F[i, j] = np.linalg.det(XY)
 
     return F
-
+@profile
 def motion_from_essential(E: np.ndarray) -> tuple[list[np.ndarray], list[np.ndarray]]:
     """
     Calculate the possible rotations and translations from the essential matrix (E).
@@ -369,10 +378,10 @@ def motion_from_essential(E: np.ndarray) -> tuple[list[np.ndarray], list[np.ndar
 
     return rotations_matrices, translations
 
-
+@profile
 def bundle_adjustment(image_points, camera_poses, socketio):
     cameras = Cameras.instance()
-
+    @profile
     def params_to_camera_poses(params):
         focal_distances = []
         num_cameras = int((params.size-1)/7)+1
@@ -389,7 +398,7 @@ def bundle_adjustment(image_points, camera_poses, socketio):
             })
 
         return camera_poses, focal_distances
-
+    @profile
     def residual_function(params):
         camera_poses, focal_distances = params_to_camera_poses(params)
         for i in range(0, len(camera_poses)):
@@ -418,7 +427,7 @@ def bundle_adjustment(image_points, camera_poses, socketio):
     )
     return params_to_camera_poses(res.x)[0]
     
-
+@profile
 def triangulate_point(image_points, camera_poses):
     image_points = np.array(image_points)
     cameras = Cameras.instance()
@@ -437,6 +446,7 @@ def triangulate_point(image_points, camera_poses):
         Ps.append(P)
 
     # https://temugeb.github.io/computer_vision/2021/02/06/direct-linear-transorms.html
+    @profile
     def DLT(Ps, image_points):
         A = []
 
@@ -454,8 +464,7 @@ def triangulate_point(image_points, camera_poses):
     object_point = DLT(Ps, image_points)
 
     return object_point
-
-
+@profile
 def triangulate_points(image_points, camera_poses):
     object_points = []
     for image_points_i in image_points:
@@ -464,7 +473,7 @@ def triangulate_points(image_points, camera_poses):
     
     return np.array(object_points)
 
-
+@profile
 def find_point_correspondance_and_object_points(image_points, camera_poses, frames):
     cameras = Cameras.instance()
 
@@ -549,7 +558,7 @@ def find_point_correspondance_and_object_points(image_points, camera_poses, fram
 
     return np.array(errors), np.array(object_points), frames
 
-
+@profile
 def locate_objects(object_points, errors):
     dist1 = 0.095
     dist2 = 0.15
@@ -608,7 +617,7 @@ def locate_objects(object_points, errors):
     
     return objects
 
-
+@profile
 def numpy_fillna(data):
     data = np.array(data, dtype=object)
     # Get lengths of each row of data
@@ -622,7 +631,7 @@ def numpy_fillna(data):
     out[mask] = np.concatenate(data)
     return out
         
-
+@profile
 def drawlines(img1,lines):
     r,c,_ = img1.shape
     for r in lines:
@@ -632,7 +641,7 @@ def drawlines(img1,lines):
         img1 = cv.line(img1, (x0,y0), (x1,y1), color,1)
     return img1
 
-
+@profile
 def make_square(img):
     x, y, _ = img.shape
     size = max(x, y)
@@ -651,17 +660,18 @@ def make_square(img):
 
     return new_img
 
-
+@profile
 def camera_pose_to_serializable(camera_poses):
     for i in range(0, len(camera_poses)):
         camera_poses[i] = {k: v.tolist() for (k, v) in camera_poses[i].items()}
 
     return camera_poses
-
+@profile
 def cartesian_product(x, y):
     return np.array([[x0, y0] for x0 in x for y0 in y])
-
+@profile
 def add_white_border(image, border_size):
     height, width = image.shape[:2]
     bordered_image = cv.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv.BORDER_CONSTANT, value=[255, 255, 255])
     return bordered_image
+

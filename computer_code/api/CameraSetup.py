@@ -239,7 +239,7 @@ def pick_resolution(resolutions):
     output = ""
     for index, line in enumerate(resolutions):
         output += str(index) + ": " + str(line) + "\n"
-    choice = get_int_input("select a resolution from this list\n " + output, validator=lambda x: x >0 and x < len(resolutions), errorMessage ="please select valid option in the list" )
+    choice = get_int_input("select a resolution from this list\n " + output, validator=lambda x: x >=0 and x < len(resolutions), errorMessage ="please select valid option in the list" )
     width, height = resolutions[int(choice)]
     return width, height
 

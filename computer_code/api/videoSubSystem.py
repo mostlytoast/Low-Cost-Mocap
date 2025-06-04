@@ -90,22 +90,24 @@ def getResolution(camera_id):
     # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height
     # command to use
     # TODO make this platform independent
-    command = "v4l2-ctl -d /dev/video" + str(camera_id) + " --list-formats-ext"
-    result = (
-        subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-        .stdout.decode("utf-8")
-        .split("\n")
-    )
-    if result[-1] == "":
-        result.pop()
-    resolutions = []
-    for line in result:
-        if "Size: Discrete" in line:
-            parts = line.strip().split()
-            if len(parts) >= 3:
-                size = parts[2]
-                if "x" in size:
-                    w, h = size.split("x")
-                    resolutions.append((int(w), int(h)))
+    if platform.system().lower() == "linux":
+        command = "v4l2-ctl -d /dev/video" + str(camera_id) + " --list-formats-ext"
+        result = (
+            subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+            .stdout.decode("utf-8")
+            .split("\n")
+        )
+        if result[-1] == "":
+            result.pop()
+        resolutions = []
+        for line in result:
+            if "Size: Discrete" in line:
+                parts = line.strip().split()
+                if len(parts) >= 3:
+                    size = parts[2]
+                    if "x" in size:
+                        w, h = size.split("x")
+                        resolutions.append((int(w), int(h)))
 
-    return resolutions
+        return resolutions
+    return [(1920,1080)]

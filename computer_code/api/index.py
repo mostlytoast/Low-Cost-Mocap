@@ -18,7 +18,7 @@ from ruckig import InputParameter, OutputParameter, Result, Ruckig
 from flask_cors import CORS
 import json
 from scipy.stats import zscore
-
+from line_profiler import profile
 serialLock = threading.Lock()
 
 # ser = serial.Serial("/dev/cu.usbserial-02X2K2GE", 1000000, write_timeout=1, )
@@ -30,7 +30,7 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 cameras_init = False
 
 num_objects = 2
-
+@profile
 @app.route("/api/camera-stream")
 def camera_stream():
     cameras = Cameras.instance()
@@ -62,7 +62,7 @@ def camera_stream():
                 b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n')
 
     return Response(gen(cameras), mimetype='multipart/x-mixed-replace; boundary=frame')
-
+@profile
 @app.route("/api/trajectory-planning", methods=["POST"])
 def trajectory_planning_api():
     data = json.loads(request.data)
@@ -85,7 +85,7 @@ def trajectory_planning_api():
     return json.dumps({
         "setpoints": setpoints
     })
-
+@profile
 def plan_trajectory(start_pos, end_pos, waypoints, max_vel, max_accel, max_jerk, timestep):
     otg = Ruckig(3*num_objects, timestep, len(waypoints))  # DoFs, timestep, number of waypoints
     inp = InputParameter(3*num_objects)
@@ -113,7 +113,7 @@ def plan_trajectory(start_pos, end_pos, waypoints, max_vel, max_accel, max_jerk,
         out.pass_to_input(inp)
 
     return setpoints
-
+@profile
 @socketio.on("arm-drone")
 def arm_drone(data):
     global cameras_init
@@ -130,7 +130,7 @@ def arm_drone(data):
             None
         
         time.sleep(0.01)
-
+@profile
 @socketio.on("set-drone-pid")
 def arm_drone(data):
     serial_data = {
@@ -139,7 +139,7 @@ def arm_drone(data):
     with serialLock:
         # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
         time.sleep(0.01)
-
+@profile
 @socketio.on("set-drone-setpoint")
 def arm_drone(data):
     serial_data = {
@@ -148,7 +148,7 @@ def arm_drone(data):
     with serialLock:
         # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
         time.sleep(0.01)
-
+@profile
 @socketio.on("set-drone-trim")
 def arm_drone(data):
     serial_data = {
@@ -158,7 +158,7 @@ def arm_drone(data):
         # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
         time.sleep(0.01)
 
-
+@profile
 @socketio.on("acquire-floor")
 def acquire_floor(data):
     cameras = Cameras.instance()
@@ -198,7 +198,7 @@ def acquire_floor(data):
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
 
-
+@profile
 @socketio.on("set-origin")
 def set_origin(data):
     cameras = Cameras.instance()
@@ -213,13 +213,13 @@ def set_origin(data):
     cameras.to_world_coords_matrix = to_world_coords_matrix
 
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-
+@profile
 @socketio.on("update-camera-settings")
 def change_camera_settings(data):
     cameras = Cameras.instance()
     
     cameras.edit_settings(data["exposure"], data["gain"])
-
+@profile
 @socketio.on("capture-points")
 def capture_points(data):
     start_or_stop = data["startOrStop"]
@@ -230,7 +230,7 @@ def capture_points(data):
         return
     elif (start_or_stop == "stop"):
         cameras.stop_capturing_points()
-
+@profile
 @socketio.on("calculate-camera-pose")
 def calculate_camera_pose(data):
     cameras = Cameras.instance()
@@ -282,7 +282,7 @@ def calculate_camera_pose(data):
     error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
 
     socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
-
+@profile
 @socketio.on("locate-objects")
 def start_or_stop_locating_objects(data):
     cameras = Cameras.instance()
@@ -293,7 +293,7 @@ def start_or_stop_locating_objects(data):
         return
     elif (start_or_stop == "stop"):
         cameras.stop_locating_objects()
-
+@profile
 @socketio.on("determine-scale")
 def determine_scale(data):
     object_points = data["objectPoints"]
@@ -315,7 +315,7 @@ def determine_scale(data):
 
     socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
 
-
+@profile
 @socketio.on("triangulate-points")
 def live_mocap(data):
     cameras = Cameras.instance()
