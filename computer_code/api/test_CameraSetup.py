@@ -72,24 +72,7 @@ class TestGenerateCalibrationData(unittest.TestCase):
         #     self.assertEqual(input_value, "test input")
         # finally:
         #     sys.stdin = original_stdin
-
-    def test_resolutions_work(self):
-        # TODO for somereason when ran this pops up with a screen shot of the display?
-        camera_name = "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4):"
-        camera_id = CameraSetup.get_id_from_name(camera_name)
-        cap = cv2.VideoCapture(camera_id)
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
-        resolutions = CameraSetup.getResolution(camera_id)
-        for res in resolutions:
-            width, height = res
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-            cap_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-            cap_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-            print(f"Resolution: {width} x {height}")
-            assert (cap_width == width and cap_height == height)
-            ret, img = cap.read()
-            cv2.imshow("img", img)
+    
 
     def test_generate_calibration_data_write_to_json(self):
 
@@ -128,68 +111,7 @@ class TestGenerateCalibrationData(unittest.TestCase):
         assert mtx is not None
         assert dist is not None
 
-    @mock.patch("builtins.input", return_value="1")
-    @mock.patch("subprocess.run")
-    def test_getResolution_returns_correct_resolution(self, mock_run, mock_input):
-        # Simulate v4l2-ctl output with three resolutions
-        v4l2_output = (
-            "Pixel Format: 'MJPG' (Motion-JPEG)\n"
-            "\tSize: Discrete 640x480\n"
-            "\tSize: Discrete 1280x720\n"
-            "\tSize: Discrete 1920x1080\n"
-        )
-        mock_process = mock.Mock()
-        mock_process.stdout = v4l2_output.encode("utf-8")
-        mock_run.return_value = mock_process
-
-        # User selects index 1 (1280x720)
-        result = CameraSetup.getResolution(0)
-        self.assertEqual(result[0], (640, 480))
-        self.assertEqual(result[1], (1280, 720))
-        self.assertEqual(result[2], (1920, 1080))
-
-    @mock.patch("builtins.input", return_value="0")
-    @mock.patch("subprocess.run")
-    def test_getResolution_single_resolution(self, mock_run, mock_input):
-        v4l2_output = (
-            "Pixel Format: 'MJPG' (Motion-JPEG)\n" "\tSize: Discrete 800x600\n"
-        )
-        mock_process = mock.Mock()
-        mock_process.stdout = v4l2_output.encode("utf-8")
-        mock_run.return_value = mock_process
-
-        result = CameraSetup.getResolution(1)[0]
-        self.assertEqual(result, (800, 600))
-
-    @mock.patch("builtins.input", return_value="0")
-    @mock.patch("subprocess.run")
-    def test_getResolution_no_discrete_sizes(self, mock_run, mock_input):
-        v4l2_output = (
-            "Pixel Format: 'MJPG' (Motion-JPEG)\n" "\tNo discrete sizes available\n"
-        )
-        mock_process = mock.Mock()
-        mock_process.stdout = v4l2_output.encode("utf-8")
-        mock_run.return_value = mock_process
-
-        result = CameraSetup.getResolution(2)
-        self.assertEqual(result, [])  # Should return [] if no resolutions found
-
-    @mock.patch("builtins.input", return_value="0")
-    @mock.patch("subprocess.run")
-    def test_getResolution_handles_trailing_newline(self, mock_run, mock_input):
-        v4l2_output = (
-            "Pixel Format: 'MJPG' (Motion-JPEG)\n"
-            "\tSize: Discrete 320x240\n"
-            "\tSize: Discrete 640x480\n\n"
-        )
-        mock_process = mock.Mock()
-        mock_process.stdout = v4l2_output.encode("utf-8")
-        mock_run.return_value = mock_process
-
-        result = CameraSetup.getResolution(3)
-
-        self.assertEqual(result[0], (320, 240))
-        self.assertEqual(result[1], (640, 480))
+   
 
 
 if __name__ == "__main__":

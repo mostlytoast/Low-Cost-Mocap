@@ -9,12 +9,10 @@ import time
 import numpy as np
 import cv2 as cv
 from KalmanFilter import KalmanFilter
-# from pseyepy import Camera
 from Singleton import Singleton
 import videoSubSystem 
 
-from subprocess import PIPE, run
-import platform
+
 
 @Singleton
 class Cameras:
@@ -236,45 +234,6 @@ class Cameras:
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
 
-def find_camera_id(camera_name):
-    """_summary_ used to find correct cameras based on what usb ports they are connected to 
-    Args:
-        camera_name (_string_): camera name as listed by lsusb 
-    """
-    # TODO find way to do this based on the usb port its connected to 
-    if platform.system().lower() == "linux":
-        # On Linux, use v4l2-ctl to list devices and match camera_name
-        command = ["v4l2-ctl", "--list-devices"]
-        result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-        cam_id = []
-        lines = result.stdout.splitlines()
-        for idx, line in enumerate(lines):
-            if camera_name in line:
-                # The next line(s) should have /dev/video* entries
-                j = idx + 1
-                while j < len(lines) and lines[j].startswith("\t"):
-                    dev = lines[j].strip()
-                    if dev.startswith("/dev/video"):
-                        # Extract the numeric id from /dev/videoX
-                        try:
-                            cam_id.append(int(dev.replace("/dev/video", "")))
-                            break
-                        except ValueError:
-                            pass
-                    j += 1
-               
-        return cam_id
-    elif platform.system().lower() == "macos":
-        # camera_name = "Arducam OV9281 USB Camera"
-        command = ["ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", '""']
-        result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-        cam_id = []
-        # print(result)
-        for item in result.stderr.splitlines():
-            if camera_name in item:
-                cam_id.append(int(item.split("[")[2].split("]")[0]))
-        # print("cam id", cam_id)
-        return cam_id
 
 def calculate_reprojection_errors(image_points, object_points, camera_poses):
     errors = np.array([])

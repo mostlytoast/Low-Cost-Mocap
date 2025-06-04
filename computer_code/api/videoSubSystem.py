@@ -1,15 +1,33 @@
-
+import platform
 import subprocess
 
+
 def listWebcams():
-    result = (
-        subprocess.run("v4l2-ctl --list-devices", shell=True, stdout=subprocess.PIPE)
-        .stdout.decode("utf-8")
-        .split("\n")
-    )
-    if result[-1] == "":
-        result.pop()
-    return result
+    # TODO get alternative versions working for different operating systems
+    output = []
+    if platform.system().lower() == "linux":
+        result = (
+            subprocess.run(
+                "v4l2-ctl --list-devices", shell=True, stdout=subprocess.PIPE
+            )
+            .stdout.decode("utf-8")
+            .split("\n")
+        )
+        result = [i for i in result if i != '']
+        
+        for i, line in enumerate(result):
+            if ("\t" not in line) and (i < len(result)-1) :
+                # camera name found
+                # todo get error checking working
+                # Extract the last number from the next line (device id)
+                device_line = result[i + 1]
+                # Extract the device id from a line like '\t/dev/video4'
+                device_id_str = get_id_from_v4l2(device_line)
+                device_id = int(device_id_str)
+                output.append([line, device_id])
+                # should this include the id of the camera? this could change immediately after running this code
+    #todo get working for macos 
+    return output
 
 
 def find_camera():
@@ -39,33 +57,8 @@ def find_camera():
     #     if result_no_cam != third_result:
     #         break
     #     time.sleep(0.5)
+    return [x for x in result_with_cam if x not in result_no_cam]
 
-    diff = []
-    # print("result_no_cam", result_no_cam)
-
-    # print("result_with_cam", result_with_cam)
-    s = set(result_no_cam)
-    diff = [x for x in result_with_cam if x not in s]
-    # for element in result_no_cam: #https://www.geeksforgeeks.org/python-difference-two-lists/
-    #     if element not in result_with_cam:
-    #         diff.append(element)
-    output = (
-        []
-    )  # list of cameras and their name and id (id will change after this program so done use it for long )
-
-    for i, line in enumerate(diff):
-        if "\t" not in line:
-            # camera name found
-            # todo get error checking working
-            # Extract the last number from the next line (device id)
-            device_line = diff[i + 1]
-            # Extract the device id from a line like '\t/dev/video4'
-            device_id_str = get_id_from_v4l2(device_line)
-            device_id = int(device_id_str)
-            output.append([line, device_id])
-            # should this include the id of the camera? this could change immediately after running this code
-
-    return output
 
 
 def get_id_from_v4l2(device_line):
@@ -80,26 +73,39 @@ def get_id_from_name(name):
     Example:
         get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4)")
     """
-    #
-    #
+    # TODO get alternative versions working for different operating systems
     lines = listWebcams()
-    # print(result)
-    # output = result.stdout.decode('utf-8').strip()
-    # lines = output.split('\n')
-    # # if lines[-1] == '' :
-    #     lines.pop()
+
     cameras = []
     for index, line in enumerate(lines):
-        # print(line)
-        # print(line.split(' ')[3].strip(":"))
-        # Device_id = int(line.split(' ')[3].strip(":"))
         if name in line:
-            cameras.append(get_id_from_v4l2(lines[index + 1]))
-        # if 'Webcam' in line:
-        # vendor_id = line.split(' ')[5].split(':')[0]
-        # product_id = line.split(' ')[5].split(':')[1]
-        # # print(vendor_id, ", ", product_id)
-        # if vendor_id == '0c45' and product_id == '6366':
-        #     webcam = line.split(':')[-1].strip()
-        #     cameras.append(webcam)
+            cameras.append(line[1])
+
+    if len(cameras) == 0 or  len(cameras) > 1:
+        return -1
     return cameras[0]
+
+
+def getResolution(camera_id):
+    # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height
+    # command to use
+    # TODO make this platform independent
+    command = "v4l2-ctl -d /dev/video" + str(camera_id) + " --list-formats-ext"
+    result = (
+        subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+        .stdout.decode("utf-8")
+        .split("\n")
+    )
+    if result[-1] == "":
+        result.pop()
+    resolutions = []
+    for line in result:
+        if "Size: Discrete" in line:
+            parts = line.strip().split()
+            if len(parts) >= 3:
+                size = parts[2]
+                if "x" in size:
+                    w, h = size.split("x")
+                    resolutions.append((int(w), int(h)))
+
+    return resolutions

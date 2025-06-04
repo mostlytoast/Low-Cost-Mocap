@@ -1,21 +1,10 @@
-from helpers import find_camera_id
+
 from videoSubSystem import *
 import cv2
 import numpy as np
-import os
-
-import subprocess
-import os
-import cv2  # OpenCV for image handling
-import time
 import json
-import shutil
 
 # todo document
-
-
-
-
 
 
 # code based on https://github.com/jyjblrd/Low-Cost-Mocap/discussions/11#discussioncomment-9380283
@@ -124,11 +113,7 @@ def generate_calibration_data(images, checkerboard, dimension):
                 imgNotGood = index
                 continue
 
-        # new_frame_name = cam_images_folder_name_calibrated + '/' + os.path.basename(fname)
-        # # print(new_frame_name)
-        # cv2.imwrite(new_frame_name, img)
-
-    # cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
 
     h, w = img.shape[:2]
 
@@ -150,14 +135,8 @@ def generate_calibration_data(images, checkerboard, dimension):
 
 
 def default_setup():
-    cwd = os.getcwd()
-    calib_folder = cwd + "/calib_img/"  # todo have way for user to change calib_folder
-
     checkerboard_size = (6, 5)  # todo have way for user to change checkerboard_size
     num_cameras = 0
-    camera_id = []
-    cameras = []
-    # filename = f'cam_{cam_index}/image_{i}.jpg'
     # ! have save file structure as each camera as a sub folder to calib_img
     # get_calibration_images(0,cwd+'/calib_img/') #todo have this work regardless if on windows mac linux
     # generate_calibration_data(cwd+'/calib_img/', (5,6))
@@ -166,6 +145,7 @@ def default_setup():
     #   A: setup from scratch
     #   A: add camera
     #   A: recalibrate existing camera
+    #   A: generate grid
     # Q: setup from scratch
     # ask what name of setup (save to specific directory )
     #  ask for num_cameras (double check with amount connected) then repeat the following num_cameras times
@@ -178,41 +158,36 @@ def default_setup():
     #  then run calibration and save calibration and device id to camera-params.json
     # Q: recalibrate existing camera
     #  ask for camera id
+    # Q: ask for settings of dimensions and then export as pdf
 
-    option = int(
-        input(
-            "chose option\n 1. setup from scratch \n 2. add camera to existing setup \n 3. recalibrate existing camera in existing setup\n"
-        )
-    )
-    while option == 1:  # scratch
+    option = get_int_input(
+        "chose option\n 1. setup from scratch \n 2. add camera to existing setup \n 3. recalibrate existing camera in existing setup\n",
+        validator=lambda x: x in [1, 2, 3],
+         errorMessage="Invalid option. Please enter 1, 2, or 3."
+            )
+            
+    
+    while option == 1:  # from scratch
         output = []
-        num_cameras = int(input("how many cameras are there?\n"))
+        num_cameras = get_int_input("how many cameras are there?\n",validator=lambda x: x >0, errorMessage ="number of cameras can't be zero" )
         if num_cameras <= 0:
             print("invalid number of cameras")
             continue
         for i in range(0, num_cameras):
             rotation = 0
-            camera_number = int(
-                input("what id is labeled on the side of this camera?\n")
-            )
             camera_name, camera_index = getCameraID()
-           
-            print("camera_index",camera_index)
+            camera_number = get_int_input("what id is labeled on the side of this camera?\n",validator=lambda x: x >0, errorMessage ="id on camera can't be zero" )
+            
+            
+
+            print("camera_index", camera_index)
             resolutions = getResolution(camera_index)
-            width, height = pick_resolution(resolutions)#todo make it so it saves this info for future cameras 
-            images = get_calibration_images(
-                camera_index, width, height
-            )  # todo have this work regardless if on windows mac linux
-            mtx, dist = generate_calibration_data(images, (5, 6), 31.69)
-            data = {
-                "intrinsic_matrix": mtx,
-                "distortion_coef": dist,
-                "rotation": rotation,
-                "id": camera_number,  # general id associated with camera for human use
-                "name": camera_name,
-                "width": width,
-                "height": height,
-            }
+            width, height = pick_resolution(
+                resolutions
+            )  # todo make it so it saves this info for future cameras
+            data = get_calibration_data(
+                rotation, camera_number, camera_name, camera_index, width, height
+            )
             output.append(data)
             with open("computer_code/api/camera-params.json", "w") as f:
                 json.dump(output, f, indent=4)
@@ -222,83 +197,64 @@ def default_setup():
         None
     while option == 3:  # recalibrate existing camera in existing setup
         None
+"""_summary_ keeps trying to get int from user by displaying test message if error happens prevents crash and displays error to user
+"""
+def get_int_input(text, validator=None, errorMessage="error: please provide an integer"):
+    while True:
+        try:
+            output = int(input(text))
+            if validator is not None and not validator(output):
+                print(errorMessage)
+                continue
+            break
+        except KeyboardInterrupt:
+            try:
+                input("\nare you sure you want to quit? hit control c again ")
+            except KeyboardInterrupt:
+                print("\nKeyboardInterrupt detected. Exiting input loop.")
+                exit(-1)
+        except Exception as e:
+            print(f"{errorMessage}\nError details: {e}")
+    return output
 
+def get_calibration_data(
+    rotation, camera_number, camera_name, camera_index, width, height
+):
+    images = get_calibration_images(
+        camera_index, width, height
+    )  # todo have this work regardless if on windows mac linux
+    mtx, dist = generate_calibration_data(images, (5, 6), 31.69)
+    return {
+        "intrinsic_matrix": mtx.tolist(),
+        "distortion_coef": dist.tolist(),
+        "rotation": rotation,
+        "id": camera_number,  # general id associated with camera for human use
+        "name": camera_name,
+        "width": width,
+        "height": height,
+    }
+   
 
 def pick_resolution(resolutions):
     output = ""
     for index, line in enumerate(resolutions):
         output += str(index) + ": " + str(line) + "\n"
-    choice = input("select a resolution from this list\n " + output)
+    choice = get_int_input("select a resolution from this list\n " + output, validator=lambda x: x >0 and x < len(resolutions), errorMessage ="please select valid option in the list" )
     width, height = resolutions[int(choice)]
     return width, height
 
-
 def getCameraID():
     while True:
-
         output = find_camera()
         if len(output) > 1:
             print("error to many devices were disconnected try again")
-
         elif len(output) <= 0:
             print("no devices were disconnected try again")
         else:
-
             break
     return output[0]
 
 
-def getResolution(camera_id):
-    # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height
-    # command to use
-    command = "v4l2-ctl -d /dev/video" + str(camera_id) + " --list-formats-ext"
-    result = (
-        subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-        .stdout.decode("utf-8")
-        .split("\n")
-    )
-    if result[-1] == "":
-        result.pop()
-    resolutions = []
-    for line in result:
-        if "Size: Discrete" in line:
-            parts = line.strip().split()
-            if len(parts) >= 3:
-                size = parts[2]
-                if "x" in size:
-                    w, h = size.split("x")
-                    resolutions.append((int(w), int(h)))
-
-    return resolutions
-
 if __name__ == "__main__":
-    # camera_number = 0
-    # rotation = 0
-    # output=""
-    # camera_name, camera_index = [
-    #     "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4)",
-    #     4,
-    # ]
-    # camera_index = get_id_from_name(camera_name)
-    # print("camera_index",camera_index)
-    # resolutions = getResolution(camera_index)
-    # width, height = pick_resolution(resolutions)
 
-    
-    # images = get_calibration_images(
-    #     camera_index, width, height
-    # )  # todo have this work regardless if on windows mac linux
-    # mtx, dist = generate_calibration_data(images, (5, 6), 31.69)
-    # data = {
-    #     "intrinsic_matrix": mtx,
-    #     "distortion_coef": dist,
-    #     "rotation": rotation,
-    #     "id": camera_number,  # general id associated with camera for human use
-    #     "name": camera_name,
-    #     "width": width,
-    #     "height": height,
-    # }
-    # output.append(data)
-    # with open("computer_code/api/camera-params.json", "w") as f:
-    #     json.dump(output, f, indent=4)
     default_setup()
