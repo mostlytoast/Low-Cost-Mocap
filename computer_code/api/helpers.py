@@ -11,6 +11,7 @@ import cv2 as cv
 from KalmanFilter import KalmanFilter
 # from pseyepy import Camera
 from Singleton import Singleton
+import videoSubSystem 
 
 from subprocess import PIPE, run
 import platform
@@ -31,15 +32,16 @@ class Cameras:
         # print("num cameras",self.num_cameras )
         camera_list = []
         for camera_data in self.camera_params: #use opencv instead of pseyepy
-            camera_list.extend(find_camera_id(camera_data["name"]))
-        camera_list = list(set(camera_list)) #remove duplicates 
-        for cameras in camera_list:
+            camera_id = videoSubSystem.get_id_from_name(camera_data["name"])
+            
+            camera_list.extend(camera_id)
+        # camera_list = list(set(camera_list)) #remove duplicates 
+        # for cameras in camera_list:
 
-            cap =cv.VideoCapture(cameras)
+            cap =cv.VideoCapture(camera_id)
             cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
-
-            # cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
-            # cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
+            cap.set(cv.CAP_PROP_FRAME_WIDTH, float(camera_data["width"]))
+            cap.set(cv.CAP_PROP_FRAME_HEIGHT, float(camera_data["height"]))
             self.cameras.append(cap)
 
         # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
