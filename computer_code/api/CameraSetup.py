@@ -3,7 +3,8 @@ from videoSubSystem import *
 import cv2
 import numpy as np
 import json
-
+checkerboard = (9,6)
+checkerboard_dimension= 21.86
 # todo document
 
 
@@ -223,7 +224,8 @@ def get_calibration_data(
     images = get_calibration_images(
         camera_index, width, height
     )  # todo have this work regardless if on windows mac linux
-    mtx, dist = generate_calibration_data(images, (5, 6), 31.69)
+    
+    mtx, dist = generate_calibration_data(images, checkerboard, checkerboard_dimension)
     return {
         "intrinsic_matrix": mtx.tolist(),
         "distortion_coef": dist.tolist(),

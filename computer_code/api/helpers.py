@@ -116,7 +116,7 @@ class Cameras:
             # TODO should we be squaring images? might be causing issues 
             frames[i] = make_square(frames[i])
             frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
-            frames[i] = cv.GaussianBlur(frames[i],(9,9),0)
+            frames[i] = cv.GaussianBlur(frames[i], (21, 21), 0)
             kernel = np.array([[-2,-1,-1,-1,-2],
                                [-1,1,3,1,-1],
                                [-1,3,4,3,-1],
@@ -168,7 +168,13 @@ class Cameras:
                         for filtered_object in filtered_objects:
                             filtered_object["vel"] = filtered_object["vel"].tolist()
                             filtered_object["pos"] = filtered_object["pos"].tolist()
-                    
+                    for obj in object_points.tolist():
+                        
+                        if self.to_world_coords_matrix is not None:
+                            obj_hom = np.concatenate([obj, [1]])
+                            obj_world = np.dot(self.to_world_coords_matrix, obj_hom)
+                            obj_world = obj_world[:3] / obj_world[3]
+                            print(f"norm x: {obj[0]*10:.4f}, y: {obj[1]*10:.4f}, z: {obj[2]*10:.4f} world x: {obj_world[0]*10:.4f}, y: {obj_world[1]*10:.4f}, z: {obj_world[2]*10:.4f}")
                     self.socketio.emit("object-points", {
                         "object_points": object_points.tolist(), 
                         "errors": errors.tolist(), 

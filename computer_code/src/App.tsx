@@ -33,6 +33,9 @@ export default function App() {
   const [isLocatingObjects, setIsLocatingObjects] = useState(false);
 
   const objectPoints = useRef<Array<Array<Array<number>>>>([])
+  // const plane = useRef<Array<object>>([])
+  // const [cameraPoses, setCameraPoses] = useState<Array<object>>([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]}])
+
   const filteredObjects = useRef<object[][]>([])
   const droneSetpointHistory = useRef<number[][]>([])
   const objectPointErrors = useRef<Array<Array<number>>>([])
@@ -251,6 +254,36 @@ export default function App() {
     }
   }, [objectPointCount])
 
+  // useEffect(() => {
+  //   // Listen for "plane" events from the server (optional, if you want to receive planes)
+  //   socket.on("plane", (data) => {
+  //     plane.current.push(data["plane"])
+  //     if (data["plane"].length != 0) {
+  //       filteredObjects.current.push(data["plane"])
+  //     }
+  //     objectPointErrors.current.push(data["errors"])
+  //     objects.current.push(data["objects"])
+  //     droneSetpointHistory.current.push(droneSetpointWithMotion)
+  //     setObjectPointCount(objectPointCount + 1)
+  //     // You can handle incoming plane data here if needed
+  //     // Example: setPlaneData(data)
+  //     // For now, just log it
+  //     console.log("Received plane data:", data);
+  //   });
+
+  //   return () => {
+  //     socket.off("plane");
+  //   };
+  // }, []);
+
+  // // Function to emit a plane definition to the server
+  // const sendPlane = (size: [number, number], matrix: number[][]) => {
+  //   socket.emit("plane", {
+  //     size,
+  //     matrix
+  //   });
+  // };
+
   useEffect(() => {
     socket.on("camera-pose", data => {
       console.log(data["camera_poses"])
@@ -418,6 +451,7 @@ export default function App() {
                   onClick={() => {
                     if (!isTriangulatingPoints) {
                       objectPoints.current = []
+                      // plane.current=[]
                       objectPointErrors.current = []
                       objects.current = []
                       filteredObjects.current = []

@@ -192,7 +192,13 @@ def acquire_floor(data):
     R = F @ G @ linalg.inv(F)
 
     R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
-
+    # # Swap y and z axis in R
+    # swap = np.array([
+    #     [1, 0, 0],
+    #     [0, 0, 1],
+    #     [0, 1, 0]
+    # ])
+    # R = swap @ R @ swap.T
     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
 
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
