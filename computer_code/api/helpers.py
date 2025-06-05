@@ -136,6 +136,8 @@ class Cameras:
                     self.socketio.emit("image-points", [x[0] for x in image_points])
                 elif self.is_triangulating_points:
                     errors, object_points, frames = find_point_correspondance_and_object_points(image_points, self.camera_poses, frames)
+                    for obj in object_points.tolist():
+                        print(f"orig x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f}")
 
                     # convert to world coordinates
                     for i, object_point in enumerate(object_points):
@@ -174,7 +176,7 @@ class Cameras:
                             obj_hom = np.concatenate([obj, [1]])
                             obj_world = np.dot(self.to_world_coords_matrix, obj_hom)
                             obj_world = obj_world[:3] / obj_world[3]
-                            print(f"norm x: {obj[0]*10:.4f}, y: {obj[1]*10:.4f}, z: {obj[2]*10:.4f} world x: {obj_world[0]*10:.4f}, y: {obj_world[1]*10:.4f}, z: {obj_world[2]*10:.4f}")
+                            print(f"norm x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f} world x: {obj_world[0]*10:8.4f}, y: {obj_world[1]*10:8.4f}, z: {obj_world[2]*10:8.4f}")
                     self.socketio.emit("object-points", {
                         "object_points": object_points.tolist(), 
                         "errors": errors.tolist(), 
