@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "computer_code/api/index.py",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/computer_code/venv/bin/python"
+            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
 
         }
     ]
