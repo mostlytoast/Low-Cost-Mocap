@@ -40,3 +40,4 @@ computer_code/include/*
 computer_code/lib64/*
 computer_code/venv/*
 calib_img/*
+venv/*
