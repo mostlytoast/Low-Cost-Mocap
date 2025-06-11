@@ -162,37 +162,19 @@ def arm_drone(data):
 @profile
 @socketio.on("acquire-floor")
 def acquire_floor(data):
-
-
-
-    
-
-
     cameras = Cameras.instance()
     object_points = data["objectPoints"]
     object_points = np.array([item for sublist in object_points for item in sublist])
+    print("\nobject_points",object_points.tolist())
+    print("cameras.to_world_coords_matrix",cameras.to_world_coords_matrix )
 
-    # tmp_A = []
-    # tmp_b = []
-    # for i in range(len(object_points)):
-    #     tmp_A.append([object_points[i,0], object_points[i,1], 1])
-    #     tmp_b.append(object_points[i,2])
-    # b = np.matrix(tmp_b).T
-    # A = np.matrix(tmp_A)
-
-    # fit, residual, rnk, s = linalg.lstsq(A, b)
-    # fit = fit.T[0]
-
-    # plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
-    # plane_normal = plane_normal / linalg.norm(plane_normal)
-    # up_normal = np.array([[0],[0],[1]], dtype=np.float32)
-
-    # plane = np.array([fit[0], fit[1], -1, fit[2]])
     temp_points = []
-    for i in range(len(object_points)):
+    for temp_obj in object_points:
         # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
 
-        temp_points.append([object_points[i,0], object_points[i,1], object_points[i,2]])
+        temp_obj[1], temp_obj[2] = temp_obj[2], temp_obj[1]
+        temp_points.append([temp_obj[0], temp_obj[1], temp_obj[2]])
+
     points = Points(temp_points)
     plane = Plane.best_fit(points)
     # Get the normal vector and a point on the plane
@@ -200,7 +182,7 @@ def acquire_floor(data):
     plane_point = plane.point
     #https://mattloftus.github.io/2016/01/23/threejs-p1/
     # The floor of the coordinate space is assumed to be y=0, normal [0,1,0]
-    floor_normal = np.array([0, 1, 0])
+    floor_normal = np.array([0, 1,0])
     floor_point = np.array([0, 0, 0])
 
     # Compute rotation to align plane_normal to floor_normal
@@ -231,43 +213,70 @@ def acquire_floor(data):
     # ])
     # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
 
-    # object_points_hom = np.hstack([object_points, np.ones((object_points.shape[0], 1))])
-    # object_points_transformed = (to_world_coords_matrix @ object_points_hom.T).T[:, :3]
-    # for obj in object_points:
-    #     new_object_point = np.array(to_world_coords_matrix) @ obj
+   
 
-    #    # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
-    # mat_3x3 = np.array([[1,0,0],[0,-1,0],[0,0,1]])
-    # mat_4x4 = np.eye(4)
-    # mat_4x4[:3, :3] = mat_3x3
-    # new_to_world_coords_matrix = new_to_world_coords_matrix @ mat_4x4  # i dont fucking know why
-    # Save to cameras object
-    #apply new matrix onto previous matrix 
-    print("new_to_world_coords_matrix",new_to_world_coords_matrix.tolist())
+    # Swap y and z axes in the transformation matrix
+    swap_yz = np.array([
+        [1, 0, 0, 0],
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 1]
+    ])
+    new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
+    
+    
     # perm = [0, 2, 1, 3]
-    # new_to_world_coords_matrix = new_to_world_coords_matrix[perm, :][:, perm]
-    cameras.to_world_coords_matrix = new_to_world_coords_matrix @ cameras.to_world_coords_matrix
-    perm = [0, 2, 1, 3]
-    cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
-    # # https://math.stackexchange.com/a/897677/1012327
-    # G = np.array([
-    #     [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
-    #     [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
-    #     [0, 0, 1]
-    # ])
-    # F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
-    # R = F @ G @ linalg.inv(F)
-
-    # R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
-
-    # cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
-    # Apply the transformation matrix to object_points
-   
-    # data["objectPoints"] = object_points_transformed
-
+    # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
  
-   
+    
+    cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
+    # cameras.to_world_coords_matrix = new_to_world_coords_matrix
+    # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
+    swap_yz_4x4 = np.eye(4)
+    swap_yz_4x4[:3, :3] = np.array([[1,0,0],[0,-1,0],[0,0,1]])
+    cameras.to_world_coords_matrix = cameras.to_world_coords_matrix @ swap_yz_4x4 # i dont fucking know why
+    
+    print("new_to_world_coords_matrix",new_to_world_coords_matrix.tolist())
+    
     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+
+# @socketio.on("acquire-floor")
+# def acquire_floor(data):
+#     cameras = Cameras.instance()
+#     object_points = data["objectPoints"]
+#     object_points = np.array([item for sublist in object_points for item in sublist])
+
+#     tmp_A = []
+#     tmp_b = []
+#     for i in range(len(object_points)):
+#         tmp_A.append([object_points[i,0], object_points[i,1], 1])
+#         tmp_b.append(object_points[i,2])
+#     b = np.matrix(tmp_b).T
+#     A = np.matrix(tmp_A)
+
+#     fit, residual, rnk, s = linalg.lstsq(A, b)
+#     fit = fit.T[0]
+
+#     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
+#     plane_normal = plane_normal / linalg.norm(plane_normal)
+#     up_normal = np.array([[0],[0],[1]], dtype=np.float32)
+
+#     plane = np.array([fit[0], fit[1], -1, fit[2]])
+
+#     # https://math.stackexchange.com/a/897677/1012327
+#     G = np.array([
+#         [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
+#         [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
+#         [0, 0, 1]
+#     ])
+#     F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
+#     R = F @ G @ linalg.inv(F)
+
+#     R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
+#     # cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]]))) 
+#     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
+
+#     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
 
 @profile
@@ -299,7 +308,11 @@ def capture_points(data):
     cameras = Cameras.instance()
 
     if (start_or_stop == "start"):
-        cameras.start_capturing_points()
+        # cameras.start_capturing_points()
+        socketio.emit("object-points", {
+                        "object_points":[0,0,1]
+                    
+                    })
         return
     elif (start_or_stop == "stop"):
         cameras.stop_capturing_points()

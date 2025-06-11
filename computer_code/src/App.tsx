@@ -1308,8 +1308,13 @@ export default function App() {
               <Col style={{ height: "1000px" }}>
                 <Canvas orthographic camera={{ zoom: 1000, position: [0, 0, 10] }}>
                   <ambientLight />
+                  {/* Point at y = 2 */}
+                  <mesh position={[0, 1, 0]}>
+                  <sphereGeometry args={[0.03, 16, 16]} />
+                  <meshStandardMaterial color="red" />
+                  </mesh>
                   {cameraPoses.map(({ R, t }, i) => (
-                    <CameraWireframe R={R} t={t} toWorldCoordsMatrix={toWorldCoordsMatrix} key={i} />
+                  <CameraWireframe R={R} t={t} toWorldCoordsMatrix={toWorldCoordsMatrix} key={i} />
                   ))}
                   <Points objectPointsRef={objectPoints} objectPointErrorsRef={objectPointErrors} count={objectPointCount} />
                   <Objects filteredObjectsRef={filteredObjects} count={objectPointCount} />

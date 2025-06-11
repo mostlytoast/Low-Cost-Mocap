@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Ensure script is run from the 'computer_code' directory
+if [ "$(basename "$PWD")" != "computer_code" ]; then
+    echo "Error: Please run this script from the 'computer_code' directory."
+    exit 1
+fi
+
 # Check if virtual environment exists
 if [ -d "venv" ]; then
     echo "Using existing virtual environment."
@@ -44,6 +50,8 @@ install_if_missing ffmpeg
 
 
 # install v4l2
+#TODO error never notices this is already installed because of command name vs install name diff
+#TODO install mac/windows alternatives based on system version 
 install_if_missing v4l-utils
 
 # Upgrade pip and install numpy
@@ -52,3 +60,4 @@ pip install numpy scipy opencv-python flask Flask-SocketIO Ruckig flask-cors sci
 
 echo "Virtual environment ready and numpy installed."  
 
+echo "Run 'source venv/bin/activate' to activate the virtual environment in your terminal."
