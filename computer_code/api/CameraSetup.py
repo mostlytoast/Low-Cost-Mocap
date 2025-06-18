@@ -3,6 +3,8 @@ from videoSubSystem import *
 import cv2
 import numpy as np
 import json
+from PyQt5 import QtWidgets, QtCore
+import sys
 checkerboard = (9,6)
 checkerboard_dimension= 21.86
 # todo document
@@ -257,6 +259,50 @@ def getCameraID():
     return output[0]
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    default_setup()
+    # default_setup()
+class CameraSetupGUI(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Camera Setup")
+        self.layout = QtWidgets.QVBoxLayout()
+
+        self.option_label = QtWidgets.QLabel("Choose option:")
+        self.layout.addWidget(self.option_label)
+
+        self.option_combo = QtWidgets.QComboBox()
+        self.option_combo.addItems([
+            "1. Setup from scratch",
+            "2. Add camera to existing setup",
+            "3. Recalibrate existing camera"
+        ])
+        self.layout.addWidget(self.option_combo)
+
+        self.start_button = QtWidgets.QPushButton("Start")
+        self.start_button.clicked.connect(self.handle_option)
+        self.layout.addWidget(self.start_button)
+
+        self.output_text = QtWidgets.QTextEdit()
+        self.output_text.setReadOnly(True)
+        self.layout.addWidget(self.output_text)
+
+        self.setLayout(self.layout)
+
+    def handle_option(self):
+        option = self.option_combo.currentIndex() + 1
+        if option == 1:
+            self.output_text.append("Starting setup from scratch...")
+            # You can call default_setup() or refactor logic to work with GUI
+        elif option == 2:
+            self.output_text.append("Adding camera to existing setup...")
+        elif option == 3:
+            self.output_text.append("Recalibrating existing camera...")
+        else:
+            self.output_text.append("Invalid option.")
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = CameraSetupGUI()
+    window.show()
+    sys.exit(app.exec_())

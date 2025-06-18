@@ -2,9 +2,14 @@
 
 ### An extention to a cheap open source motion capture system with improved tools and cameras
 
-## Cameras 
+## Cameras
 
- 
+
+
+![img](https://github.com/mostlytoast/Low-Cost-Mocap/blob/no-cv-sfm/images/arducamov9281caseasmexplosion-ezgif.com-video-to-gif-converter-2.gif?raw=true)
+
+In previous interations 
+
 ## Dependencies
 
 Install the pseyepy python library: [https://github.com/bensondaled/pseyepy](https://github.com/bensondaled/pseyepy)
