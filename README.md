@@ -1,7 +1,10 @@
 # Low Cost Mocap (for drones)
 
-### A general purpose motion capture system built from the ground up, used to autonomously fly multiple drones indoors
+### An extention to a cheap open source motion capture system with improved tools and cameras
 
+## Cameras 
+
+ 
 ## Dependencies
 
 Install the pseyepy python library: [https://github.com/bensondaled/pseyepy](https://github.com/bensondaled/pseyepy)
