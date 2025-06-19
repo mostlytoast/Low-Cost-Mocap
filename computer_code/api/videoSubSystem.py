@@ -3,6 +3,10 @@ import subprocess
 
 
 def listWebcams():
+    """_summary_ returns list of attached webcams plus their ids
+    Returns:
+    list : [<system name>, device_id]
+    """
     # TODO get alternative versions working for different operating systems
     output = []
     if platform.system().lower() == "linux":
@@ -13,10 +17,10 @@ def listWebcams():
             .stdout.decode("utf-8")
             .split("\n")
         )
-        result = [i for i in result if i != '']
-        
+        result = [i for i in result if i != ""]
+
         for i, line in enumerate(result):
-            if ("\t" not in line) and (i < len(result)-1) :
+            if ("\t" not in line) and (i < len(result) - 1):
                 # camera name found
                 # todo get error checking working
                 # Extract the last number from the next line (device id)
@@ -26,7 +30,7 @@ def listWebcams():
                 device_id = int(device_id_str)
                 output.append([line, device_id])
                 # should this include the id of the camera? this could change immediately after running this code
-    #todo get working for macos 
+    # todo get working for macos
     return output
 
 
@@ -60,7 +64,6 @@ def find_camera():
     return [x for x in result_with_cam if x not in result_no_cam]
 
 
-
 def get_id_from_v4l2(device_line):
     device_id_str = device_line.strip().split("/")[-1].replace("video", "")
     return int(device_id_str)
@@ -69,7 +72,7 @@ def get_id_from_v4l2(device_line):
 def get_id_from_name(name):
     """_summary_ find the device id for a given usb product and vendor id which can be found with v4l2-ctl --list-devices or listWebcams() used to determine the opencv id for cv.VideoCapture(id)
     Args:
-        name (_str_): the name of camera with id info given by v4l2-ctl --list-devices or listWebcams() return -1 if cant find it 
+        name (_str_): the name of camera with id info given by v4l2-ctl --list-devices or listWebcams() return -1 if cant find it
     Example:
         get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4)")
     """
@@ -81,7 +84,7 @@ def get_id_from_name(name):
         if name in line:
             cameras.append(line[1])
 
-    if len(cameras) == 0 or  len(cameras) > 1:
+    if len(cameras) == 0 or len(cameras) > 1:
         return -1
     return cameras[0]
 
@@ -110,4 +113,4 @@ def getResolution(camera_id):
                         resolutions.append((int(w), int(h)))
 
         return resolutions
-    return [(1920,1080)]
+    return [(1920, 1080)]

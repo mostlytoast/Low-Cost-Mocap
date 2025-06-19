@@ -4,21 +4,20 @@
 
 ## Cameras
 
-
-
 ![img](https://github.com/mostlytoast/Low-Cost-Mocap/blob/no-cv-sfm/images/arducamov9281caseasmexplosion-ezgif.com-video-to-gif-converter-2.gif?raw=true)
 
-In previous interations 
+In previous iterations of this system PlayStation Eye cameras were used which required heavy modifications. This is no longer the case with a new and improved 3d printed case for the Arducam OV9281 usb webcam. 
+
+## Camera calibration 
+Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system. This will also have a GUI version shortly 
 
 ## Dependencies
-
-Install the pseyepy python library: [https://github.com/bensondaled/pseyepy](https://github.com/bensondaled/pseyepy)
 
 install npm and yarn
 
 ## Runing the code
 
-make virtual python enviroment using pipx https://pipx.pypa.io/stable/installation/
+make virtual python environment using pipx https://pipx.pypa.io/stable/installation/
 
 create a virtual environment using python3 -m venv path/to/venv.
 Low-Cost-Mocap$ python3 -m venv computer_code/
@@ -30,7 +29,7 @@ run install script
 
 `bash install.sh`
 
-open python virtual enviroment
+open python virtual environment
 
 `source venv/bin/activate`
 
