@@ -69,7 +69,7 @@ def get_id_from_v4l2(device_line):
 def get_id_from_name(name):
     """_summary_ find the device id for a given usb product and vendor id which can be found with v4l2-ctl --list-devices or listWebcams() used to determine the opencv id for cv.VideoCapture(id)
     Args:
-        name (_str_): the name of camera with id info given by v4l2-ctl --list-devices or listWebcams()
+        name (_str_): the name of camera with id info given by v4l2-ctl --list-devices or listWebcams() return -1 if cant find it 
     Example:
         get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.4)")
     """

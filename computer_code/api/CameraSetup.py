@@ -1,7 +1,7 @@
 
 from videoSubSystem import *
 from PyQt5 import QtWidgets, QtCore
-# import cv2
+import cv2
 import numpy as np
 import json
 import sys
@@ -13,128 +13,128 @@ checkerboard_dimension= 21.86
 # code based on https://github.com/jyjblrd/Low-Cost-Mocap/discussions/11#discussioncomment-9380283
 
 
-# def get_calibration_images(camera_id, width, height):
-#     """_summary_ takes and saves images to path"""
-#     images = []
-#     cap = cv2.VideoCapture(camera_id)
-#     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
-#     cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(width))
-#     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(height))
-#     # TODO have to get this working
+def get_calibration_images(camera_id, width, height):
+    """_summary_ takes and saves images to path"""
+    images = []
+    cap = cv2.VideoCapture(camera_id)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(width))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(height))
+    # TODO have to get this working
 
-#     # Check if resolution was set successfully
-#     cap_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-#     cap_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-#     print(f"Resolution: {width} x {height}")
-#     if cap_width != width or cap_height != height:
-#         print("error resolution cant be changed to whats specified")
+    # Check if resolution was set successfully
+    cap_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    cap_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    print(f"Resolution: {width} x {height}")
+    if cap_width != width or cap_height != height:
+        print("error resolution cant be changed to whats specified")
 
-#     # todo have default to specific resolution of cameras
-#     count = 0
-#     while True:
+    # todo have default to specific resolution of cameras
+    count = 0
+    while True:
 
-#         ret, img = cap.read()
-#         cv2.imshow("img", img)
-#         if cv2.waitKey(20) & 0xFF == ord("c"):
-#             images.append(img)
-#             # cv2.imwrite(name, img)
-#             cv2.imshow("img", img)
-#             count += 1
-#             # todo make it so you can quit whenever not just after you take a capture
-#             if cv2.waitKey(0) & 0xFF == ord("q"):
-#                 break
-#     cap.release()
-#     return images
+        ret, img = cap.read()
+        cv2.imshow("img", img)
+        if cv2.waitKey(20) & 0xFF == ord("c"):
+            images.append(img)
+            # cv2.imwrite(name, img)
+            cv2.imshow("img", img)
+            count += 1
+            # todo make it so you can quit whenever not just after you take a capture
+            if cv2.waitKey(0) & 0xFF == ord("q"):
+                break
+    cap.release()
+    return images
 
 
-# def generate_calibration_data(images, checkerboard, dimension):
-#     # dimension = width of block in mm
+def generate_calibration_data(images, checkerboard, dimension):
+    # dimension = width of block in mm
 
-#     # Defining the dimensions of checkerboard
-#     # CHECKERBOARD = (6,9)
-#     # CHECKERBOARD = (5,6)
+    # Defining the dimensions of checkerboard
+    # CHECKERBOARD = (6,9)
+    # CHECKERBOARD = (5,6)
 
-#     CHECKERBOARD = checkerboard
-#     criteria = (
-#         cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
-#         int(dimension),
-#         0.001,
-#     )
-#     # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+    CHECKERBOARD = checkerboard
+    criteria = (
+        cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
+        int(dimension),
+        0.001,
+    )
+    # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-#     # Creating vector to store vectors of 3D points for each checkerboard image
-#     objpoints = []
-#     # Creating vector to store vectors of 2D points for each checkerboard image
-#     imgpoints = []
+    # Creating vector to store vectors of 3D points for each checkerboard image
+    objpoints = []
+    # Creating vector to store vectors of 2D points for each checkerboard image
+    imgpoints = []
 
-#     # Defining the world coordinates for 3D points
-#     objp = np.zeros((1, CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
-#     objp[0, :, :2] = np.mgrid[0 : CHECKERBOARD[0], 0 : CHECKERBOARD[1]].T.reshape(-1, 2)
-#     prev_img_shape = None
+    # Defining the world coordinates for 3D points
+    objp = np.zeros((1, CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
+    objp[0, :, :2] = np.mgrid[0 : CHECKERBOARD[0], 0 : CHECKERBOARD[1]].T.reshape(-1, 2)
+    prev_img_shape = None
 
-#     # Extracting path of individual image stored in a given directory
-#     # images = glob.glob(f'{cam_images_folder_name}/*.jpg')
-#     print(len(images))
-#     if len(images) < 9:
-#         print("Not enough images were found: at least 9 shall be provided!!!")
-#         exit(-1)
+    # Extracting path of individual image stored in a given directory
+    # images = glob.glob(f'{cam_images_folder_name}/*.jpg')
+    print(len(images))
+    if len(images) < 9:
+        print("Not enough images were found: at least 9 shall be provided!!!")
+        exit(-1)
 
-#     for index, img in enumerate(images):
-#         print("image: ", index)
-#         # img = cv2.imread(fname)
-#         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#         # Find the chess board corners
-#         # If desired number of corners are found in the image then ret = true
-#         # ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE)
-#         ret, corners = cv2.findChessboardCorners(
-#             gray,
-#             CHECKERBOARD,
-#             cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE,
-#         )
+    for index, img in enumerate(images):
+        print("image: ", index)
+        # img = cv2.imread(fname)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Find the chess board corners
+        # If desired number of corners are found in the image then ret = true
+        # ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE)
+        ret, corners = cv2.findChessboardCorners(
+            gray,
+            CHECKERBOARD,
+            cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE,
+        )
 
-#         """
-#         If desired number of corner are detected,
-#         we refine the pixel coordinates and display 
-#         them on the images of checker board
-#         """
-#         if ret == True:
-#             print("Pattern found! Press ESC to skip or ENTER to accept")
-#             objpoints.append(objp)
-#             # refining pixel coordinates for given 2d points.
-#             corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+        """
+        If desired number of corner are detected,
+        we refine the pixel coordinates and display 
+        them on the images of checker board
+        """
+        if ret == True:
+            print("Pattern found! Press ESC to skip or ENTER to accept")
+            objpoints.append(objp)
+            # refining pixel coordinates for given 2d points.
+            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
 
-#             imgpoints.append(corners2)
+            imgpoints.append(corners2)
 
-#             # Draw and display the corners
-#             img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
+            # Draw and display the corners
+            img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
 
-#             cv2.imshow("img", img)
-#             # cv2.waitKey(0)
-#             k = cv2.waitKey(0) & 0xFF
-#             if k == 27:  # -- ESC Button
-#                 print("Image Skipped")
-#                 imgNotGood = index
-#                 continue
+            cv2.imshow("img", img)
+            # cv2.waitKey(0)
+            k = cv2.waitKey(0) & 0xFF
+            if k == 27:  # -- ESC Button
+                print("Image Skipped")
+                imgNotGood = index
+                continue
 
-#     cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
 
-#     h, w = img.shape[:2]
+    h, w = img.shape[:2]
 
-#     """
-#     Performing camera calibration by 
-#     passing the value of known 3D points (objpoints)
-#     and corresponding pixel coordinates of the 
-#     detected corners (imgpoints)
-#     """
-#     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
-#         objpoints, imgpoints, gray.shape[::-1], None, None
-#     )
+    """
+    Performing camera calibration by 
+    passing the value of known 3D points (objpoints)
+    and corresponding pixel coordinates of the 
+    detected corners (imgpoints)
+    """
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
+        objpoints, imgpoints, gray.shape[::-1], None, None
+    )
 
-#     print("Camera matrix : \n")
-#     print(mtx.tolist())
-#     print("dist : \n")
-#     print(dist.tolist())
-#     return (mtx, dist)
+    print("Camera matrix : \n")
+    print(mtx.tolist())
+    print("dist : \n")
+    print(dist.tolist())
+    return (mtx, dist)
 
 
 def default_setup():
@@ -257,95 +257,95 @@ def getCameraID():
     return output[0]
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-    # default_setup()
-class detectCameraGUI(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+    default_setup()
+# class detectCameraGUI(QtWidgets.QWidget):
+#     def __init__(self):
+#         super().__init__()
 
-        # self.setWindowTitle("HELLO!")
+#         # self.setWindowTitle("HELLO!")
 
-        # QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+#         # QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
 
-        # self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-        # self.buttonBox.accepted.connect(self.accept)
-        # self.buttonBox.rejected.connect(self.reject)
+#         # self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
+#         # self.buttonBox.accepted.connect(self.accept)
+#         # self.buttonBox.rejected.connect(self.reject)
 
-        # layout = QtWidgets.QVBoxLayout()
-        # message = QtWidgets.QLabel("Something happened, is that OK?")
-        # layout.addWidget(message)
-        # layout.addWidget(self.buttonBox)
-        # self.setLayout(layout)
-        self.setup_button = QtWidgets.QPushButton(" from scratch")
-        # self.setup_button.clicked.connect(self.setup)
-        self.layout1.addWidget(self.setup_button)
+#         # layout = QtWidgets.QVBoxLayout()
+#         # message = QtWidgets.QLabel("Something happened, is that OK?")
+#         # layout.addWidget(message)
+#         # layout.addWidget(self.buttonBox)
+#         # self.setLayout(layout)
+#         self.setup_button = QtWidgets.QPushButton(" from scratch")
+#         # self.setup_button.clicked.connect(self.setup)
+#         self.layout1.addWidget(self.setup_button)
 
-        # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-        # self.setup_button.clicked.connect(self.handle_option)
-        # self.layout1.addWidget(self.setup_button)
+#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
+#         # self.setup_button.clicked.connect(self.handle_option)
+#         # self.layout1.addWidget(self.setup_button)
         
-        # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-        # self.setup_button.clicked.connect(self.handle_option)
-        # self.layout1.addWidget(self.setup_button)
-        # self.output_text = QtWidgets.QTextEdit()
-        # self.output_text.setReadOnly(True)
-        # self.layout1.addWidget(self.output_text)
+#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
+#         # self.setup_button.clicked.connect(self.handle_option)
+#         # self.layout1.addWidget(self.setup_button)
+#         # self.output_text = QtWidgets.QTextEdit()
+#         # self.output_text.setReadOnly(True)
+#         # self.layout1.addWidget(self.output_text)
 
-        self.setLayout(self.layout1)
-class CameraSetupGUI(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Camera Setup")
-        self.layout1 = QtWidgets.QHBoxLayout()
+#         self.setLayout(self.layout1)
+# class CameraSetupGUI(QtWidgets.QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle("Camera Setup")
+#         self.layout1 = QtWidgets.QHBoxLayout()
         
-        # self.option_label = QtWidgets.QLabel("Choose option:")
-        # self.layout1.addWidget(self.option_label)
+#         # self.option_label = QtWidgets.QLabel("Choose option:")
+#         # self.layout1.addWidget(self.option_label)
 
-        # self.option_combo = QtWidgets.QComboBox()
-        # self.option_combo.addItems([
-        #     "1. Setup from scratch",
-        #     "2. Add camera to existing setup",
-        #     "3. Recalibrate existing camera"
-        # ])
-        # self.layout1.addWidget(self.option_combo)
+#         # self.option_combo = QtWidgets.QComboBox()
+#         # self.option_combo.addItems([
+#         #     "1. Setup from scratch",
+#         #     "2. Add camera to existing setup",
+#         #     "3. Recalibrate existing camera"
+#         # ])
+#         # self.layout1.addWidget(self.option_combo)
 
-        self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-        self.setup_button.clicked.connect(self.setup)
-        self.layout1.addWidget(self.setup_button)
+#         self.setup_button = QtWidgets.QPushButton("Setup from scratch")
+#         self.setup_button.clicked.connect(self.setup)
+#         self.layout1.addWidget(self.setup_button)
 
-        # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-        # self.setup_button.clicked.connect(self.handle_option)
-        # self.layout1.addWidget(self.setup_button)
+#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
+#         # self.setup_button.clicked.connect(self.handle_option)
+#         # self.layout1.addWidget(self.setup_button)
         
-        # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-        # self.setup_button.clicked.connect(self.handle_option)
-        # self.layout1.addWidget(self.setup_button)
-        # self.output_text = QtWidgets.QTextEdit()
-        # self.output_text.setReadOnly(True)
-        # self.layout1.addWidget(self.output_text)
+#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
+#         # self.setup_button.clicked.connect(self.handle_option)
+#         # self.layout1.addWidget(self.setup_button)
+#         # self.output_text = QtWidgets.QTextEdit()
+#         # self.output_text.setReadOnly(True)
+#         # self.layout1.addWidget(self.output_text)
 
-        self.setLayout(self.layout1)
+#         self.setLayout(self.layout1)
 
-    def setup(self):
-        # # Remove the old layout and replace it with a new one
-        # QtWidgets.QWidget().setLayout(self.layout())  # Detach old layout
-        # self.layout1 = QtWidgets.QHBoxLayout()        # Create a new layout
-        # self.setLayout(self.layout1)                  # Set the new layout
-        # self.setWindowTitle("scratch")
-        # self.alert =  QtWidgets.QDialog()
-        # self.layout1.addWidget(self.setup_button)
-        dlg = QtWidgets.QDialog(self)
-        dlg.setWindowTitle("HELLO!")
-        dlg.exec()
-    # add camera to existing 
-    # recalibrate camera 
-    # reconfigure connections (usb id's)
+#     def setup(self):
+#         # # Remove the old layout and replace it with a new one
+#         # QtWidgets.QWidget().setLayout(self.layout())  # Detach old layout
+#         # self.layout1 = QtWidgets.QHBoxLayout()        # Create a new layout
+#         # self.setLayout(self.layout1)                  # Set the new layout
+#         # self.setWindowTitle("scratch")
+#         # self.alert =  QtWidgets.QDialog()
+#         # self.layout1.addWidget(self.setup_button)
+#         dlg = QtWidgets.QDialog(self)
+#         dlg.setWindowTitle("HELLO!")
+#         dlg.exec()
+#     # add camera to existing 
+#     # recalibrate camera 
+#     # reconfigure connections (usb id's)
 
        
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = CameraSetupGUI()
-    window.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     window = CameraSetupGUI()
+#     window.show()
+#     sys.exit(app.exec_())

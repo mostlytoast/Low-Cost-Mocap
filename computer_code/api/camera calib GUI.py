@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QListWidget,
-    QListWidgetItem,
+    # QListWidgetItem,
     QShortcut,
     QHBoxLayout,
     QVBoxLayout,
@@ -13,48 +13,18 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
-import cv2
-from PyQt5.QtCore import QThread, pyqtSignal as Signal, pyqtSlot as Slot
-import imutils
-import sys
+from PyQt5.QtCore import  pyqtSlot as Slot
+# import sys
+import cameraThread
 import videoSubSystem
 
-"""_summary_ separate thread to get video from webcam 
-
-Returns:
-    _type_: _description_ signal image 
-"""
-
-
-class MyThread(QThread):
-    frame_signal = Signal(QImage)
-
-    def __init__(self, camera_id):
-        super().__init__()
-        self.camera_id = camera_id
-
-    def set_camera_id(self, camera_id):
-        self.camera_id = camera_id
-
-    def run(self):
-        self.cap = cv2.VideoCapture(self.camera_id)
-        while self.cap.isOpened():
-            _, frame = self.cap.read()
-            frame = self.cvimage_to_label(frame)
-            self.frame_signal.emit(frame)
-
-    def cvimage_to_label(self, image):
-        image = imutils.resize(image, width=640)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = QImage(image, image.shape[1], image.shape[0], QImage.Format_RGB888)
-        return image
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Camera Setup")
-        self.camera_thread = MyThread(0)
+        self.camera_thread = cameraThread.MyThread(0)
         self.camera_thread.frame_signal.connect(self.setImage)
         self.initUI()
 
@@ -192,8 +162,8 @@ class MainWindow(QMainWindow):
 
         # webcams not added
         self.non_added_webcam_list = QListWidget()
-        self.non_added_webcam_list.addItem("webcam 4")
-        self.non_added_webcam_list.addItem("webcam 2")
+        # self.non_added_webcam_list.addItem("webcam 4")
+        # self.non_added_webcam_list.addItem("webcam 2")
         self.webcam_list_layout.addWidget(self.non_added_webcam_list)
         self.main_layout.addLayout(self.webcam_list_layout)
         # Shortcuts for deleting items in each list
@@ -216,7 +186,7 @@ class MainWindow(QMainWindow):
         self.label = QLabel()
         self.webcam_preview_layout.addWidget(self.label)
 
-        self.camera_thread = MyThread(0)
+        self.camera_thread = cameraThread.MyThread(0)
         self.camera_thread.frame_signal.connect(self.setImage)
         self.main_layout.addLayout(self.webcam_preview_layout)
         # Set main_layout on a QWidget and set as central widget
@@ -257,6 +227,20 @@ class MainWindow(QMainWindow):
             videoSubSystem.get_id_from_name(self.data["addedWebcams"][self.added_webcam_list.currentItem().text()]["name"])
         )
         self.camera_thread.start()
+    """_summary_ reloads the list of cameras connected to the system
+    """
+    # def reload_cameras(self):
+    #     webcams = self.data["addedWebcams"] + self.data["nonAddedWebcams"]
+    #     for attached_webcams in videoSubSystem.listWebcams:
+    #         # TODO find better way of doing this 
+    #         for current_webcams in webcams:
+    #             if 
+            #check if webcam is still attached 
+            # if videoSubSystem.get_id_from_name(webcams[name]) == -1:
+                #webcam is not attached so remove 
+
+
+
 
 
 if __name__ == "__main__":
