@@ -69,6 +69,18 @@ class Cameras:
 
         global cameras_init
         cameras_init = True
+    # function to add to JSON
+    def write_json(new_data, filename='data.json'):
+        # https://www.geeksforgeeks.org/python/append-to-json-file-using-python/
+        with open(filename,'r+') as file:
+            # First we load existing data into a dict.
+            file_data = json.load(file)
+            # Join new_data with file_data inside emp_details
+            file_data["emp_details"].append(new_data)
+            # Sets file's current position at offset.
+            file.seek(0)
+            # convert back to json.
+            json.dump(file_data, file, indent = 4)
 
     def set_socketio(self, socketio):
         self.socketio = socketio
@@ -140,13 +152,16 @@ class Cameras:
                         print(f"orig x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f}")
 
                     # convert to world coordinates
+                    self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_pre.json")
                     for i, object_point in enumerate(object_points):
+                        #save pre transform objects to json file 
                         new_object_point = np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ object_point
                         new_object_point = np.concatenate((new_object_point, [1]))
                         new_object_point = np.array(self.to_world_coords_matrix) @ new_object_point
                         new_object_point = new_object_point[:3] / new_object_point[3]
                         new_object_point[1], new_object_point[2] = new_object_point[2], new_object_point[1]
                         object_points[i] = new_object_point
+                    self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_post.json")
 
                     objects = []
                     filtered_objects = []
