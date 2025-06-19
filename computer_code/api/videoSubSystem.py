@@ -90,6 +90,14 @@ def get_id_from_name(name):
 
 
 def getResolution(camera_id):
+    """_summary_
+
+    Args:
+        camera_id (int): system id of camera 
+
+    Returns:
+        list tuple : list of tuples with width and then height 
+    """
     # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height
     # command to use
     # TODO make this platform independent
