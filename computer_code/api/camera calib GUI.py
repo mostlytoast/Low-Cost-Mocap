@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QAction,
     QPushButton,
     QLabel,
+    QComboBox
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
@@ -17,6 +18,7 @@ from PyQt5.QtCore import  pyqtSlot as Slot
 # import sys
 import cameraThread
 import videoSubSystem
+from PyQt5.QtWidgets import QSplitter
 
 
 
@@ -105,6 +107,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("QMenuBar Example")
         self.setGeometry(300, 300, 400, 300)
         self.main_layout = QVBoxLayout()
+        self.webcam_settings_layout = QVBoxLayout()
         self.webcam_preview_layout = QHBoxLayout()
         self.webcam_list_layout = QHBoxLayout()
         self.move_buttons_layout = QVBoxLayout()
@@ -172,9 +175,50 @@ class MainWindow(QMainWindow):
         self.delete_shortcut2.activated.connect(self.add_webcam)
 
         self.open_btn = QPushButton("Open The Camera", clicked=self.open_camera)
-        self.webcam_preview_layout.addWidget(self.open_btn)
+        self.webcam_settings_layout.addWidget(self.open_btn)
+        # Create a vertical layout for editable items based on self.data[0]
+        self.editable_fields_layout = QVBoxLayout()
+        self.editable_labels = {}
+        index = 0
+        
+        # Connect selection changes to update_editable_fields
+        # self.added_webcam_list.itemSelectionChanged.connect(self.update_editable_fields)
+        # self.non_added_webcam_list.itemSelectionChanged.connect(self.update_editable_fields)
+
+        # # Initial population
+        # self.update_editable_fields()
+        # # Dropdown to edit a variable (e.g., "rotation" of the first webcam)
+        # combobox = QComboBox(self)
+        # combobox.setEditable(True)
+        # combobox.addItem("0")
+        # combobox.addItem("90")
+        # combobox.addItem("180")
+        # combobox.addItem("270")
+        # combobox.setCurrentText(str(self.data[0]["rotation"]))
+
+        
+
+        # combobox.currentTextChanged.connect(self.on_combobox_changed)
+        
+        # self.editable_fields_layout.addWidget(combobox)
+
+        self.webcam_settings_layout.addLayout(self.editable_fields_layout)
+        
+        # Use a QSplitter to allow resizing between settings and preview
+
+        self.webcam_settings_widget = QWidget()
+        self.webcam_settings_widget.setLayout(self.webcam_settings_layout)
+        self.webcam_settings_widget.setMinimumWidth(200)  # Minimum width
+        self.webcam_settings_widget.setMaximumWidth(400)  # Optional: Maximum width
+
         self.label = QLabel()
-        self.webcam_preview_layout.addWidget(self.label)
+        self.label.setAlignment(Qt.AlignRight)
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.webcam_settings_widget)
+        splitter.addWidget(self.label)
+        splitter.setSizes([200, 400])  # Initial sizes
+
+        self.webcam_preview_layout.addWidget(splitter)
 
         self.camera_thread = cameraThread.MyThread(0)
         self.camera_thread.frame_signal.connect(self.setImage)
@@ -183,7 +227,37 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(self.main_layout)
         self.setCentralWidget(central_widget)
+    # Function to update editable fields when selection changes
+    # def update_editable_fields(self):
+    #     # Remove all widgets from the layout
+    #     while self.editable_fields_layout.count():
+    #         item = self.editable_fields_layout.takeAt(0)
+    #         widget = item.widget()
+    #         if widget is not None:
+    #             widget.deleteLater()
+    #     self.editable_labels.clear()
 
+    #     # Determine which list and item is selected
+    #     selected_item = None
+    #     if self.added_webcam_list.selectedItems():
+    #         selected_item = self.added_webcam_list.selectedItems()[0]
+    #     elif self.non_added_webcam_list.selectedItems():
+    #         selected_item = self.non_added_webcam_list.selectedItems()[0]
+    #     idx = 0
+    #     if selected_item:
+    #         idx = selected_item.data(Qt.UserRole)
+    #     for key, value in self.data[idx].items():
+    #         label = QLabel(f"{key}: {value}")
+    #         label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+    #         self.editable_fields_layout.addWidget(label)
+    #         self.editable_labels[key] = label
+
+    # def on_combobox_changed(self,value):
+    #     try:
+    #         self.data[0]["rotation"] = int(value)
+    #         self.editable_labels["rotation"].setText(f"rotation: {value}")
+    #     except ValueError:
+    #         pass  # Ignore invalid input
     def remove_webcam(self):
         selected_items = self.added_webcam_list.selectedItems()
         for item in selected_items:
@@ -225,7 +299,8 @@ class MainWindow(QMainWindow):
             item.setData(Qt.UserRole, index)
 
 
-
+    def test(self):
+        print("test")
     @Slot(QImage)
     def setImage(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
@@ -234,9 +309,7 @@ class MainWindow(QMainWindow):
         item = self.added_webcam_list.currentItem()
         if not item:
             return
-        # name = item.text()
-        # webcam = next((w for w in self.data if w["added"] and w["name"] == name), None)
-        
+      
         name = self.data[item.data(Qt.UserRole)]["name"] 
         if not name:
             return
@@ -249,7 +322,7 @@ class MainWindow(QMainWindow):
     """
     def reload_cameras(self):
         # TODO have to find way of adding newly added cameras in system to list 
-        # webcams = {**self.data["addedWebcams"], **self.data["nonAddedWebcams"]}
+
         attached_webcams = videoSubSystem.listWebcams()
             # TODO find better way of doing this 
         for current_webcams in self.data:
@@ -275,19 +348,9 @@ class MainWindow(QMainWindow):
                     current_webcams["connected"] = True
                     break
     
-        # for current_webcams in self.data["nonAddedWebcams"]:
-        #     # assume its false
-        #     self.data["nonAddedWebcams"][current_webcams]["connected"] = False
-        #     for attached_webcam in attached_webcams:
 
-        #         if self.data["nonAddedWebcams"][current_webcams]["name"] == attached_webcam[0]:
-        #             self.data["nonAddedWebcams"][current_webcams]["connected"] = True
-        #             break
         self.update_list()
-            # check if webcam is still attached 
-            # if videoSubSystem.get_id_from_name(webcams[name]) == -1:
-                # webcam is not attached so remove 
-
+          
     # def search_data(self,search_attribute,value):
     #         # TODO make this support multiple matching felids 
     #         """_summary_ finds dictionary in data structure with same attribute as value 
