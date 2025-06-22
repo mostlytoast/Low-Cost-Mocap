@@ -43,3 +43,4 @@ calib_img/*
 venv/*
 test.spec
 dist/*
+computer_code/build/*

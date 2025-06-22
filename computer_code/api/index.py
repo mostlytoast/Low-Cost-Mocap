@@ -1,33 +1,34 @@
 from helpers import camera_pose_to_serializable, calculate_reprojection_errors, bundle_adjustment, Cameras, triangulate_points, essential_from_fundamental, motion_from_essential
-from KalmanFilter import KalmanFilter
+# from KalmanFilter import KalmanFilter
 
 from flask import Flask, Response, request
 import cv2 as cv
 import numpy as np
-import numpy.linalg as nplinalg
+# import numpy.linalg as nplinalg
 import json
-from scipy import linalg
-from scipy.spatial.transform import Rotation as ROTTT
+# from scipy import linalg
+# from scipy.spatial.transform import Rotation as ROTTT
 
 from flask_socketio import SocketIO
-import copy
+# import copy
 import time
 # import serial
 import threading
-from ruckig import InputParameter, OutputParameter, Result, Ruckig
+# from ruckig import InputParameter, OutputParameter, Result, Ruckig
 from flask_cors import CORS
 import json
-from scipy.stats import zscore
+# from scipy.stats import zscore
 from line_profiler import profile
 serialLock = threading.Lock()
 from skspatial.objects import Plane, Points
 
 # ser = serial.Serial("/dev/cu.usbserial-02X2K2GE", 1000000, write_timeout=1, )
-
+print(__name__)
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-socketio = SocketIO(app, cors_allowed_origins='*')
-
+# socketio = SocketIO(app, cors_allowed_origins='*')
+from engineio.async_drivers import gevent
+socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
 cameras_init = False
 
 num_objects = 2
@@ -66,98 +67,106 @@ def camera_stream():
 @profile
 @app.route("/api/trajectory-planning", methods=["POST"])
 def trajectory_planning_api():
-    data = json.loads(request.data)
+    # data = json.loads(request.data)
 
-    waypoint_groups = [] # grouped by continuious movement (no stopping)
-    for waypoint in data["waypoints"]:
-        stop_at_waypoint = waypoint[-1]
-        if stop_at_waypoint:
-            waypoint_groups.append([waypoint[:3*num_objects]])
-        else:
-            waypoint_groups[-1].append(waypoint[:3*num_objects])
+    # waypoint_groups = [] # grouped by continuious movement (no stopping)
+    # for waypoint in data["waypoints"]:
+    #     stop_at_waypoint = waypoint[-1]
+    #     if stop_at_waypoint:
+    #         waypoint_groups.append([waypoint[:3*num_objects]])
+    #     else:
+    #         waypoint_groups[-1].append(waypoint[:3*num_objects])
     
     setpoints = []
-    for i in range(0, len(waypoint_groups)-1):
-        start_pos = waypoint_groups[i][0]
-        end_pos = waypoint_groups[i+1][0]
-        waypoints = waypoint_groups[i][1:]
-        setpoints += plan_trajectory(start_pos, end_pos, waypoints, data["maxVel"], data["maxAccel"], data["maxJerk"], data["timestep"])
+    # for i in range(0, len(waypoint_groups)-1):
+    #     start_pos = waypoint_groups[i][0]
+    #     end_pos = waypoint_groups[i+1][0]
+    #     waypoints = waypoint_groups[i][1:]
+    #     setpoints += plan_trajectory(start_pos, end_pos, waypoints, data["maxVel"], data["maxAccel"], data["maxJerk"], data["timestep"])
 
     return json.dumps({
         "setpoints": setpoints
     })
 @profile
 def plan_trajectory(start_pos, end_pos, waypoints, max_vel, max_accel, max_jerk, timestep):
-    otg = Ruckig(3*num_objects, timestep, len(waypoints))  # DoFs, timestep, number of waypoints
-    inp = InputParameter(3*num_objects)
-    out = OutputParameter(3*num_objects, len(waypoints))
+    # otg = Ruckig(3*num_objects, timestep, len(waypoints))  # DoFs, timestep, number of waypoints
+    # inp = InputParameter(3*num_objects)
+    # out = OutputParameter(3*num_objects, len(waypoints))
 
-    inp.current_position = start_pos
-    inp.current_velocity = [0,0,0]*num_objects
-    inp.current_acceleration = [0,0,0]*num_objects
+    # inp.current_position = start_pos
+    # inp.current_velocity = [0,0,0]*num_objects
+    # inp.current_acceleration = [0,0,0]*num_objects
 
-    inp.target_position = end_pos
-    inp.target_velocity = [0,0,0]*num_objects
-    inp.target_acceleration = [0,0,0]*num_objects
+    # inp.target_position = end_pos
+    # inp.target_velocity = [0,0,0]*num_objects
+    # inp.target_acceleration = [0,0,0]*num_objects
 
-    inp.intermediate_positions = waypoints
+    # inp.intermediate_positions = waypoints
 
-    inp.max_velocity = max_vel*num_objects
-    inp.max_acceleration = max_accel*num_objects
-    inp.max_jerk = max_jerk*num_objects
+    # inp.max_velocity = max_vel*num_objects
+    # inp.max_acceleration = max_accel*num_objects
+    # inp.max_jerk = max_jerk*num_objects
 
-    setpoints = []
-    res = Result.Working
-    while res == Result.Working:
-        res = otg.update(inp, out)
-        setpoints.append(copy.copy(out.new_position))
-        out.pass_to_input(inp)
+    # setpoints = []
+    # res = Result.Working
+    # while res == Result.Working:
+    #     res = otg.update(inp, out)
+    #     setpoints.append(copy.copy(out.new_position))
+    #     out.pass_to_input(inp)
 
-    return setpoints
+    # return setpoints
+    return []
 @profile
 @socketio.on("arm-drone")
 def arm_drone(data):
-    global cameras_init
-    if not cameras_init:
-        return
+    # global cameras_init
+    # if not cameras_init:
+    #     return
     
-    Cameras.instance().drone_armed = data["droneArmed"]
-    for droneIndex in range(0, num_objects):
-        serial_data = {
-            "armed": data["droneArmed"][droneIndex],
-        }
-        with serialLock:
-            # ser.write(f"{str(droneIndex)}{json.dumps(serial_data)}".encode('utf-8'))
-            None
+    # Cameras.instance().drone_armed = data["droneArmed"]
+    # for droneIndex in range(0, num_objects):
+    #     serial_data = {
+    #         "armed": data["droneArmed"][droneIndex],
+    #     }
+    #     with serialLock:
+    #         # ser.write(f"{str(droneIndex)}{json.dumps(serial_data)}".encode('utf-8'))
+    #         None
         
-        time.sleep(0.01)
+    #     time.sleep(0.01)
+    return
 @profile
 @socketio.on("set-drone-pid")
 def arm_drone(data):
-    serial_data = {
-        "pid": [float(x) for x in data["dronePID"]],
-    }
-    with serialLock:
-        # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-        time.sleep(0.01)
+    # serial_data = {
+    #     "pid": [float(x) for x in data["dronePID"]],
+    # }
+    # with serialLock:
+    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
+    #     time.sleep(0.01)
+    return
+
 @profile
 @socketio.on("set-drone-setpoint")
 def arm_drone(data):
-    serial_data = {
-        "setpoint": [float(x) for x in data["droneSetpoint"]],
-    }
-    with serialLock:
-        # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-        time.sleep(0.01)
+    # serial_data = {
+    #     "setpoint": [float(x) for x in data["droneSetpoint"]],
+    # }
+    # with serialLock:
+    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
+    #     time.sleep(0.01)
+    return
+
 @profile
 @socketio.on("set-drone-trim")
 def arm_drone(data):
-    serial_data = {
-        "trim": [int(x) for x in data["droneTrim"]],
-    }
-    with serialLock:
-        # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-        time.sleep(0.01)
+    # serial_data = {
+    #     "trim": [int(x) for x in data["droneTrim"]],
+    # }
+    # with serialLock:
+    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
+    #     time.sleep(0.01)
+    return
+
 
 @profile
 @socketio.on("acquire-floor")
