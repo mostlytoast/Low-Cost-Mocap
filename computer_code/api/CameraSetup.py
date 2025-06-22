@@ -8,7 +8,7 @@ import sys
 checkerboard = (9,6)
 checkerboard_dimension= 21.86
 # todo document
-\
+
 
 # code based on https://github.com/jyjblrd/Low-Cost-Mocap/discussions/11#discussioncomment-9380283
 

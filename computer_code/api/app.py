@@ -1,6 +1,6 @@
 import sys
-import json
-import requests
+# import json
+# import requests
 import socketio
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QPushButton,
@@ -11,9 +11,9 @@ from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import Qt
 
 from PyQt5.QtGui import QPixmap, QImage
-TRAJECTORY_PLANNING_TIMESTEP = 0.05
-LAND_Z_HEIGHT = 0.075
-NUM_DRONES = 2
+# TRAJECTORY_PLANNING_TIMESTEP = 0.05
+# LAND_Z_HEIGHT = 0.075
+# NUM_DRONES = 2
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -168,33 +168,33 @@ class MainWindow(QWidget):
         gain = self.gain_slider.value()
         self.sio.emit("update-camera-settings", {"exposure": exposure, "gain": gain})
 
-    def plan_trajectory(self):
-        try:
-            waypoints = json.loads(self.waypoints_input.toPlainText())
-            max_vel = [float(x) for x in self.max_vel_input.text().split(",")]
-            max_accel = [float(x) for x in self.max_accel_input.text().split(",")]
-            max_jerk = [float(x) for x in self.max_jerk_input.text().split(",")]
-            timestep = TRAJECTORY_PLANNING_TIMESTEP
-            body = {
-                "waypoints": waypoints,
-                "maxVel": max_vel,
-                "maxAccel": max_accel,
-                "maxJerk": max_jerk,
-                "timestep": timestep
-            }
-            resp = requests.post("http://localhost:3001/api/trajectory-planning", json=body)
-            if resp.ok:
-                setpoints = resp.json()["setpoints"]
-                self.traj_result.setPlainText(json.dumps(setpoints, indent=2))
-            else:
-                self.traj_result.setPlainText("Error: " + resp.text)
-        except Exception as e:
-            self.traj_result.setPlainText(f"Error: {e}")
+    # def plan_trajectory(self):
+    #     try:
+    #         waypoints = json.loads(self.waypoints_input.toPlainText())
+    #         max_vel = [float(x) for x in self.max_vel_input.text().split(",")]
+    #         max_accel = [float(x) for x in self.max_accel_input.text().split(",")]
+    #         max_jerk = [float(x) for x in self.max_jerk_input.text().split(",")]
+    #         timestep = TRAJECTORY_PLANNING_TIMESTEP
+    #         body = {
+    #             "waypoints": waypoints,
+    #             "maxVel": max_vel,
+    #             "maxAccel": max_accel,
+    #             "maxJerk": max_jerk,
+    #             "timestep": timestep
+    #         }
+    #         resp = requests.post("http://localhost:3001/api/trajectory-planning", json=body)
+    #         if resp.ok:
+    #             setpoints = resp.json()["setpoints"]
+    #             self.traj_result.setPlainText(json.dumps(setpoints, indent=2))
+    #         else:
+    #             self.traj_result.setPlainText("Error: " + resp.text)
+    #     except Exception as e:
+    #         self.traj_result.setPlainText(f"Error: {e}")
 
-    def send_setpoints(self):
-        for i, (x, y, z) in enumerate(self.drone_setpoint_inputs):
-            setpoint = [float(x.text()), float(y.text()), float(z.text())]
-            self.sio.emit("set-drone-setpoint", {"droneSetpoint": setpoint, "droneIndex": i})
+    # def send_setpoints(self):
+    #     for i, (x, y, z) in enumerate(self.drone_setpoint_inputs):
+    #         setpoint = [float(x.text()), float(y.text()), float(z.text())]
+    #         self.sio.emit("set-drone-setpoint", {"droneSetpoint": setpoint, "droneIndex": i})
 
     def register_socket_handlers(self):
         @self.sio.on("fps")

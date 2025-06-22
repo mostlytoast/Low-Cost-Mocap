@@ -16,6 +16,8 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QFileDialog,
     QStackedWidget,
+    QDialog,
+    QDialogButtonBox,
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
@@ -27,6 +29,8 @@ import videoSubSystem
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMessageBox
+
+import calibrationWidget
 
 
 class MainWindow(QMainWindow):
@@ -124,7 +128,7 @@ class MainWindow(QMainWindow):
         open_action.setStatusTip("Open File")
 
         self.calibrate_scratch_action = QAction("calibrate from scratch", self)
-        self.calibGui = calibrate_widget
+        # self.calibGui = calibrationWidget.calibrate_widget(self)
         self.calibrate_scratch_action.triggered.connect(self.calib_scratch)
         calibrate_menu.addAction(self.calibrate_scratch_action)
         # self.calibrate_scratch_action.setShortcut("Ctrl+O")
@@ -145,30 +149,36 @@ class MainWindow(QMainWindow):
         calibrate_menu.addAction(self.copy_calibration_action)
         # self.copy_calibration_action.setShortcut("Ctrl+O")
         self.copy_calibration_action.setStatusTip(
-            "copies calibraation from one camera to another"
+            "copies calibration from one camera to another"
         )
 
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
+        # Apply a VS Code-like style using QSS
+        with open("computer_code/api/style.css") as style:
+            self.styleText = style.read()
+            self.setStyleSheet(self.styleText)
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
         self.setup()
 
     def calib_scratch(self):
         # todo ask to save when settings are un modified
-        calibrate_widget_instance = calibrate_widget(self)
+        calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
         self.central_widget.addWidget(calibrate_widget_instance)
         self.central_widget.setCurrentWidget(calibrate_widget_instance)
         calibrate_widget_instance.scratch_ui()
+
     def calib_single(self):
         # todo ask to save when settings are un modified
-        calibrate_widget_instance = calibrate_widget(self)
+        calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
         self.central_widget.addWidget(calibrate_widget_instance)
         self.central_widget.setCurrentWidget(calibrate_widget_instance)
         calibrate_widget_instance.single_ui()
+
     def calib_copy(self):
         # todo ask to save when settings are un modified
-        calibrate_widget_instance = calibrate_widget(self)
+        calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
         self.central_widget.addWidget(calibrate_widget_instance)
         self.central_widget.setCurrentWidget(calibrate_widget_instance)
         # calibrate_widget_instance.copy()
@@ -231,42 +241,6 @@ class MainWindow(QMainWindow):
         self.save_path = ""  # delete path so can open new files in future
 
 
-class calibrate_widget(QWidget):
-    def __init__(self, parent=None):
-        super(calibrate_widget, self).__init__(parent)
-        self.parent = parent
-        self.layout = QVBoxLayout()
-        self.back_button = QPushButton("Back")
-        self.back_button.clicked.connect(parent.setup)
-        self.layout.addWidget(self.back_button)
-        self.setLayout(self.layout)
-
-    def single_ui(self):
-        print()
-        
-
-    def scratch_ui(self):
-        # self.layout = QVBoxLayout()
-        self.back_button = QPushButton("Back4444")
-        self.back_button.clicked.connect(self.parent.setup)
-        self.layout.addWidget(self.back_button)
-        # self.setLayout(self.layout)
-
-    # def go_back(self):
-    #     # Assumes parent is MainWindow and has a QStackedWidget as central_widget
-    #     parent = self.parent
-    #     if hasattr(parent, "central_widget"):
-    #         for i in range(parent.central_widget.count()):
-    #             widget = parent.central_widget.widget(i)
-    #             if isinstance(widget, setup_window):
-    #                 parent.central_widget.setCurrentWidget(widget)
-    #                 break
-    # def calib(self):
-    #     parent = self.parent
-    #     if hasattr(parent, "central_widget"):
-    #         parent.central_widget.setCurrentWidget(self)
-
-
 class setup_window(QWidget):
     def __init__(self, parent=None):
         super(setup_window, self).__init__(parent)
@@ -288,13 +262,13 @@ class setup_window(QWidget):
 
         self.webcam_list_layout.addWidget(self.added_webcam_list, 1, 0)
         # Create a vertical layout for the edit button and label
-        self.edit_layout = QVBoxLayout()
-        self.edit_button = QPushButton("edit")
-        self.edit_button.setEnabled(False)  # Initially greyed out
-        self.edit_button.clicked.connect(self.add_webcam)
+        # self.edit_layout = QVBoxLayout()
+        # self.edit_button = QPushButton("edit")
+        # self.edit_button.setEnabled(False)  # Initially greyed out
+        # self.edit_button.clicked.connect(self.add_webcam)
 
-        self.edit_layout.addWidget(self.edit_button)
-        self.move_buttons_layout.addLayout(self.edit_layout)
+        # self.edit_layout.addWidget(self.edit_button)
+        # self.move_buttons_layout.addLayout(self.edit_layout)
 
         self.reload_button = QPushButton("reload")
         self.reload_button.clicked.connect(self.reload_cameras)
@@ -313,19 +287,39 @@ class setup_window(QWidget):
         self.webcam_list_layout.addWidget(QLabel("non added webcams"), 0, 2)
         self.webcam_list_layout.addWidget(self.non_added_webcam_list, 1, 2)
 
-        # Enable the discover button only when an item is selected in either list
-        self.added_webcam_list.itemSelectionChanged.connect(
-            lambda: self.edit_button.setEnabled(
-                bool(self.added_webcam_list.selectedItems())
-                or bool(self.non_added_webcam_list.selectedItems())
-            )
-        )
+        # # Enable the discover button only when an item is selected in either list
+        # self.added_webcam_list.itemSelectionChanged.connect(
+        #     lambda: self.edit_button.setEnabled(
+        #         bool(self.added_webcam_list.selectedItems())
+        #         or bool(self.non_added_webcam_list.selectedItems())
+        #     )
+        # )
+        # self.non_added_webcam_list.itemSelectionChanged.connect(
+        #     lambda: self.edit_button.setEnabled(
+        #         bool(self.added_webcam_list.selectedItems())
+        #         or bool(self.non_added_webcam_list.selectedItems())
+        #     )
+        # )
+
+        # Ensure only one list has a selection at a time and clicking an item selects it immediately
+        def handle_added_selection():
+            if self.added_webcam_list.selectedItems():
+                self.non_added_webcam_list.clearSelection()
+
+        def handle_non_added_selection():
+            if self.non_added_webcam_list.selectedItems():
+                self.added_webcam_list.clearSelection()
+
+        self.added_webcam_list.itemSelectionChanged.connect(handle_added_selection)
         self.non_added_webcam_list.itemSelectionChanged.connect(
-            lambda: self.edit_button.setEnabled(
-                bool(self.added_webcam_list.selectedItems())
-                or bool(self.non_added_webcam_list.selectedItems())
-            )
+            handle_non_added_selection
         )
+
+        # Make single-click select items (default for QListWidget), but ensure focus follows mouse
+        self.added_webcam_list.setSelectionMode(QListWidget.SingleSelection)
+        self.non_added_webcam_list.setSelectionMode(QListWidget.SingleSelection)
+        self.added_webcam_list.setFocusPolicy(Qt.StrongFocus)
+        self.non_added_webcam_list.setFocusPolicy(Qt.StrongFocus)
 
         self.main_layout.addLayout(self.webcam_list_layout)
         # Shortcuts for deleting items in each list
@@ -359,6 +353,8 @@ class setup_window(QWidget):
 
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignRight)
+        self.label.setMinimumSize(800, 600)
+        # self.label.setBackgroundRole()
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.webcam_settings_widget)
         splitter.addWidget(self.label)
@@ -388,6 +384,15 @@ class setup_window(QWidget):
 
     def settings_ui(self):
         self.editable_fields_layout = QGridLayout()
+        self.editable_fields_layout.setColumnStretch(0, 0)
+        self.editable_fields_layout.setColumnStretch(1, 1)
+        self.editable_fields_layout.setHorizontalSpacing(10)
+        self.editable_fields_layout.setVerticalSpacing(5)
+        self.editable_fields_layout.setAlignment(Qt.AlignTop)
+        self.editable_fields_layout.setSizeConstraint(QGridLayout.SetMinAndMaxSize)
+        self.editable_fields_layout.setContentsMargins(0, 0, 0, 0)
+        self.editable_fields_layout.setSpacing(8)
+        self.editable_fields_layout.setColumnMinimumWidth(1, 120)
 
         # Connect selection changes to update_settings_ui
         self.added_webcam_list.itemSelectionChanged.connect(self.update_settings_ui)
@@ -413,59 +418,82 @@ class setup_window(QWidget):
         elif self.non_added_webcam_list.selectedItems():
             selected_item = self.non_added_webcam_list.selectedItems()[0]
         self.idx = 0
-        if selected_item:
-
+        data = {}
+        if not selected_item:
+            # show when there is no camera selected
+            data = {
+                "intrinsic_matrix": [
+                    [0.0, 0.0, 0.0],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                    ],
+                    [0.0, 0.0, 1.0],
+                ],
+                "distortion_coef": [[0.0, 0.0, 0.0, 0.0, 0.0]],
+                "rotation": 0,
+                "id": 0,
+                "name": "",
+                "width": 0,
+                "height": 0,
+            }
+        else:
             self.idx = selected_item.data(Qt.UserRole)
-            # list non editable settings
-            key = "intrinsic_matrix"
-            row = 0
-            for key in ["intrinsic_matrix", "distortion_coef", "name"]:
-                label = QLabel(f"{str(self.data[self.idx][key])}")
-                label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            data = self.data[self.idx]
 
-                self.editable_fields_layout.addWidget(QLabel(key), row, 0)
-                self.editable_fields_layout.addWidget(label, row, 1)
-                row += 1
-                # self.editable_labels[key] = label
+        # list non editable settings
+        key = "intrinsic_matrix"
+        row = 0
+        for key in ["intrinsic_matrix", "distortion_coef", "name"]:
+            label = QLabel(f"{str(data[key])}")
+            label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
-            # edit rotation
-            self.combobox_rotation = QComboBox(self)
-            self.combobox_rotation.setEditable(True)
-
-            self.combobox_rotation.addItem("0", 0)
-            self.combobox_rotation.addItem("90", 1)
-            self.combobox_rotation.addItem("180", 2)
-            self.combobox_rotation.addItem("270", 3)
-            self.combobox_rotation.setCurrentText(str(self.data[self.idx]["rotation"]))
-
-            self.combobox_rotation.currentIndexChanged.connect(
-                lambda i, key="rotation": self.on_data_change(
-                    self.idx, key, self.combobox_rotation.itemData(i)
-                )
-            )
-            self.editable_fields_layout.addWidget(QLabel("rotation"), row, 0)
-            self.editable_fields_layout.addWidget(self.combobox_rotation, row, 1)
+            self.editable_fields_layout.addWidget(QLabel(key), row, 0)
+            self.editable_fields_layout.addWidget(label, row, 1)
             row += 1
-            # edit id
-            self.line_edit_id = QLineEdit(self)
-            self.line_edit_id.setValidator(QIntValidator(1, 2147483647, self))
-            self.line_edit_id.setText(str(self.data[self.idx]["id"]))
-            self.line_edit_id.editingFinished.connect(
-                lambda idx=self.idx, key="id": self.on_data_change(
-                    idx, key, int(self.line_edit_id.text())
-                )
+            # self.editable_labels[key] = label
+
+        # edit rotation
+        self.combobox_rotation = QComboBox(self)
+        self.combobox_rotation.setEditable(True)
+
+        self.combobox_rotation.addItem("0", 0)
+        self.combobox_rotation.addItem("90", 1)
+        self.combobox_rotation.addItem("180", 2)
+        self.combobox_rotation.addItem("270", 3)
+        self.combobox_rotation.setCurrentText(str(data["rotation"]))
+
+        self.combobox_rotation.currentIndexChanged.connect(
+            lambda i, key="rotation": self.on_data_change(
+                self.idx, key, self.combobox_rotation.itemData(i)
             )
-            self.editable_fields_layout.addWidget(QLabel("id"), row, 0)
+        )
+        self.editable_fields_layout.addWidget(QLabel("rotation"), row, 0)
+        self.editable_fields_layout.addWidget(self.combobox_rotation, row, 1)
+        row += 1
+        # edit id
+        self.line_edit_id = QLineEdit(self)
+        self.line_edit_id.setValidator(QIntValidator(1, 2147483647, self))
+        self.line_edit_id.setText(str(data["id"]))
+        self.line_edit_id.editingFinished.connect(
+            lambda idx=self.idx, key="id": self.on_data_change(
+                idx, key, int(self.line_edit_id.text())
+            )
+        )
+        self.editable_fields_layout.addWidget(QLabel("id"), row, 0)
 
-            self.editable_fields_layout.addWidget(self.line_edit_id, row, 1)
-            row += 1
+        self.editable_fields_layout.addWidget(self.line_edit_id, row, 1)
+        row += 1
 
-            # edit width and height
+        # edit width and height
 
-            self.combobox_resolution = QComboBox(self)
-            self.combobox_resolution.setEditable(True)
+        self.combobox_resolution = QComboBox(self)
+        self.combobox_resolution.setEditable(True)
+        if data.get("connected", False):
+
             for resolution in videoSubSystem.getResolution(
-                videoSubSystem.get_id_from_name(self.data[self.idx]["name"])
+                videoSubSystem.get_id_from_name(data["name"])
             ):
                 self.combobox_resolution.addItem(
                     str(resolution[0]) + "x" + str(resolution[1]), resolution
@@ -473,26 +501,24 @@ class setup_window(QWidget):
                 # item = self.combobox_resolution.item(self.combobox_resolution.count() - 1)
                 # item.setData(Qt.UserRole, resolution)
 
-            self.combobox_resolution.setCurrentText(
-                str(self.data[self.idx]["width"])
-                + "x"
-                + str(self.data[self.idx]["height"])
-            )
+        self.combobox_resolution.setCurrentText(
+            str(data["width"]) + "x" + str(data["height"])
+        )
 
-            self.combobox_resolution.currentIndexChanged.connect(
-                lambda i, key="width": self.on_data_change(
-                    self.idx, key, self.combobox_resolution.itemData(i)[0]
-                )
+        self.combobox_resolution.currentIndexChanged.connect(
+            lambda i, key="width": self.on_data_change(
+                self.idx, key, self.combobox_resolution.itemData(i)[0]
             )
-            self.combobox_resolution.currentIndexChanged.connect(
-                lambda i, key="height": self.on_data_change(
-                    self.idx, key, self.combobox_resolution.itemData(i)[1]
-                )
+        )
+        self.combobox_resolution.currentIndexChanged.connect(
+            lambda i, key="height": self.on_data_change(
+                self.idx, key, self.combobox_resolution.itemData(i)[1]
             )
-            self.editable_fields_layout.addWidget(QLabel("resolution"), row, 0)
+        )
+        self.editable_fields_layout.addWidget(QLabel("resolution"), row, 0)
 
-            self.editable_fields_layout.addWidget(self.combobox_resolution, row, 1)
-            row += 1
+        self.editable_fields_layout.addWidget(self.combobox_resolution, row, 1)
+        row += 1
 
     def remove_webcam(self):
         selected_items = self.added_webcam_list.selectedItems()
@@ -539,6 +565,9 @@ class setup_window(QWidget):
         for current_webcams in self.data:
             for attached_webcam in attached_webcams:
                 if not any(cam["name"] == attached_webcam[0] for cam in self.data):
+                    res = videoSubSystem.getResolution(
+                        videoSubSystem.get_id_from_name(attached_webcam[0])
+                    )[0]
                     self.data.append(
                         {
                             "intrinsic_matrix": [],
@@ -546,8 +575,8 @@ class setup_window(QWidget):
                             "rotation": 0,
                             "id": None,
                             "name": attached_webcam[0],
-                            "width": 0,
-                            "height": 0,
+                            "width": res[0],
+                            "height": res[1],
                             "connected": True,
                             "calibrated": False,
                             "added": False,
@@ -575,11 +604,51 @@ class setup_window(QWidget):
         name = self.data[item.data(Qt.UserRole)]["name"]
         if not name:
             return
-        camera_id = videoSubSystem.get_id_from_name(name)
+        camera_id = int(videoSubSystem.get_id_from_name(name))
+        if (camera_id) == -1:
+            print("stop")
+            alert = alert_widget(
+                "this camera could not be accessed", "ok", "", style=self.styleSheet()
+            )
+            # alert.setStyleSheet(self.parent().styleSheet() if self.parent() else self.styleSheet())
+
+            alert.exec()
+
+            return
+
         print(camera_id)
         self.camera_thread.set_camera_id(camera_id)
 
         self.camera_thread.start()
+
+
+class alert_widget(QDialog):
+    def __init__(
+        self, msg, accept_msg="ok", reject_msg="cancel", style=None, parent=None
+    ):
+        super(alert_widget, self).__init__(parent)
+        if style:
+            self.setStyleSheet(style)
+
+        self.setWindowTitle("HELLO!")
+
+        QBtn = QDialogButtonBox.Ok
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.button(QDialogButtonBox.Ok).setText(accept_msg)
+        if reject_msg != "":
+            QBtn = QBtn | QDialogButtonBox.Cancel
+            self.buttonBox.rejected.connect(self.reject)
+            self.buttonBox.button(QDialogButtonBox.cancel).setText(reject_msg)
+
+        layout = QVBoxLayout()
+        message = QLabel(msg)
+        layout.addWidget(message)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
+
+    def accept(self):
+        return super().accept()
 
 
 if __name__ == "__main__":
