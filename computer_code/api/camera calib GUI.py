@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QGridLayout,
     QFileDialog,
-    QStackedWidget
+    QStackedWidget,
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
@@ -39,9 +39,9 @@ class MainWindow(QMainWindow):
         # login_widget = setup_window(self)
         # # login_widget.button.clicked.connect(self.login)
         # self.central_widget.addWidget(login_widget)
-        
+
         self.setWindowTitle("Camera Setup")
-        
+
         self.initUI()
         self.save_path = ""
 
@@ -102,11 +102,11 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("File")
         calibrate_menu = menubar.addMenu("calibration")
         # copy_menu = menubar.addMenu("copy")
-        #todo add shortcuts?
+        # todo add shortcuts?
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-        
+
         save_as_action = QAction("save as", self)
         save_as_action.triggered.connect(self.save_as)
         file_menu.addAction(save_as_action)
@@ -115,35 +115,38 @@ class MainWindow(QMainWindow):
         save_action.triggered.connect(self.save)
         file_menu.addAction(save_action)
         save_action.setShortcut("Ctrl+S")
-        save_action.setStatusTip('Save File')
+        save_action.setStatusTip("Save File")
 
         open_action = QAction("open", self)
         open_action.triggered.connect(self.open)
         file_menu.addAction(open_action)
         open_action.setShortcut("Ctrl+O")
-        open_action.setStatusTip('Open File')
-        
+        open_action.setStatusTip("Open File")
+
         self.calibrate_scratch_action = QAction("calibrate from scratch", self)
         self.calibGui = calibrate_widget
-        self.calibrate_scratch_action.triggered.connect(self.calib)
+        self.calibrate_scratch_action.triggered.connect(self.calib_scratch)
         calibrate_menu.addAction(self.calibrate_scratch_action)
         # self.calibrate_scratch_action.setShortcut("Ctrl+O")
-        self.calibrate_scratch_action.setStatusTip('Calibrate a system from scratch, ignores all previous configurations')
-        
+        self.calibrate_scratch_action.setStatusTip(
+            "Calibrate a system from scratch, ignores all previous configurations"
+        )
+
         self.calibrate_single_action = QAction("calibrate single camera", self)
         # self.calibGui = CalibrateGUI
-        # self.calibrate_single_action.triggered.connect(self.calibration_scratch)
+        self.calibrate_single_action.triggered.connect(self.calib_single)
         calibrate_menu.addAction(self.calibrate_single_action)
         # self.calibrate_single_action.setShortcut("Ctrl+O")
-        self.calibrate_single_action.setStatusTip('calibrate one camera')
+        self.calibrate_single_action.setStatusTip("calibrate one camera")
 
         self.copy_calibration_action = QAction("copy calibration", self)
         # self.calibGui = CalibrateGUI
-        # self.copy_calibration_action.triggered.connect(self.calibration_scratch)
+        self.copy_calibration_action.triggered.connect(self.calib_copy)
         calibrate_menu.addAction(self.copy_calibration_action)
         # self.copy_calibration_action.setShortcut("Ctrl+O")
-        self.copy_calibration_action.setStatusTip('copies calibraation from one camera to another')
-
+        self.copy_calibration_action.setStatusTip(
+            "copies calibraation from one camera to another"
+        )
 
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
@@ -151,15 +154,30 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.setup()
 
-    def calib(self):
-        #todo ask to save when settings are un modified 
+    def calib_scratch(self):
+        # todo ask to save when settings are un modified
         calibrate_widget_instance = calibrate_widget(self)
         self.central_widget.addWidget(calibrate_widget_instance)
         self.central_widget.setCurrentWidget(calibrate_widget_instance)
+        calibrate_widget_instance.scratch_ui()
+    def calib_single(self):
+        # todo ask to save when settings are un modified
+        calibrate_widget_instance = calibrate_widget(self)
+        self.central_widget.addWidget(calibrate_widget_instance)
+        self.central_widget.setCurrentWidget(calibrate_widget_instance)
+        calibrate_widget_instance.single_ui()
+    def calib_copy(self):
+        # todo ask to save when settings are un modified
+        calibrate_widget_instance = calibrate_widget(self)
+        self.central_widget.addWidget(calibrate_widget_instance)
+        self.central_widget.setCurrentWidget(calibrate_widget_instance)
+        # calibrate_widget_instance.copy()
+
     def setup(self):
         setup_widget = setup_window(self)
         self.central_widget.addWidget(setup_widget)
         self.central_widget.setCurrentWidget(setup_widget)
+
     def save(self):
         if self.save_path == "":
 
@@ -211,16 +229,28 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.exec_()
         self.save_path = ""  # delete path so can open new files in future
-   
+
+
 class calibrate_widget(QWidget):
     def __init__(self, parent=None):
         super(calibrate_widget, self).__init__(parent)
-        
+        self.parent = parent
         self.layout = QVBoxLayout()
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(parent.setup)
         self.layout.addWidget(self.back_button)
         self.setLayout(self.layout)
+
+    def single_ui(self):
+        print()
+        
+
+    def scratch_ui(self):
+        # self.layout = QVBoxLayout()
+        self.back_button = QPushButton("Back4444")
+        self.back_button.clicked.connect(self.parent.setup)
+        self.layout.addWidget(self.back_button)
+        # self.setLayout(self.layout)
 
     # def go_back(self):
     #     # Assumes parent is MainWindow and has a QStackedWidget as central_widget
@@ -235,13 +265,17 @@ class calibrate_widget(QWidget):
     #     parent = self.parent
     #     if hasattr(parent, "central_widget"):
     #         parent.central_widget.setCurrentWidget(self)
+
+
 class setup_window(QWidget):
     def __init__(self, parent=None):
         super(setup_window, self).__init__(parent)
 
         self.camera_thread = cameraThread.MyThread(0)
         self.camera_thread.frame_signal.connect(self.setImage)
-        self.data = parent.data  # Access parent's data list directly; modifications here affect parent
+        self.data = (
+            parent.data
+        )  # Access parent's data list directly; modifications here affect parent
         self.main_layout = QVBoxLayout()
         self.webcam_settings_layout = QVBoxLayout()
         self.webcam_preview_layout = QHBoxLayout()
@@ -338,7 +372,7 @@ class setup_window(QWidget):
         # Set main_layout on a QWidget and set as central widget
 
         self.setLayout(self.main_layout)
-        
+
         # self.setCentralWidget(central_widget)
 
     # Function to update editable fields when selection changes
@@ -430,7 +464,9 @@ class setup_window(QWidget):
 
             self.combobox_resolution = QComboBox(self)
             self.combobox_resolution.setEditable(True)
-            for resolution in videoSubSystem.getResolution(videoSubSystem.get_id_from_name(self.data[self.idx]["name"])):
+            for resolution in videoSubSystem.getResolution(
+                videoSubSystem.get_id_from_name(self.data[self.idx]["name"])
+            ):
                 self.combobox_resolution.addItem(
                     str(resolution[0]) + "x" + str(resolution[1]), resolution
                 )
@@ -472,8 +508,6 @@ class setup_window(QWidget):
             self.added_webcam_list.addItem(item)
             self.data[item.data(Qt.UserRole)]["added"] = True
 
-    
-    
     def update_list(self):
         self.added_webcam_list.clear()
         self.non_added_webcam_list.clear()
@@ -494,8 +528,6 @@ class setup_window(QWidget):
                 item.setForeground(Qt.red)
                 item.setToolTip("not connected")
             item.setData(Qt.UserRole, index)
-    
-    
 
     def reload_cameras(self):
         """_summary_ reloads the list of cameras connected to the system"""
@@ -530,6 +562,7 @@ class setup_window(QWidget):
                     break
 
         self.update_list()
+
     @Slot(QImage)
     def setImage(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
@@ -548,9 +581,10 @@ class setup_window(QWidget):
 
         self.camera_thread.start()
 
+
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
     window.show()
     app.exec_()
-    # TODO have to find a way to reallocate a camera that moved to a different port with its original calibration settings ex move camera to new usb port and hit reload now have two webcams one without settings 
+    # TODO have to find a way to reallocate a camera that moved to a different port with its original calibration settings ex move camera to new usb port and hit reload now have two webcams one without settings
