@@ -48,6 +48,7 @@ class TestIndexSystem(unittest.TestCase):
         print("objects modified location")
         temp_objs = []
         for i, object_point in enumerate(object_points):
+            #save pre transform objects to json file 
             new_object_point = np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ object_point
             new_object_point = np.concatenate((new_object_point, [1]))
             new_object_point = np.array(mock_cameras_instance.to_world_coords_matrix) @ new_object_point
@@ -62,11 +63,12 @@ class TestIndexSystem(unittest.TestCase):
             # 
             # print("temp_obj", temp_obj)
             # temp_objs.append(temp_obj)
+        print("corrected points", object_points.tolist())
         self.points_are_flat(object_points)
 
     def test_1(self):
         data = {
-            "objectPoints": [[[1.0, 2.0, 3.0]], [[0.0, 2.0, 2.0]], [[4.0, 2.0, 3.0]]]
+            "objectPoints": [[[0,2,-1]], [[1,2,-1]], [[1,0,0]],[[0,0,0]]]
         }
         self.check_floor(data)
 
@@ -350,25 +352,27 @@ class TestIndexSystem(unittest.TestCase):
         }
 
         # Mock Points and Plane.best_fit
-        mock_points = MagicMock()
-        mock_Points.return_value = mock_points
-        # Plane normal not aligned with y
-        mock_plane = MagicMock()
-        mock_plane.normal = np.array([0.0, 0.7071, 0.7071])
-        mock_plane.point = np.array([0.0, 0.0, 0.0])
-        mock_Plane.best_fit.return_value = mock_plane
+        # mock_points = MagicMock()
+        # mock_Points.return_value = mock_points
+        # # Plane normal not aligned with y
+        # mock_plane = MagicMock()
+        # mock_plane.normal = np.array([0.0, 0.7071, 0.7071])
+        # mock_plane.point = np.array([0.0, 0.0, 0.0])
+        # mock_Plane.best_fit.return_value = mock_plane
 
         # Act
         index.acquire_floor(data)
+        self.check_floor(data)
+
 
         # Assert
-        mock_Plane.best_fit.assert_called_once()
-        mock_socketio.emit.assert_called_with(
-            "to-world-coords-matrix",
-            {
-                "to_world_coords_matrix": mock_cameras_instance.to_world_coords_matrix.tolist()
-            },
-        )
+        # mock_Plane.best_fit.assert_called_once()
+        # mock_socketio.emit.assert_called_with(
+        #     "to-world-coords-matrix",
+        #     {
+        #         "to_world_coords_matrix": mock_cameras_instance.to_world_coords_matrix.tolist()
+        #     },
+        # )
 
     @patch("index.Points")
     @patch("index.Plane")

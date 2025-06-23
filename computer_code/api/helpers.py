@@ -37,11 +37,19 @@ class Cameras:
         # camera_list = list(set(camera_list)) #remove duplicates 
         # for cameras in camera_list:
 
-            cap =cv.VideoCapture(camera_id)
+            # Use the CAP_V4L2 backend for better performance on Linux if available
+            cap = cv.VideoCapture(camera_id, cv.CAP_V4L2)
+            # Try to set a higher buffer size (may help with USB cameras)
+            cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
             # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all
+            # cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
             cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
+
+            print("res",camera_data["width"],camera_data["height"])
             cap.set(cv.CAP_PROP_FRAME_WIDTH, float(camera_data["width"]))
             cap.set(cv.CAP_PROP_FRAME_HEIGHT, float(camera_data["height"]))
+            cap.set(cv.CAP_PROP_FPS, 120)  # Set desired FPS
+
             self.cameras.append(cap)
 
         # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
@@ -104,6 +112,7 @@ class Cameras:
             
             print("Exposure set:", success, "Current exposure:", self.cameras[i].get(cv.CAP_PROP_EXPOSURE))
             self.cameras[i].set(cv.CAP_PROP_GAIN, gain) #gain = [gain] * self.num_cameras
+    
     # @profile
     def _camera_read(self):
         frames = []
@@ -151,7 +160,7 @@ class Cameras:
                         print(f"orig x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f}")
 
                     # convert to world coordinates
-                    self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_pre.json")
+                    # self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_pre.json")
                     for i, object_point in enumerate(object_points):
                         #save pre transform objects to json file 
                         new_object_point = np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ object_point
@@ -160,7 +169,7 @@ class Cameras:
                         new_object_point = new_object_point[:3] / new_object_point[3]
                         new_object_point[1], new_object_point[2] = new_object_point[2], new_object_point[1]
                         object_points[i] = new_object_point
-                    self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_post.json")
+                    # self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_post.json")
 
                     objects = []
                     filtered_objects = []

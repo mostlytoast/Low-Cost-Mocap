@@ -19,8 +19,11 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Low-Cost Mocap PyQt")
-        self.sio = socketio.Client()
-        self.sio.connect('http://localhost:3001')
+        try:
+            self.sio = socketio.Client()
+            self.sio.connect('http://localhost:3001')
+        except:
+            None
         self.camera_stream_running = False
         self.camera_stream_thread = None
         self.camera_thread = cameraThread.MyThread("http://localhost:3001/api/camera-stream")
@@ -147,12 +150,20 @@ class MainWindow(QWidget):
 
         self.setLayout(layout)
     def toggle_live_triangulation(self):
-        print()
-        # socket.emit("triangulate-points", { startOrStop, cameraPoses, toWorldCoordsMatrix })
+        # Example values for cameraPoses and toWorldCoordsMatrix
+        start_or_stop = "start"  # or "stop", depending on your logic
+        camera_poses = []  # Replace with actual camera poses data
+        to_world_coords_matrix = []  # Replace with actual matrix data
+
+        self.sio.emit("triangulate-points", {
+            "startOrStop": start_or_stop,
+            "cameraPoses": camera_poses,
+            "toWorldCoordsMatrix": to_world_coords_matrix
+        })
     def toggle_locate_objects(self):
         print()
         # setIsLocatingObjects(!isLocatingObjects);
-        #             socket.emit("locate-objects", { startOrStop: isLocatingObjects ? "stop" : "start" })
+        # self.sio.emit("locate-objects", { startOrStop: isLocatingObjects ? "stop" : "start" })
     def toggle_set_scale(self):
         print()
     def toggle_acquire_floor(self):

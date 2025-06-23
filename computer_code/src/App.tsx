@@ -1309,7 +1309,7 @@ export default function App() {
                 <Canvas orthographic camera={{ zoom: 1000, position: [0, 0, 10] }}>
                   <ambientLight />
                   {/* Point at y = 2 */}
-                  <mesh position={[0, 1, 0]}>
+                  <mesh position={[1, 2, 1]}>
                   <sphereGeometry args={[0.03, 16, 16]} />
                   <meshStandardMaterial color="red" />
                   </mesh>
