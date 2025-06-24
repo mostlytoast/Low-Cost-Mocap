@@ -199,11 +199,12 @@ class QGLControllerWidget(QtOpenGL.QGLWidget):
             self.prog, self.camera_vbo, 'in_position'
         )
         self.camera_vertex_count = len(all_vertices)
-    def add_point(self, position=(0, 0, 0), color=(1.0, 0.0, 0.0, 1.0), size=10.0):
+    def add_point(self, position=(0, 0, 0), color=(1.0, 0.0, 0.0, 1.0), size=3):
+        # TODO currently point size and color are global should not be this way 
         if len(position) != 3:
             return
         # Initialize storage for multiple points if not present
-        if not hasattr(self, 'points_list'):
+        if not hasattr(self, 'points_list')  :
             self.points_list = []
             self.point_colors = []
             self.point_size = size

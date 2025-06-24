@@ -1,9 +1,5 @@
 import os
 import sys
-
-# import json
-# import requests
-# import socketio
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -13,35 +9,20 @@ from PyQt5.QtWidgets import (
     QSlider,
     QGridLayout,
 )
-
-# import cameraThread
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import Qt
-
 from PyQt5.QtGui import QPixmap, QImage
 import index
-
 from viewer3d import QGLControllerWidget
 import time
-import calibrationWidget
-import moderngl
 from PyQt5 import QtOpenGL, QtWidgets, QtCore
-# import numpy as np
-import openmesh as om
-# from pyrr import Matrix44
-
-from ArcBall import ArcBallUtil
+import numpy as np
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.setWindowTitle("Low-Cost Mocap PyQt")
-        # try:
-        #     self.sio = socketio.Client()
-        #     self.sio.connect('http://localhost:3001')
-        # except:
-        #     None
-        # state variables
+    
         
         self.camera_stream_running = False
         self.camera_stream_thread = None
@@ -55,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.object_points = []
         self.last_time= 0
         self.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
+        self.cameraPoses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
 
         self.camera_thread = index.MyThread()
         self.camera_thread.frame_signal.connect(self.setImage)
@@ -64,67 +46,91 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout = QVBoxLayout()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
+        # self.resize(640, 480)
+# try:
+        dirname =""
+        # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            dirname = os.path.dirname(sys._MEIPASS)
+            dirname+="/_internal/api"
+            print("package",dirname)
+        else:
+            dirname = os.path.dirname(__file__)
+        # dirname = os.path.dirname(sys._MEIPASS)
+        filename = os.path.join(dirname, "style.css")
+        f = open(filename)
+        with open(filename) as style:
+            self.styleText = style.read()
+            self.setStyleSheet(self.styleText)
+
         self.init_ui()
-        self.resize(640, 480)
-        self.gl_widget = QGLControllerWidget(self)
-        self.gl_widget.setMinimumSize(640,100)
-        self.layout.addWidget(self.gl_widget)
-        # self.setCentralWidget(self.gl_widget)
-        self.menu = self.menuBar().addMenu("&File")
-        self.menu.addAction('&Open', self.openFile)
-        timer = QtCore.QTimer(self)
-        timer.setInterval(20)  # period, in milliseconds
-        timer.timeout.connect(self.gl_widget.updateGL)
-        timer.start()
-        # wait till window exists to create grid (will error out other wise)
-        QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
-        QtCore.QTimer.singleShot(0, self.test)
+        
+      
 
-        # QtCore.QTimer.singleShot(0, self.setup_scene)
+    #     # QtCore.QTimer.singleShot(0, self.setup_scene)
 
-        # 
-        # 
-        # self.register_socket_handlers()
+    #     # 
+    #     # 
+    #     # self.register_socket_handlers()
     def test(self):
-        self.gl_widget.add_point([1,2,3])
+        # self.gl_widget.add_point(position=[1,2,3],size=1)
         self.gl_widget.add_point([1,0,3])
         self.gl_widget.add_point([1,5,3])
 
     def init_ui(self):
-        
+        stream_preview = QVBoxLayout()
         # Camera Stream Viewer
         self.fps_label = QLabel("FPS 0")
-        self.layout.addWidget(self.fps_label)
+        self.fps_label.setFixedHeight(20)
+        stream_preview.addWidget(self.fps_label)
         self.camera_stream_label = QLabel("Camera Stream")
-        self.camera_stream_label.setFixedHeight(300)
+        self.camera_stream_label.setFixedHeight(200)
         self.camera_stream_label.setAlignment(Qt.AlignCenter)
         self.toggle_stream_btn = QPushButton("Start Camera Stream")
         self.toggle_stream_btn.clicked.connect(self.toggle_camera_stream)
-        self.layout.addWidget(self.camera_stream_label)
-        self.layout.addWidget(self.toggle_stream_btn)
+        self.toggle_stream_btn.setFixedHeight(30)
+
+        stream_preview.addWidget(self.camera_stream_label)
+        stream_preview.addWidget(self.toggle_stream_btn)
         
-
-
-        # Camera Controls
-        camera_group = QVBoxLayout()
-        camera_group.addWidget(QLabel("Camera Controls"))
+        #Camera Controls
+        # camera_group = QVBoxLayout()
+        stream_preview.addWidget(QLabel("Camera Controls"))
         self.exposure_slider = QSlider(Qt.Horizontal)
         self.exposure_slider.setMinimum(0)
-        self.exposure_slider.setMaximum(1000)
+        self.exposure_slider.setMaximum(100)
         self.exposure_slider.setValue(100)
+        self.exposure_slider.setFixedHeight(20)
+
         self.gain_slider = QSlider(Qt.Horizontal)
         self.gain_slider.setMinimum(0)
         self.gain_slider.setMaximum(100)
         self.gain_slider.setValue(0)
-        camera_group.addWidget(QLabel("Exposure"))
-        camera_group.addWidget(self.exposure_slider)
-        camera_group.addWidget(QLabel("Gain"))
-        camera_group.addWidget(self.gain_slider)
+        self.gain_slider.setFixedHeight(30)
+        settings = QGridLayout()
+        settings.addWidget(QLabel("Exposure"),0,0)
+        settings.addWidget(self.exposure_slider,0,1)
+        settings.addWidget(QLabel("Gain"),1,0)
+        settings.addWidget(self.gain_slider,1,1)
+        stream_preview.addLayout(settings)
+        
+
         self.update_camera_btn = QPushButton("Update Camera Settings")
         self.update_camera_btn.clicked.connect(self.update_camera_settings)
-        camera_group.addWidget(self.update_camera_btn)
-        self.layout.addLayout(camera_group)
+        self.update_camera_btn.setFixedHeight(30)
 
+        stream_preview.addWidget(self.update_camera_btn)
+        # stream_preview.
+        # stream_preview.addWidget(camera_group)
+        self.layout.addLayout(stream_preview)
+
+        self.tracking_layout = QGridLayout()
+
+        # Ensure tracking_layout and tracking_group expand properly
+        self.tracking_layout.setColumnStretch(0, 0)
+        self.tracking_layout.setColumnStretch(1, 1)
+        self.tracking_layout.setRowStretch(0, 1)
+        #
         self.tracking_group = QGridLayout()
         self.tracking_group.addWidget(QLabel("tracking settings"), 0, 0)
         self.tracking_group.addWidget(QLabel("Live triangulation"), 1, 0)
@@ -158,36 +164,43 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.tracking_group.addWidget(self.set_origin, 5, 1)
         self.tracking_group.addWidget(
-            QLabel("Collect points for camera pose calibration"), 6, 0
+            QLabel("Collect points"), 6, 0
         )
         self.collect_points = QPushButton("start")
         self.collect_points.clicked.connect(self.toggle_collect_points)
         self.collect_points.setEnabled(False)
         self.tracking_group.addWidget(self.collect_points, 6, 1)
 
-        self.calculate_pose = QPushButton("calculate camera pose with 0 points")
+        self.calculate_pose = QPushButton("calculate with 0 points")
         self.calculate_pose.clicked.connect(self.toggle_calculate_pose)
         self.calculate_pose.setEnabled(False)
+        self.tracking_group.setColumnMinimumWidth(0, 20)
+        self.tracking_group.setColumnMinimumWidth(1, 20)
         self.tracking_group.addWidget(self.calculate_pose, 7, 1)
+        # Wrap tracking_group in a QWidget for proper sizing
+        tracking_group_widget = QWidget()
+        tracking_group_widget.setLayout(self.tracking_group)
+        self.tracking_layout.addWidget(tracking_group_widget, 0, 0)
 
-        self.layout.addLayout(self.tracking_group)
+        self.gl_widget = QGLControllerWidget(self)
+        # Reduce or remove the minimum width to allow smaller window sizes
+        self.gl_widget.setMinimumSize(450, 100)
 
+        self.tracking_layout.addWidget(self.gl_widget, 0, 1)
+        # self.setCentralWidget(self.gl_widget)
+        self.layout.addLayout(self.tracking_layout)
 
-        # try:
-        dirname =""
-        # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            dirname = os.path.dirname(sys._MEIPASS)
-            dirname+="/_internal/api"
-            print("package",dirname)
-        else:
-            dirname = os.path.dirname(__file__)
-        # dirname = os.path.dirname(sys._MEIPASS)
-        filename = os.path.join(dirname, "style.css")
-        f = open(filename)
-        with open(filename) as style:
-            self.styleText = style.read()
-            self.setStyleSheet(self.styleText)
+        self.menu = self.menuBar().addMenu("&File")
+        self.menu.addAction('&Open', self.openFile)
+        timer = QtCore.QTimer(self)
+        timer.setInterval(20)  # period, in milliseconds
+        timer.timeout.connect(self.gl_widget.updateGL)
+        timer.start()
+        # wait till window exists to create grid (will error out other wise)
+        QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
+        QtCore.QTimer.singleShot(0, self.test)
+
+        
         # except:
         #     print("cant load css using normal layout")
         # self.view = QVBoxLayout()
@@ -213,9 +226,22 @@ class MainWindow(QtWidgets.QMainWindow):
     def setup_scene(self,data):
         self.gl_widget.camera_vertices_list =[]
         for camera_transform in data:
-            # todo apply the world transform to this 
-            
-            self.gl_widget.add_camera(transform=camera_transform)
+            # TODO not transforming correctly 
+            # Convert camera_transform to a 4x4 matrix
+            R = np.array(camera_transform["R"])
+            t = np.array(camera_transform["t"]).reshape(3, 1)
+            cam_matrix = np.eye(4)
+            cam_matrix[:3, :3] = R
+            cam_matrix[:3, 3] = t.flatten()
+            # Convert to_world_coords_matrix to numpy array
+            world_matrix = np.array(self.to_world_coords_matrix)
+            # Apply world transform
+            world_cam_matrix =  cam_matrix @ world_matrix
+            # Convert back to dictionary with "R" and "t"
+            R_new = world_cam_matrix[:3, :3].tolist()
+            t_new = world_cam_matrix[:3, 3].tolist()
+            camera_dict = {"R": R_new, "t": t_new}
+            self.gl_widget.add_camera(transform=camera_dict)
         
         
 
@@ -435,15 +461,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
             # print(len(self.captured_points_for_pose))
-            self.calculate_pose.setText("calculate camera pose with "+str(len(self.captured_points_for_pose))+" points")
+            self.calculate_pose.setText("calculate with "+str(len(self.captured_points_for_pose))+" points")
         # todo have to find way to append data in smart way 
         if self.is_triangulating_points and "object_points" in data:
-            
+            self.gl_widget.points_list = []
+            self.gl_widget.point_colors = []
+            self.gl_widget.point_size = 3
+
             objects =  data.get("object_points")[0]
             self.object_points.append(objects)
             for object_pos in objects:
 
-                self.gl_widget.add_point(object_pos)
+                self.gl_widget.add_point(position=object_pos,size=3)
 
         # im getting data {'object_points': ([],), 'errors': ([],), 'objects': ([],), 'filtered_objects': []}
 
