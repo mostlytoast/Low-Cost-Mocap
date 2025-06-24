@@ -22,7 +22,7 @@ from PyQt5.QtGui import QPixmap, QImage
 import index
 
 from viewer3d import QGLControllerWidget
-
+import time
 import calibrationWidget
 import moderngl
 from PyQt5 import QtOpenGL, QtWidgets, QtCore
@@ -42,6 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # except:
         #     None
         # state variables
+        
         self.camera_stream_running = False
         self.camera_stream_thread = None
         self.has_world_calibration = False
@@ -52,6 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.captured_points_for_pose = []
         self.camera_poses = []
         self.object_points = []
+        self.last_time= 0
         self.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
 
         self.camera_thread = index.MyThread()
@@ -91,6 +93,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def init_ui(self):
         
         # Camera Stream Viewer
+        self.fps_label = QLabel("FPS 0")
+        self.layout.addWidget(self.fps_label)
         self.camera_stream_label = QLabel("Camera Stream")
         self.camera_stream_label.setFixedHeight(300)
         self.camera_stream_label.setAlignment(Qt.AlignCenter)
@@ -98,6 +102,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toggle_stream_btn.clicked.connect(self.toggle_camera_stream)
         self.layout.addWidget(self.camera_stream_label)
         self.layout.addWidget(self.toggle_stream_btn)
+        
+
 
         # Camera Controls
         camera_group = QVBoxLayout()
@@ -416,15 +422,23 @@ class MainWindow(QtWidgets.QMainWindow):
     @Slot(QImage)
     def setImage(self, image):
         self.camera_stream_label.setPixmap(QPixmap.fromImage(image))
+        #update fps 
+        time_now = time.time()
+        if self.last_time != 0:
+            self.fps=1/(time_now-self.last_time)
+            self.fps_label.setText("FPS " + str(round(self.fps)))
+            print("fps", self.fps)
+        self.last_time = time_now
     @Slot(dict)
     def setData(self,data):
-        print("im getting data",data)
+        # print("im getting data",data)
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
             # print(len(self.captured_points_for_pose))
             self.calculate_pose.setText("calculate camera pose with "+str(len(self.captured_points_for_pose))+" points")
         # todo have to find way to append data in smart way 
         if self.is_triangulating_points and "object_points" in data:
+            
             objects =  data.get("object_points")[0]
             self.object_points.append(objects)
             for object_pos in objects:

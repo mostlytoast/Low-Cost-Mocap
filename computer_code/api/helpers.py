@@ -71,6 +71,16 @@ class Cameras:
 
             # Use the CAP_V4L2 backend for better performance on Linux if available
             cap = cv.VideoCapture(camera_id, cv.CAP_V4L2)
+            # Try to use multi-threaded capture if available (OpenCV 4.5+)
+            if hasattr(cv, 'CAP_PROP_HW_ACCELERATION'):
+                cap.set(cv.CAP_PROP_HW_ACCELERATION, cv.VIDEO_ACCELERATION_ANY)
+            # Try to use OpenCV's CAP_PROP_THREAD for multi-threaded capture (if supported)
+            if hasattr(cv, 'CAP_PROP_THREAD'):
+                cap.set(cv.CAP_PROP_THREAD, 1)
+            # Try to reduce internal buffer size to minimize latency
+            # cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
+            # # Try to set camera to MJPG for faster decoding (already present)
+            # cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
             # Try to set a higher buffer size (may help with USB cameras)
             cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
             # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all
@@ -80,7 +90,7 @@ class Cameras:
             print("res",camera_data["width"],camera_data["height"])
             cap.set(cv.CAP_PROP_FRAME_WIDTH, float(camera_data["width"]))
             cap.set(cv.CAP_PROP_FRAME_HEIGHT, float(camera_data["height"]))
-            cap.set(cv.CAP_PROP_FPS, 120)  # Set desired FPS
+            # cap.set(cv.CAP_PROP_FPS, 120)  # Set desired FPS
 
             self.cameras.append(cap)
 

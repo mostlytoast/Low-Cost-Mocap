@@ -1,28 +1,10 @@
 from helpers import camera_pose_to_serializable, calculate_reprojection_errors, bundle_adjustment, Cameras, triangulate_points, essential_from_fundamental, motion_from_essential
-# from KalmanFilter import KalmanFilter
-
-from flask import Flask, Response, request
 import cv2 as cv
 import numpy as np
-# import numpy.linalg as nplinalg
-import json
-# from scipy import linalg
-# from scipy.spatial.transform import Rotation as ROTTT
 from scipy import linalg
-from flask_socketio import SocketIO
-# import copy
-import time
-# import serial
-import threading
-# from ruckig import InputParameter, OutputParameter, Result, Ruckig
+
 from flask_cors import CORS
 import json
-# from scipy.stats import zscore
-from line_profiler import profile
-serialLock = threading.Lock()
-from skspatial.objects import Plane, Points
-
-# ser = serial.Serial("/dev/cu.usbserial-02X2K2GE", 1000000, write_timeout=1, )
 
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
@@ -58,31 +40,24 @@ class MyThread(QThread):
         RuntimeWarning("not implemented")
 
     def run(self):
-        
-        # self.cap = cv2.VideoCapture(self.camera_id)
+        cameras = Cameras.instance()
+        cameras.set_num_objects(num_objects)
+        output = self.camera_stream()
         while self._running:
-            # with self._lock:
-            #     if self._pending_camera_id is not None:
-            #         if self.cap is not None and self.cap.isOpened():
-            #             self.cap.release()
-            #         self.camera_id = self._pending_camera_id
-            #         self.cap = cv2.VideoCapture(self.camera_id)
-            #         self._pending_camera_id = None
 
-            # if self.cap is not None and self.cap.isOpened():
-            #     # ret, frame = self.cap.read()
-            #     # if ret:
-           
             try:
-                output= self.camera_stream()
+                
+                # output= self.camera_stream()
                 image, data= next(output)
                 # print(data)
                 frame = self.cvimage_to_label(image)
                 self.frame_signal.emit(frame)
                 self.data_signal.emit(data)
+                
+                self.msleep(10)  # avoid busy loop
+                
             except StopIteration:
                 pass
-            self.msleep(10)  # avoid busy loop
     def enable(self):
         self._running = True
     def stop(self):
@@ -109,111 +84,19 @@ class MyThread(QThread):
         # cameras.set_ser(ser)
         # cameras.set_serialLock(serialLock)
         cameras.set_num_objects(num_objects)
-        
+        self.i = 0
         def gen(cameras):
-            frequency = 150
-            loop_interval = 1.0 / frequency
-            last_run_time = 0
-            i = 0
-            fps = 0
+         
             while True:
-                time_now = time.time()
-
-                i = (i+1)%10
-                if i == 0:
-                    fps = round(1/(time_now - last_run_time))
-                    # socketio.emit("fps", {"fps": fps })
-
-                if time_now - last_run_time < loop_interval:
-                    time.sleep(last_run_time - time_now + loop_interval)
-                last_run_time = time.time()
+           
                 frames, data = cameras.get_frames()
                 # jpeg_frame = cv.imencode('.jpg', frames)[1].tostring()
                 yield frames, data
-                # yield (b'--frame\r\n'
-                #     b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n')
+          
         # TODO return fps
         return gen(cameras)
 
 
-    # def acquire_floor(data):
-    #     cameras = Cameras.instance()
-    #     object_points = data["objectPoints"]
-    #     object_points = np.array([item for sublist in object_points for item in sublist])
-    #     print("\nobject_points",object_points.tolist())
-    #     print("cameras.to_world_coords_matrix",cameras.to_world_coords_matrix )
-
-    #     temp_points = []
-    #     for temp_obj in object_points:
-    #         # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
-
-    #         temp_obj[1], temp_obj[2] = temp_obj[2], temp_obj[1]
-    #         temp_points.append([temp_obj[0], temp_obj[1], temp_obj[2]])
-
-    #     points = Points(temp_points)
-    #     plane = Plane.best_fit(points)
-    #     # Get the normal vector and a point on the plane
-    #     plane_normal = plane.normal
-    #     plane_point = plane.point
-    #     #https://mattloftus.github.io/2016/01/23/threejs-p1/
-    #     # The floor of the coordinate space is assumed to be y=0, normal [0,1,0]
-    #     floor_normal = np.array([0, 1,0])
-    #     floor_point = np.array([0, 0, 0])
-
-    #     # Compute rotation to align plane_normal to floor_normal
-    #     v = np.cross(plane_normal, floor_normal)
-    #     c = np.dot(plane_normal, floor_normal)
-    #     if np.linalg.norm(v) < 1e-8:
-    #         R = np.eye(3)
-    #     else:
-    #         vx = np.array([[0, -v[2], v[1]],
-    #                        [v[2], 0, -v[0]],
-    #                        [-v[1], v[0], 0]])
-    #         R = np.eye(3) + vx + vx @ vx * ((1 - c) / (np.linalg.norm(v) ** 2))
-
-    #     # Compute translation to move plane_point onto the floor (y=0 after rotation)
-    #     rotated_plane_point = R @ plane_point
-    #     translation = floor_point - rotated_plane_point
-
-    #     # Build 4x4 transformation matrix
-    #     new_to_world_coords_matrix = np.eye(4)
-    #     new_to_world_coords_matrix[:3, :3] = R
-    #     new_to_world_coords_matrix[:3, 3] = translation
-    #     # Swap y and z axes in the transformation matrix
-    #     # swap_yz = np.array([
-    #     #     [1, 0, 0, 0],
-    #     #     [0, 0, 1, 0],
-    #     #     [0, 1, 0, 0],
-    #     #     [0, 0, 0, 1]
-    #     # ])
-    #     # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
-
-    
-
-    #     # Swap y and z axes in the transformation matrix
-    #     swap_yz = np.array([
-    #         [1, 0, 0, 0],
-    #         [0, 0, 1, 0],
-    #         [0, 1, 0, 0],
-    #         [0, 0, 0, 1]
-    #     ])
-    #     new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
-        
-        
-    #     # perm = [0, 2, 1, 3]
-    #     # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
-    
-        
-    #     cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
-    #     # cameras.to_world_coords_matrix = new_to_world_coords_matrix
-    #     # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
-    #     swap_yz_4x4 = np.eye(4)
-    #     swap_yz_4x4[:3, :3] = np.array([[1,0,0],[0,-1,0],[0,0,1]])
-    #     cameras.to_world_coords_matrix = cameras.to_world_coords_matrix @ swap_yz_4x4 # i dont fucking know why
-        
-    #     print("new_to_world_coords_matrix",new_to_world_coords_matrix.tolist())
-        
-    #     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
 
 
