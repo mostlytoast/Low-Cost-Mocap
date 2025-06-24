@@ -74,9 +74,9 @@ class MyThread(QThread):
 
 
     # @socketio.on("acquire-floor")
-    def acquire_floor(self,data):
+    def acquire_floor(self,object_points):
         cameras = Cameras.instance()
-        object_points = data["objectPoints"]
+        # object_points = data["objectPoints"]
         object_points = np.array([item for sublist in object_points for item in sublist])
 
         tmp_A = []
@@ -105,7 +105,7 @@ class MyThread(QThread):
         F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
         R = F @ G @ linalg.inv(F)
 
-        R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
+        # R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
         # Remove translation component from R by ensuring it's a pure rotation matrix
         U, _, Vt = np.linalg.svd(R[:3, :3])
         R = U @ Vt
@@ -117,24 +117,26 @@ class MyThread(QThread):
         # ])
         # R = R @ swap_yz
         cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
+        self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
         # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
     # @socketio.on("acquire-floor")
 
-    def set_origin(self,data):
+    def set_origin(self,object_point, toWorldCoordsMatrix):
         cameras = Cameras.instance()
 
-        object_point = np.array(data["objectPoint"])
-        to_world_coords_matrix = np.array(data["toWorldCoordsMatrix"])
+        object_point = np.array(object_point)
+        to_world_coords_matrix = np.array(toWorldCoordsMatrix)
         transform_matrix = np.eye(4)
 
-        object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
+        # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
         transform_matrix[:3, 3] = -object_point
 
         to_world_coords_matrix = transform_matrix @ to_world_coords_matrix
         cameras.to_world_coords_matrix = to_world_coords_matrix
-
+        self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+        
         # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
     # @profile
     # @socketio.on("update-camera-settings")
@@ -202,16 +204,18 @@ class MyThread(QThread):
 
         camera_poses, output_data = bundle_adjustment(image_points, camera_poses)
         # todo what to do with output_data
+        # TODO is there any point to run this calculate_reprojection_errors if output is not used? likely causing slow down 
         object_points = triangulate_points(image_points, camera_poses)
         error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
-        # TODO is there any point to run this calculate_reprojection_errors if output is not used? likely causing slow down 
-        return camera_poses, output_data
+        self.data_signal.emit({"camera_poses": camera_pose_to_serializable(camera_poses)})
+        
+        # return camera_poses, output_data
         # socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
     # @profile
     # @socketio.on("locate-objects")
-    def start_or_stop_locating_objects(self,data):
+    def start_or_stop_locating_objects(self,start_or_stop):
         cameras = Cameras.instance()
-        start_or_stop = data["startOrStop"]
+        # start_or_stop = data["startOrStop"]
 
         if (start_or_stop == "start"):
             cameras.start_locating_objects()
@@ -220,9 +224,9 @@ class MyThread(QThread):
             cameras.stop_locating_objects()
     # @profile
     # @socketio.on("determine-scale")
-    def determine_scale(self,data):
-        object_points = data["objectPoints"]
-        camera_poses = data["cameraPoses"]
+    def determine_scale(self,object_points, camera_poses):
+        # object_points = data["objectPoints"]
+        # camera_poses = data["cameraPoses"]
         actual_distance = 0.15
         observed_distances = []
 
@@ -235,16 +239,18 @@ class MyThread(QThread):
         scale_factor = actual_distance/np.mean(observed_distances)
         for i in range(0, len(camera_poses)):
             camera_poses[i]["t"] = (np.array(camera_poses[i]["t"]) * scale_factor).tolist()
-        return (camera_poses)
+        self.data_signal.emit({"error": None, "camera_poses": camera_poses})
+        # return (camera_poses)
+    
         # socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
 
     # @profile
     # @socketio.on("triangulate-points")
-    def live_mocap(self,data):
+    def live_mocap(self,start_or_stop, camera_poses, to_world_coords_matrix):
         cameras = Cameras.instance()
-        start_or_stop = data["startOrStop"]
-        camera_poses = data["cameraPoses"]
-        cameras.to_world_coords_matrix = data["toWorldCoordsMatrix"]
+        # start_or_stop = data["startOrStop"]
+        # camera_poses = data["cameraPoses"]
+        cameras.to_world_coords_matrix = to_world_coords_matrix
 
         if (start_or_stop == "start"):
             cameras.start_trangulating_points(camera_poses)
@@ -261,5 +267,7 @@ class MyThread(QThread):
         print(cameras.camera_params)
         cameras.to_world_coords_matrix = data["to_world_coords_matrix"]
         cameras.camera_poses = data["camera_poses"]
+        self.data_signal.emit({ "camera_poses": cameras.camera_poses})
+
         # TODO how do we do camera poses 
 

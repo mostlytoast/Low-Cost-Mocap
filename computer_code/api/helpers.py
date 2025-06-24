@@ -166,18 +166,19 @@ class Cameras:
                     # self.socketio.emit("image-points", [x[0] for x in image_points])
                 elif self.is_triangulating_points:
                     errors, object_points, frames = find_point_correspondance_and_object_points(image_points, self.camera_poses, frames)
-                    for obj in object_points.tolist():
-                        print(f"orig x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f}")
+                    # for obj in object_points.tolist():
+                    #     print(f"orig x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f}")
 
                     # convert to world coordinates
                     # self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_pre.json")
                     for i, object_point in enumerate(object_points):
                         #save pre transform objects to json file 
-                        new_object_point = np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ object_point
+                        # np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ 
+                        new_object_point = object_point
                         new_object_point = np.concatenate((new_object_point, [1]))
                         new_object_point = np.array(self.to_world_coords_matrix) @ new_object_point
                         new_object_point = new_object_point[:3] / new_object_point[3]
-                        new_object_point[1], new_object_point[2] = new_object_point[2], new_object_point[1]
+                        # new_object_point[1], new_object_point[2] = new_object_point[2], new_object_point[1]
                         object_points[i] = new_object_point
                     # self.write_json({"object_points":object_points,"self.to_world_coords_matrix":self.to_world_coords_matrix},"object_points_post.json")
 
@@ -203,13 +204,13 @@ class Cameras:
                         for filtered_object in filtered_objects:
                             filtered_object["vel"] = filtered_object["vel"].tolist()
                             filtered_object["pos"] = filtered_object["pos"].tolist()
-                    for obj in object_points.tolist():
+                    # for obj in object_points.tolist():
                         
-                        if self.to_world_coords_matrix is not None:
-                            obj_hom = np.concatenate([obj, [1]])
-                            obj_world = np.dot(self.to_world_coords_matrix, obj_hom)
-                            obj_world = obj_world[:3] / obj_world[3]
-                            print(f"norm x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f} world x: {obj_world[0]*10:8.4f}, y: {obj_world[1]*10:8.4f}, z: {obj_world[2]*10:8.4f}")
+                    #     if self.to_world_coords_matrix is not None:
+                    #         obj_hom = np.concatenate([obj, [1]])
+                    #         obj_world = np.dot(self.to_world_coords_matrix, obj_hom)
+                    #         obj_world = obj_world[:3] / obj_world[3]
+                    #         print(f"norm x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f} world x: {obj_world[0]*10:8.4f}, y: {obj_world[1]*10:8.4f}, z: {obj_world[2]*10:8.4f}")
                  
                     output["object_points"]= object_points.tolist(), 
                     output["errors"]= errors.tolist(), 
