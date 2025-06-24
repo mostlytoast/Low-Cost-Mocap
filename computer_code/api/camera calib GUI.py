@@ -29,9 +29,16 @@ import videoSubSystem
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMessageBox
+from viewer3d import QGLControllerWidget
 
 import calibrationWidget
+import moderngl
+from PyQt5 import QtOpenGL, QtWidgets, QtCore
+# import numpy as np
+import openmesh as om
+# from pyrr import Matrix44
 
+from ArcBall import ArcBallUtil
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -44,10 +51,11 @@ class MainWindow(QMainWindow):
         # # login_widget.button.clicked.connect(self.login)
         # self.central_widget.addWidget(login_widget)
 
-        self.setWindowTitle("Camera Setup")
+        # self.setWindowTitle("Camera Setup")
 
         self.initUI()
         self.save_path = ""
+
 
     def initUI(self):
         # TODO need new data structure that better supports edits
@@ -126,6 +134,8 @@ class MainWindow(QMainWindow):
         file_menu.addAction(open_action)
         open_action.setShortcut("Ctrl+O")
         open_action.setStatusTip("Open File")
+        
+        # file_menu.addAction('&Open', setup_window.openFile)
 
         self.calibrate_scratch_action = QAction("calibrate from scratch", self)
         # self.calibGui = calibrationWidget.calibrate_widget(self)

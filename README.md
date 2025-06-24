@@ -6,10 +6,11 @@
 
 ![img](https://github.com/mostlytoast/Low-Cost-Mocap/blob/no-cv-sfm/images/arducamov9281caseasmexplosion-ezgif.com-video-to-gif-converter-2.gif?raw=true)
 
-In previous iterations of this system PlayStation Eye cameras were used which required heavy modifications. This is no longer the case with a new and improved 3d printed case for the Arducam OV9281 usb webcam. 
+In previous iterations of this system PlayStation Eye cameras were used which required heavy modifications. This is no longer the case with a new and improved 3d printed case for the Arducam OV9281 usb webcam.
 
-## Camera calibration 
-Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system. This will also have a GUI version shortly 
+## Camera calibration
+
+Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system. This will also have a GUI version shortly
 
 ## Dependencies
 
@@ -40,6 +41,10 @@ From the computer_code directory Run `yarn install` to install node dependencies
 Then run `yarn run dev` to start the webserver. You will be given a url view the frontend interface.
 
 In another terminal window, run `./computer_code/venv/bin/python3 computer_code/api/index.py` to start the backend server. This is what receives the camera streams and does motion capture computations.
+
+## other repositories used
+
+For 3d viewing i used the [PyQt5 Mesh Viewer](https://github.com/zishun/pyqt-meshviewer) by [zishun](https://github.com/zishun/pyqt-meshviewer/commits?author=zishun) with some extra modifications to support more features like zooming 
 
 ## Documentation
 

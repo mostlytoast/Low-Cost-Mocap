@@ -446,7 +446,8 @@ def bundle_adjustment(image_points, camera_poses):
         data = {"camera_poses": camera_pose_to_serializable(camera_poses)}
         # TODO this data is not getting outside of this function how to fix? signals maybe 
         # data_signal.emit(data)
-        return errors, data
+        # return errors, data
+        return errors
 
     focal_distance = cameras.get_camera_params(0)["intrinsic_matrix"][0,0]
     init_params = np.array([focal_distance])
@@ -456,9 +457,9 @@ def bundle_adjustment(image_points, camera_poses):
         init_params = np.concatenate([init_params, [focal_distance]])
         init_params = np.concatenate([init_params, rot_vec])
         init_params = np.concatenate([init_params, camera_pose["t"].flatten()])
-    errors, data = residual_function
+    # errors, data = residual_function
     res = optimize.least_squares(
-        errors, init_params, verbose=2, loss="cauchy", ftol=1E-2
+        residual_function, init_params, verbose=2, loss="cauchy", ftol=1E-2
     )
     return params_to_camera_poses(res.x)[0], data
     

@@ -20,10 +20,20 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 import index
 
+from viewer3d import QGLControllerWidget
 
-class MainWindow(QWidget):
+import calibrationWidget
+import moderngl
+from PyQt5 import QtOpenGL, QtWidgets, QtCore
+# import numpy as np
+import openmesh as om
+# from pyrr import Matrix44
+
+from ArcBall import ArcBallUtil
+class MainWindow(QtWidgets.QMainWindow):
+
     def __init__(self):
-        super().__init__()
+        QtWidgets.QMainWindow.__init__(self)
         self.setWindowTitle("Low-Cost Mocap PyQt")
         # try:
         #     self.sio = socketio.Client()
@@ -42,20 +52,37 @@ class MainWindow(QWidget):
         self.camera_thread.frame_signal.connect(self.setImage)
         self.camera_thread.data_signal.connect(self.setData)
 
-
+        self.central_widget = QWidget()
+        self.layout = QVBoxLayout()
+        self.central_widget.setLayout(self.layout)
+        self.setCentralWidget(self.central_widget)
         self.init_ui()
+        self.resize(640, 480)
+        self.gl_widget = QGLControllerWidget(self)
+        self.gl_widget.setMinimumSize(640,100)
+        self.layout.addWidget(self.gl_widget)
+        # self.setCentralWidget(self.gl_widget)
+        self.menu = self.menuBar().addMenu("&File")
+        self.menu.addAction('&Open', self.openFile)
+        timer = QtCore.QTimer(self)
+        timer.setInterval(20)  # period, in milliseconds
+        timer.timeout.connect(self.gl_widget.updateGL)
+        timer.start()
+        
+        # 
+        # 
         # self.register_socket_handlers()
 
     def init_ui(self):
-        layout = QVBoxLayout()
+        
         # Camera Stream Viewer
         self.camera_stream_label = QLabel("Camera Stream")
         self.camera_stream_label.setFixedHeight(300)
         self.camera_stream_label.setAlignment(Qt.AlignCenter)
         self.toggle_stream_btn = QPushButton("Start Camera Stream")
         self.toggle_stream_btn.clicked.connect(self.toggle_camera_stream)
-        layout.addWidget(self.camera_stream_label)
-        layout.addWidget(self.toggle_stream_btn)
+        self.layout.addWidget(self.camera_stream_label)
+        self.layout.addWidget(self.toggle_stream_btn)
 
         # Camera Controls
         camera_group = QVBoxLayout()
@@ -75,7 +102,7 @@ class MainWindow(QWidget):
         self.update_camera_btn = QPushButton("Update Camera Settings")
         self.update_camera_btn.clicked.connect(self.update_camera_settings)
         camera_group.addWidget(self.update_camera_btn)
-        layout.addLayout(camera_group)
+        self.layout.addLayout(camera_group)
 
         self.tracking_group = QGridLayout()
         self.tracking_group.addWidget(QLabel("tracking settings"), 0, 0)
@@ -122,11 +149,44 @@ class MainWindow(QWidget):
         self.calculate_pose.setEnabled(False)
         self.tracking_group.addWidget(self.calculate_pose, 7, 1)
 
-        layout.addLayout(self.tracking_group)
+        self.layout.addLayout(self.tracking_group)
+
+
+
         with open("computer_code/api/style.css") as style:
             self.styleText = style.read()
             self.setStyleSheet(self.styleText)
-        self.setLayout(layout)
+            
+        # self.view = QVBoxLayout()
+        # # self.view.setFixedHeight(300)
+        # # self.view.setAlignment(Qt.AlignCenter)
+        # self.gl_widget = QGLControllerWidget(self)
+        # self.view.addWidget(self.gl_widget)
+
+        # self.layout.addLayout(self.view)
+        # timer = QtCore.QTimer(self)
+        # timer.setInterval(20)  # period, in milliseconds
+        # timer.timeout.connect(self.gl_widget.updateGL)
+        # timer.start()
+        # fname = "/home/tom/Projects/new-Low-Cost-Mocap/Low-Cost-Mocap/teapot.obj"
+        # mesh = om.read_trimesh(fname)
+        # self.gl_widget.set_mesh(mesh)
+        
+        # 
+
+        
+        
+        # self.setCentralWidget(central_widget)
+
+    # Function to update editable fields when selection changes
+    def openFile(self):
+        # fname = QtWidgets.QFileDialog.getOpenFileName(
+        #     self, 'Open file', '', "Mesh files (*.obj *.off *.stl *.ply)")
+        # mesh = om.read_trimesh(fname[0])
+        # self.gl_widget.set_mesh(mesh)
+        self.gl_widget.create_grid()
+
+        # self.setLayout(self.layout)
 
     def toggle_live_triangulation(self):
         # Example values for cameraPoses and toWorldCoordsMatrix
