@@ -31,6 +31,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMessageBox
 
 import calibrationWidget
+import os
 
 
 class MainWindow(QMainWindow):
@@ -155,7 +156,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
         # Apply a VS Code-like style using QSS
-        with open("computer_code/api/style.css") as style:
+
+        style_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "style.css")
+        with open(style_path) as style:
             self.styleText = style.read()
             self.setStyleSheet(self.styleText)
         self.central_widget = QStackedWidget()
@@ -351,9 +354,13 @@ class setup_window(QWidget):
         self.webcam_settings_widget.setMinimumWidth(200)  # Minimum width
         self.webcam_settings_widget.setMaximumWidth(400)  # Optional: Maximum width
 
-        self.label = QLabel()
-        self.label.setAlignment(Qt.AlignRight)
+        self.label = QLabel("Camera stream")
+
+        self.label.setAlignment(Qt.AlignCenter)
+
         self.label.setMinimumSize(800, 600)
+        self.label.setAttribute(Qt.WA_StyledBackground, True)
+        self.label.setStyleSheet('background-color: #444444;')
         # self.label.setBackgroundRole()
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.webcam_settings_widget)
@@ -630,7 +637,7 @@ class alert_widget(QDialog):
         if style:
             self.setStyleSheet(style)
 
-        self.setWindowTitle("HELLO!")
+        self.setWindowTitle("Connection Error")
 
         QBtn = QDialogButtonBox.Ok
         self.buttonBox = QDialogButtonBox(QBtn)

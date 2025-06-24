@@ -6,7 +6,7 @@ QMainWindow {
 QWidget {
     background-color: #1e1e1e;
     color: #d4d4d4;
-    font-family: 'Segoe UI', 'Consolas', 'Courier New', monospace;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
     font-size: 12pt;
 }
 QMenuBar {
