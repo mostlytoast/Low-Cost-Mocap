@@ -17,12 +17,15 @@ from viewer3d import QGLControllerWidget
 import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
+import openmesh as om
+
+
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.setWindowTitle("Low-Cost Mocap PyQt")
-    
+
         self.camera_stream_running = False
         self.camera_stream_thread = None
         self.has_world_calibration = False
@@ -31,15 +34,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_triangulating_points = False
         self.is_locating_objects = False
 
-        #data variables 
+        # data variables
         self.captured_points_for_pose = []
         self.camera_poses = []
         self.object_points = []
-        self.last_time= 0
+        self.last_time = 0
         # self.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
         self.to_world_coords_matrix = np.eye(4)
         # self.cameraPoses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
-        self.cameraPoses = [{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]}]
+        self.cameraPoses = [{"R": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "t": [0, 0, 0]}]
 
         self.camera_thread = index.MyThread()
         self.camera_thread.frame_signal.connect(self.setImage)
@@ -50,13 +53,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
         # self.resize(640, 480)
-        # TODO probs just include in this file and not as separate css 
-        dirname =""
+        # TODO probs just include in this file and not as separate css
+        dirname = ""
         # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             dirname = os.path.dirname(sys._MEIPASS)
-            dirname+="/_internal/api"
-            print("package",dirname)
+            dirname += "/_internal/api"
+            print("package", dirname)
         else:
             dirname = os.path.dirname(__file__)
         # dirname = os.path.dirname(sys._MEIPASS)
@@ -67,7 +70,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setStyleSheet(self.styleText)
 
         self.init_ui()
-        
 
     def init_ui(self):
         stream_preview = QVBoxLayout()
@@ -84,8 +86,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         stream_preview.addWidget(self.camera_stream_label)
         stream_preview.addWidget(self.toggle_stream_btn)
-        
-        #Camera Controls
+
+        # Camera Controls
         stream_preview.addWidget(QLabel("Camera Controls"))
         self.exposure_slider = QSlider(Qt.Horizontal)
         self.exposure_slider.setMinimum(0)
@@ -99,12 +101,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.gain_slider.setValue(0)
         self.gain_slider.setFixedHeight(30)
         settings = QGridLayout()
-        settings.addWidget(QLabel("Exposure"),0,0)
-        settings.addWidget(self.exposure_slider,0,1)
-        settings.addWidget(QLabel("Gain"),1,0)
-        settings.addWidget(self.gain_slider,1,1)
+        settings.addWidget(QLabel("Exposure"), 0, 0)
+        settings.addWidget(self.exposure_slider, 0, 1)
+        settings.addWidget(QLabel("Gain"), 1, 0)
+        settings.addWidget(self.gain_slider, 1, 1)
         stream_preview.addLayout(settings)
-        
 
         self.update_camera_btn = QPushButton("Update Camera Settings")
         self.update_camera_btn.clicked.connect(self.update_camera_settings)
@@ -152,9 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_origin.setEnabled(False)
 
         self.tracking_group.addWidget(self.set_origin, 5, 1)
-        self.tracking_group.addWidget(
-            QLabel("Collect points"), 6, 0
-        )
+        self.tracking_group.addWidget(QLabel("Collect points"), 6, 0)
         self.collect_points = QPushButton("start")
         self.collect_points.clicked.connect(self.toggle_collect_points)
         self.collect_points.setEnabled(False)
@@ -179,7 +178,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addLayout(self.tracking_layout)
 
         self.menu = self.menuBar().addMenu("&File")
-        self.menu.addAction('&Open', self.openFile)
+        self.menu.addAction("&Open", self.openFile)
         timer = QtCore.QTimer(self)
         timer.setInterval(20)  # period, in milliseconds
         timer.timeout.connect(self.gl_widget.updateGL)
@@ -188,17 +187,39 @@ class MainWindow(QtWidgets.QMainWindow):
         QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
         QtCore.QTimer.singleShot(0, self.test_points)
 
-        
     def test_points(self):
-        self.gl_widget.add_point([0,0,1])
-        self.gl_widget.add_point([0,0,2])
+        # mesh = om.read_trimesh(
+        #     "computer_code/api/Untitled_Scan_17_01_20/textured_output.obj"
+        # )
+        # # Example: Rotate mesh 90 degrees around Z axis
+        # # Set rotation angles in degrees for x, y, z
+        # angle_x = np.radians(90)  # Change as needed
 
-        self.gl_widget.add_point([0,5,0])
+        # # Rotation matrix around X axis
+        # Rx = np.array(
+        #     [
+        #         [1, 0, 0],
+        #         [0, np.cos(angle_x), -np.sin(angle_x)],
+        #         [0, np.sin(angle_x), np.cos(angle_x)],
+        #     ]
+        # )
 
-        
+        # # Combined rotation: R = Rz @ Ry @ Rx
+        # rotation_matrix = Rx
 
-    def setup_scene(self,data):
-        self.gl_widget.camera_vertices_list =[]
+        # for vh in mesh.vertices():
+        #     v = mesh.point(vh)
+        #     rotated = rotation_matrix @ np.array([v[0], v[1], v[2]])
+        #     mesh.set_point(vh, rotated)
+
+        # self.gl_widget.set_mesh(mesh)
+        self.gl_widget.add_point([0, 0, 1])
+        self.gl_widget.add_point([0, 0, 2])
+
+        self.gl_widget.add_point([0, 5, 0])
+
+    def setup_scene(self, data):
+        self.gl_widget.camera_vertices_list = []
         for camera_transform in data:
             # Convert R and t to 4x4 transformation matrix
             R = np.array(camera_transform["R"])
@@ -207,7 +228,8 @@ class MainWindow(QtWidgets.QMainWindow):
             cam_matrix[:3, :3] = R
             cam_matrix[:3, 3] = t.flatten()
             # Apply world transform
-            world_matrix = self.to_world_coords_matrix @ cam_matrix
+            # TODO what order to apply transforms?
+            world_matrix = cam_matrix @ self.to_world_coords_matrix
             # Extract world R and t
             world_R = world_matrix[:3, :3].tolist()
             world_t = world_matrix[:3, 3].tolist()
@@ -215,57 +237,59 @@ class MainWindow(QtWidgets.QMainWindow):
             self.gl_widget.add_camera(transform=world_camera_transform)
             # self.gl_widget.add_camera(transform=camera_transform)
 
-        
-        
-
     # Function to get camera config
     def openFile(self):
         # TODO have to find way for this ro
         fname = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Open file', '', "Camera Configuration files (*.json)")
+            self, "Open file", "", "Camera Configuration files (*.json)"
+        )
         self.camera_thread.update_camera_params(filename=fname[0])
-            
 
     def toggle_live_triangulation(self):
         self.is_triangulating_points = not self.is_triangulating_points
-        self.camera_thread.live_mocap("start" if self.is_triangulating_points else "stop",self.camera_poses,self.to_world_coords_matrix)
-        self.live_triangulation.setText("Stop" if self.is_triangulating_points else "Start")
+        self.camera_thread.live_mocap(
+            "start" if self.is_triangulating_points else "stop",
+            self.camera_poses,
+            self.to_world_coords_matrix,
+        )
+        self.live_triangulation.setText(
+            "Stop" if self.is_triangulating_points else "Start"
+        )
         self.update_enabled_states()
 
     def toggle_locate_objects(self):
         self.is_locating_objects = not self.is_locating_objects
-        self.camera_thread.start_or_stop_locating_objects("start" if self.is_locating_objects else "stop")
+        self.camera_thread.start_or_stop_locating_objects(
+            "start" if self.is_locating_objects else "stop"
+        )
         self.locate_objects.setText("Stop" if self.is_locating_objects else "Start")
 
         self.update_enabled_states()
 
     def toggle_set_scale(self):
-        self.camera_thread.determine_scale(self.object_points,self.camera_poses)
-
-        print()
-        self.update_enabled_states()
+        self.camera_thread.determine_scale(self.object_points, self.camera_poses)
+        # self.update_enabled_states()
 
     def toggle_acquire_floor(self):
         self.camera_thread.acquire_floor(self.object_points)
-        
+        # self.update_enabled_states()
 
-           
-        print()
 
     def toggle_set_origin(self):
-        self.camera_thread.set_origin(self.object_points[-1],self.to_world_coords_matrix)
-       
-        print()
+        self.camera_thread.set_origin(
+            self.object_points[-1], self.to_world_coords_matrix
+        )
+        # self.update_enabled_states()
+
 
     def toggle_collect_points(self):
         if not self.collecting_points:
-            self.captured_points_for_pose= []
+            self.captured_points_for_pose = []
             self.camera_thread.capture_points({"startOrStop": "start"})
             self.collecting_points = True
             self.update_enabled_states()
-    
-            self.collect_points.setText("Stop")
 
+            self.collect_points.setText("Stop")
 
         else:
             self.collect_points.setText("Start")
@@ -274,21 +298,21 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_enabled_states()
         # self.has_collected_points = True
         self.update_enabled_states()
-      
 
     def toggle_calculate_pose(self):
         # TODO stop point capture (disable button)
         self.collecting_points = False
         self.has_world_calibration = True
         # send data to calculate_camera_pose
-        # self.camera_poses, output_data = 
-        self.camera_thread.calculate_camera_pose({"cameraPoints":self.captured_points_for_pose})
-        
+        # self.camera_poses, output_data =
+        self.camera_thread.calculate_camera_pose(
+            {"cameraPoints": self.captured_points_for_pose}
+        )
+
         # print("camera pose",self.camera_poses, output_data)
-        
+
         # self.setup_scene(self.camera_poses)
         self.update_enabled_states()
-
 
     def update_camera_settings(self):
         exposure = self.exposure_slider.value()
@@ -313,7 +337,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.toggle_stream_btn.setText("Start Camera Stream")
         self.update_enabled_states()
 
-
     def update_enabled_states(self):
         """_summary_ updates if the buttons should be enabled or not based on state"""
         self.live_triangulation.setEnabled(
@@ -329,49 +352,51 @@ class MainWindow(QtWidgets.QMainWindow):
             self.camera_stream_running and self.has_world_calibration
         )
         self.set_origin.setEnabled(
-            self.camera_stream_running and self.has_world_calibration and len(self.object_points) >0
+            self.camera_stream_running
+            and self.has_world_calibration
+            and len(self.object_points) > 0
         )
 
         self.collect_points.setEnabled(self.camera_stream_running)
 
-        self.calculate_pose.setEnabled(
-            len(self.captured_points_for_pose)>0
-        )
+        self.calculate_pose.setEnabled(len(self.captured_points_for_pose) > 0)
 
-   
     @Slot(QImage)
     def setImage(self, image):
         self.camera_stream_label.setPixmap(QPixmap.fromImage(image))
-        #update fps 
+        # update fps
         time_now = time.time()
         if self.last_time != 0:
-            self.fps=1/(time_now-self.last_time)
+            self.fps = 1 / (time_now - self.last_time)
             self.fps_label.setText("FPS " + str(round(self.fps)))
             print("fps", self.fps)
         self.last_time = time_now
+
     @Slot(dict)
-    def setData(self,data):
+    def setData(self, data):
 
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
-           
-            self.calculate_pose.setText("calculate with "+str(len(self.captured_points_for_pose))+" points")
-        # todo have to find way to append data in smart way 
+
+            self.calculate_pose.setText(
+                "calculate with " + str(len(self.captured_points_for_pose)) + " points"
+            )
+        # todo have to find way to append data in smart way
         if self.is_triangulating_points and "object_points" in data:
             self.gl_widget.points_list = []
             self.gl_widget.point_colors = []
             self.gl_widget.point_size = 3
 
-            objects =  data.get("object_points")[0]
+            objects = data.get("object_points")[0]
             self.object_points.append(objects)
             for object_pos in objects:
 
-                self.gl_widget.add_point(position=object_pos,size=3)
+                self.gl_widget.add_point(position=object_pos, size=3)
             self.update_enabled_states()
         if "camera_poses" in data:
             self.camera_poses = data.get("camera_poses")
             self.setup_scene(data=self.camera_poses)
-            # TODO join setup_scene in camera and world if statements 
+            # TODO join setup_scene in camera and world if statements
             self.update_enabled_states()
         if "to_world_coords_matrix" in data:
             self.to_world_coords_matrix = data.get("to_world_coords_matrix")
@@ -379,13 +404,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_enabled_states()
 
 
-
-
 def main() -> None:
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+
+
 # import cProfile
 if __name__ == "__main__":
     main()
