@@ -1,3 +1,4 @@
+import os
 import sys
 
 # import json
@@ -166,11 +167,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addLayout(self.tracking_group)
 
 
-
-        with open("computer_code/api/style.css") as style:
+        # try:
+        dirname =""
+        # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            dirname = os.path.dirname(sys._MEIPASS)
+            dirname+="/_internal/api"
+            print("package",dirname)
+        else:
+            dirname = os.path.dirname(__file__)
+        # dirname = os.path.dirname(sys._MEIPASS)
+        filename = os.path.join(dirname, "style.css")
+        f = open(filename)
+        with open(filename) as style:
             self.styleText = style.read()
             self.setStyleSheet(self.styleText)
-            
+        # except:
+        #     print("cant load css using normal layout")
         # self.view = QVBoxLayout()
         # # self.view.setFixedHeight(300)
         # # self.view.setAlignment(Qt.AlignCenter)
@@ -204,9 +217,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def openFile(self):
         # TODO have to find way for this ro
         fname = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Open file', '', "Camera Configuration files (*.txt)")
-        with open(fname[0],"r") as f:
-            self.config_data = f.read()
+            self, 'Open file', '', "Camera Configuration files (*.json)")
+        self.camera_thread.update_camera_params(filename=fname[0])
+            
+
         # todo might want to clear scene before hand?
         # self.setup_scene()
         # mesh = om.read_trimesh(fname[0])

@@ -1,0 +1,1 @@
+binaries = ([("v4l", "/usr/bin/v4l", "BINARY")],)

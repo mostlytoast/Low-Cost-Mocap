@@ -399,6 +399,16 @@ class MyThread(QThread):
             return
         elif (start_or_stop == "stop"):
             cameras.stop_trangulating_points()
+    def update_camera_params(self, filename):
+        cameras = Cameras.instance()
+        f = open(filename)
+        data = json.load(f)
+        cameras.camera_params = data["camera-params"]
+        cameras.configure()
+        print(cameras.camera_params)
+        cameras.to_world_coords_matrix = data["to_world_coords_matrix"]
+        # camera_poses = data["camera_poses"]
+        # TODO how do we do camera poses 
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 [
-    {
+    {"camera-params":[{
         "intrinsic_matrix": [
             [
                 677.8118436477158,
@@ -28,7 +28,7 @@
         ],
         "rotation": 0,
         "id": 3,
-        "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-1.4):",
+        "name": "cant:",
         "width": 800,
         "height": 600,
         "connected": false,
@@ -70,5 +70,8 @@
         "connected": false,
         "calibrated": false,
         "added": true
-    }
+    }],
+    "to_world_coords_matrix":{},
+    "camera_poses":{}
+}
 ]

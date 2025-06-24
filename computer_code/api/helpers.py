@@ -10,6 +10,7 @@ import cv2 as cv
 from KalmanFilter import KalmanFilter
 from Singleton import Singleton
 import videoSubSystem 
+import sys
 # from time import sleep
 # from line_profiler import profile
 
@@ -18,11 +19,42 @@ import videoSubSystem
 class Cameras:
     # @profile
     def __init__(self):
-        dirname = os.path.dirname(__file__)
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            dirname = os.path.dirname(sys._MEIPASS)
+            dirname+="_internal/api"
+            print("package",dirname)
+        else:
+            dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "camera-params.json")
         f = open(filename)
         self.camera_params = json.load(f)
+        # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
+        self.configure()
+        # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
+        # print(self.num_cameras)
+        self.is_capturing_points = False
 
+        self.is_triangulating_points = False
+        self.camera_poses = None
+
+        self.is_locating_objects = False
+
+        self.to_world_coords_matrix = None
+
+        self.drone_armed = []
+
+        self.num_objects = None
+
+        self.kalman_filter = None
+
+        self.socketio = None
+        self.ser = None
+
+        self.serialLock = None
+
+        global cameras_init
+        cameras_init = True
+    def configure(self):
         self.cameras = []
         # todo have default to specific resolution of cameras 
         # self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
@@ -52,30 +84,6 @@ class Cameras:
 
             self.cameras.append(cap)
 
-        # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
-        # print(self.num_cameras)
-        self.is_capturing_points = False
-
-        self.is_triangulating_points = False
-        self.camera_poses = None
-
-        self.is_locating_objects = False
-
-        self.to_world_coords_matrix = None
-
-        self.drone_armed = []
-
-        self.num_objects = None
-
-        self.kalman_filter = None
-
-        self.socketio = None
-        self.ser = None
-
-        self.serialLock = None
-
-        global cameras_init
-        cameras_init = True
     # function to add to JSON
     def write_json(new_data, filename='data.json'):
         # https://www.geeksforgeeks.org/python/append-to-json-file-using-python/
