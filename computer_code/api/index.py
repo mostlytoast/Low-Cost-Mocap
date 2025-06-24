@@ -24,456 +24,383 @@ from skspatial.objects import Plane, Points
 
 # ser = serial.Serial("/dev/cu.usbserial-02X2K2GE", 1000000, write_timeout=1, )
 
-print(__name__)
-app = Flask(__name__)
-CORS(app, supports_credentials=True)
-socketio = SocketIO(app, cors_allowed_origins='*')
-# from engineio.async_drivers import gevent
-# socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
+from PyQt5.QtCore import QThread, pyqtSignal as Signal
+from PyQt5.QtGui import QImage
+import cv2
+import imutils
+from threading import Lock
+import index
+"""_summary_ separate thread to get video from webcam 
+
+Returns:
+    _type_: _description_ signal image 
+"""
 cameras_init = False
 
 num_objects = 2
-@profile
-@app.route("/api/camera-stream")
-def camera_stream():
-    cameras = Cameras.instance()
-    cameras.set_socketio(socketio)
-    # cameras.set_ser(ser)
-    cameras.set_serialLock(serialLock)
-    cameras.set_num_objects(num_objects)
+class MyThread(QThread):
+    frame_signal = Signal(QImage)
+    data_signal = Signal(dict)
+    def __init__(self):
+        super().__init__()
     
-    def gen(cameras):
-        frequency = 150
-        loop_interval = 1.0 / frequency
-        last_run_time = 0
-        i = 0
+        self.cap = None
+        self._running = True
+        self._lock = self.mutex()
+        self._pending_camera_id = None
+        self.index_instance = index
 
-        while True:
-            time_now = time.time()
+    def set_camera_id(self, camera_id):
+        with self._lock:
+            self._pending_camera_id = camera_id
 
-            i = (i+1)%10
-            if i == 0:
-                socketio.emit("fps", {"fps": round(1/(time_now - last_run_time))})
+    def set_resolution(self, height, width):
+        RuntimeWarning("not implemented")
 
-            if time_now - last_run_time < loop_interval:
-                time.sleep(last_run_time - time_now + loop_interval)
-            last_run_time = time.time()
-            frames = cameras.get_frames()
-            jpeg_frame = cv.imencode('.jpg', frames)[1].tostring()
-
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n')
-
-    return Response(gen(cameras), mimetype='multipart/x-mixed-replace; boundary=frame')
-@profile
-@app.route("/api/trajectory-planning", methods=["POST"])
-def trajectory_planning_api():
-    # data = json.loads(request.data)
-
-    # waypoint_groups = [] # grouped by continuious movement (no stopping)
-    # for waypoint in data["waypoints"]:
-    #     stop_at_waypoint = waypoint[-1]
-    #     if stop_at_waypoint:
-    #         waypoint_groups.append([waypoint[:3*num_objects]])
-    #     else:
-    #         waypoint_groups[-1].append(waypoint[:3*num_objects])
-    
-    setpoints = []
-    # for i in range(0, len(waypoint_groups)-1):
-    #     start_pos = waypoint_groups[i][0]
-    #     end_pos = waypoint_groups[i+1][0]
-    #     waypoints = waypoint_groups[i][1:]
-    #     setpoints += plan_trajectory(start_pos, end_pos, waypoints, data["maxVel"], data["maxAccel"], data["maxJerk"], data["timestep"])
-
-    return json.dumps({
-        "setpoints": setpoints
-    })
-@profile
-def plan_trajectory(start_pos, end_pos, waypoints, max_vel, max_accel, max_jerk, timestep):
-    # otg = Ruckig(3*num_objects, timestep, len(waypoints))  # DoFs, timestep, number of waypoints
-    # inp = InputParameter(3*num_objects)
-    # out = OutputParameter(3*num_objects, len(waypoints))
-
-    # inp.current_position = start_pos
-    # inp.current_velocity = [0,0,0]*num_objects
-    # inp.current_acceleration = [0,0,0]*num_objects
-
-    # inp.target_position = end_pos
-    # inp.target_velocity = [0,0,0]*num_objects
-    # inp.target_acceleration = [0,0,0]*num_objects
-
-    # inp.intermediate_positions = waypoints
-
-    # inp.max_velocity = max_vel*num_objects
-    # inp.max_acceleration = max_accel*num_objects
-    # inp.max_jerk = max_jerk*num_objects
-
-    # setpoints = []
-    # res = Result.Working
-    # while res == Result.Working:
-    #     res = otg.update(inp, out)
-    #     setpoints.append(copy.copy(out.new_position))
-    #     out.pass_to_input(inp)
-
-    # return setpoints
-    return []
-@profile
-@socketio.on("arm-drone")
-def arm_drone(data):
-    # global cameras_init
-    # if not cameras_init:
-    #     return
-    
-    # Cameras.instance().drone_armed = data["droneArmed"]
-    # for droneIndex in range(0, num_objects):
-    #     serial_data = {
-    #         "armed": data["droneArmed"][droneIndex],
-    #     }
-    #     with serialLock:
-    #         # ser.write(f"{str(droneIndex)}{json.dumps(serial_data)}".encode('utf-8'))
-    #         None
+    def run(self):
         
-    #     time.sleep(0.01)
-    return
-@profile
-@socketio.on("set-drone-pid")
-def arm_drone(data):
-    # serial_data = {
-    #     "pid": [float(x) for x in data["dronePID"]],
-    # }
-    # with serialLock:
-    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-    #     time.sleep(0.01)
-    return
+        # self.cap = cv2.VideoCapture(self.camera_id)
+        while self._running:
+            # with self._lock:
+            #     if self._pending_camera_id is not None:
+            #         if self.cap is not None and self.cap.isOpened():
+            #             self.cap.release()
+            #         self.camera_id = self._pending_camera_id
+            #         self.cap = cv2.VideoCapture(self.camera_id)
+            #         self._pending_camera_id = None
 
-@profile
-@socketio.on("set-drone-setpoint")
-def arm_drone(data):
-    # serial_data = {
-    #     "setpoint": [float(x) for x in data["droneSetpoint"]],
-    # }
-    # with serialLock:
-    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-    #     time.sleep(0.01)
-    return
+            # if self.cap is not None and self.cap.isOpened():
+            #     # ret, frame = self.cap.read()
+            #     # if ret:
+           
+            try:
+                output= self.camera_stream()
+                image, data= next(output)
+                # print(data)
+                frame = self.cvimage_to_label(image)
+                self.frame_signal.emit(frame)
+                self.data_signal.emit(data)
+            except StopIteration:
+                pass
+            self.msleep(10)  # avoid busy loop
+    def enable(self):
+        self._running = True
+    def stop(self):
+        self._running = False
+        # if self.cap is not None and self.cap.isOpened():
+        #     self.cap.release()
 
-@profile
-@socketio.on("set-drone-trim")
-def arm_drone(data):
-    # serial_data = {
-    #     "trim": [int(x) for x in data["droneTrim"]],
-    # }
-    # with serialLock:
-    #     # ser.write(f"{str(data['droneIndex'])}{json.dumps(serial_data)}".encode('utf-8'))
-    #     time.sleep(0.01)
-    return
+    def mutex(self):
+        # Simple cross-thread lock for PyQt5 QThread
+        return Lock()
+
+    def cvimage_to_label(self, image):
+        image = imutils.resize(image, width=640)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = QImage(image, image.shape[1], image.shape[0], QImage.Format_RGB888)
+        return image
+# from engineio.async_drivers import gevent
+# socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
 
 
-# @profile
-# @socketio.on("acquire-floor")
-# def acquire_floor(data):
-#     cameras = Cameras.instance()
-#     object_points = data["objectPoints"]
-#     object_points = np.array([item for sublist in object_points for item in sublist])
-#     print("\nobject_points",object_points.tolist())
-#     print("cameras.to_world_coords_matrix",cameras.to_world_coords_matrix )
+    def camera_stream(self):
+        cameras = Cameras.instance()
+        # cameras.set_socketio(socketio)
+        # cameras.set_ser(ser)
+        # cameras.set_serialLock(serialLock)
+        cameras.set_num_objects(num_objects)
+        
+        def gen(cameras):
+            frequency = 150
+            loop_interval = 1.0 / frequency
+            last_run_time = 0
+            i = 0
+            fps = 0
+            while True:
+                time_now = time.time()
 
-#     temp_points = []
-#     for temp_obj in object_points:
-#         # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
+                i = (i+1)%10
+                if i == 0:
+                    fps = round(1/(time_now - last_run_time))
+                    # socketio.emit("fps", {"fps": fps })
 
-#         temp_obj[1], temp_obj[2] = temp_obj[2], temp_obj[1]
-#         temp_points.append([temp_obj[0], temp_obj[1], temp_obj[2]])
+                if time_now - last_run_time < loop_interval:
+                    time.sleep(last_run_time - time_now + loop_interval)
+                last_run_time = time.time()
+                frames, data = cameras.get_frames()
+                # jpeg_frame = cv.imencode('.jpg', frames)[1].tostring()
+                yield frames, data
+                # yield (b'--frame\r\n'
+                #     b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n')
+        # TODO return fps
+        return gen(cameras)
 
-#     points = Points(temp_points)
-#     plane = Plane.best_fit(points)
-#     # Get the normal vector and a point on the plane
-#     plane_normal = plane.normal
-#     plane_point = plane.point
-#     #https://mattloftus.github.io/2016/01/23/threejs-p1/
-#     # The floor of the coordinate space is assumed to be y=0, normal [0,1,0]
-#     floor_normal = np.array([0, 1,0])
-#     floor_point = np.array([0, 0, 0])
 
-#     # Compute rotation to align plane_normal to floor_normal
-#     v = np.cross(plane_normal, floor_normal)
-#     c = np.dot(plane_normal, floor_normal)
-#     if np.linalg.norm(v) < 1e-8:
-#         R = np.eye(3)
-#     else:
-#         vx = np.array([[0, -v[2], v[1]],
-#                        [v[2], 0, -v[0]],
-#                        [-v[1], v[0], 0]])
-#         R = np.eye(3) + vx + vx @ vx * ((1 - c) / (np.linalg.norm(v) ** 2))
+    # def acquire_floor(data):
+    #     cameras = Cameras.instance()
+    #     object_points = data["objectPoints"]
+    #     object_points = np.array([item for sublist in object_points for item in sublist])
+    #     print("\nobject_points",object_points.tolist())
+    #     print("cameras.to_world_coords_matrix",cameras.to_world_coords_matrix )
 
-#     # Compute translation to move plane_point onto the floor (y=0 after rotation)
-#     rotated_plane_point = R @ plane_point
-#     translation = floor_point - rotated_plane_point
+    #     temp_points = []
+    #     for temp_obj in object_points:
+    #         # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
 
-#     # Build 4x4 transformation matrix
-#     new_to_world_coords_matrix = np.eye(4)
-#     new_to_world_coords_matrix[:3, :3] = R
-#     new_to_world_coords_matrix[:3, 3] = translation
-#     # Swap y and z axes in the transformation matrix
-#     # swap_yz = np.array([
-#     #     [1, 0, 0, 0],
-#     #     [0, 0, 1, 0],
-#     #     [0, 1, 0, 0],
-#     #     [0, 0, 0, 1]
-#     # ])
-#     # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
+    #         temp_obj[1], temp_obj[2] = temp_obj[2], temp_obj[1]
+    #         temp_points.append([temp_obj[0], temp_obj[1], temp_obj[2]])
 
-   
+    #     points = Points(temp_points)
+    #     plane = Plane.best_fit(points)
+    #     # Get the normal vector and a point on the plane
+    #     plane_normal = plane.normal
+    #     plane_point = plane.point
+    #     #https://mattloftus.github.io/2016/01/23/threejs-p1/
+    #     # The floor of the coordinate space is assumed to be y=0, normal [0,1,0]
+    #     floor_normal = np.array([0, 1,0])
+    #     floor_point = np.array([0, 0, 0])
 
-#     # Swap y and z axes in the transformation matrix
-#     swap_yz = np.array([
-#         [1, 0, 0, 0],
-#         [0, 0, 1, 0],
-#         [0, 1, 0, 0],
-#         [0, 0, 0, 1]
-#     ])
-#     new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
+    #     # Compute rotation to align plane_normal to floor_normal
+    #     v = np.cross(plane_normal, floor_normal)
+    #     c = np.dot(plane_normal, floor_normal)
+    #     if np.linalg.norm(v) < 1e-8:
+    #         R = np.eye(3)
+    #     else:
+    #         vx = np.array([[0, -v[2], v[1]],
+    #                        [v[2], 0, -v[0]],
+    #                        [-v[1], v[0], 0]])
+    #         R = np.eye(3) + vx + vx @ vx * ((1 - c) / (np.linalg.norm(v) ** 2))
+
+    #     # Compute translation to move plane_point onto the floor (y=0 after rotation)
+    #     rotated_plane_point = R @ plane_point
+    #     translation = floor_point - rotated_plane_point
+
+    #     # Build 4x4 transformation matrix
+    #     new_to_world_coords_matrix = np.eye(4)
+    #     new_to_world_coords_matrix[:3, :3] = R
+    #     new_to_world_coords_matrix[:3, 3] = translation
+    #     # Swap y and z axes in the transformation matrix
+    #     # swap_yz = np.array([
+    #     #     [1, 0, 0, 0],
+    #     #     [0, 0, 1, 0],
+    #     #     [0, 1, 0, 0],
+    #     #     [0, 0, 0, 1]
+    #     # ])
+    #     # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
+
     
+
+    #     # Swap y and z axes in the transformation matrix
+    #     swap_yz = np.array([
+    #         [1, 0, 0, 0],
+    #         [0, 0, 1, 0],
+    #         [0, 1, 0, 0],
+    #         [0, 0, 0, 1]
+    #     ])
+    #     new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
+        
+        
+    #     # perm = [0, 2, 1, 3]
+    #     # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
     
-#     # perm = [0, 2, 1, 3]
-#     # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
- 
+        
+    #     cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
+    #     # cameras.to_world_coords_matrix = new_to_world_coords_matrix
+    #     # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
+    #     swap_yz_4x4 = np.eye(4)
+    #     swap_yz_4x4[:3, :3] = np.array([[1,0,0],[0,-1,0],[0,0,1]])
+    #     cameras.to_world_coords_matrix = cameras.to_world_coords_matrix @ swap_yz_4x4 # i dont fucking know why
+        
+    #     print("new_to_world_coords_matrix",new_to_world_coords_matrix.tolist())
+        
+    #     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+
+
+
+    # @socketio.on("acquire-floor")
+    def acquire_floor(self,data):
+        cameras = Cameras.instance()
+        object_points = data["objectPoints"]
+        object_points = np.array([item for sublist in object_points for item in sublist])
+
+        tmp_A = []
+        tmp_b = []
+        for i in range(len(object_points)):
+            tmp_A.append([object_points[i,0], object_points[i,1], 1])
+            tmp_b.append(object_points[i,2])
+        b = np.matrix(tmp_b).T
+        A = np.matrix(tmp_A)
+
+        fit, residual, rnk, s = linalg.lstsq(A, b)
+        fit = fit.T[0]
+
+        plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
+        plane_normal = plane_normal / linalg.norm(plane_normal)
+        up_normal = np.array([[0],[0],[1]], dtype=np.float32)
+
+        plane = np.array([fit[0], fit[1], -1, fit[2]])
+
+        # https://math.stackexchange.com/a/897677/1012327
+        G = np.array([
+            [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
+            [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
+            [0, 0, 1]
+        ])
+        F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
+        R = F @ G @ linalg.inv(F)
+
+        R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
+        # Remove translation component from R by ensuring it's a pure rotation matrix
+        U, _, Vt = np.linalg.svd(R[:3, :3])
+        R = U @ Vt
+        # # Swap y and z axes in the rotation matrix
+        # swap_yz = np.array([
+        #     [1, 0, 0],
+        #     [0, 0, 1],
+        #     [0, 1, 0]
+        # ])
+        # R = R @ swap_yz
+        cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
+
+        # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+
+    # @socketio.on("acquire-floor")
+
+    def set_origin(self,data):
+        cameras = Cameras.instance()
+
+        object_point = np.array(data["objectPoint"])
+        to_world_coords_matrix = np.array(data["toWorldCoordsMatrix"])
+        transform_matrix = np.eye(4)
+
+        object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
+        transform_matrix[:3, 3] = -object_point
+
+        to_world_coords_matrix = transform_matrix @ to_world_coords_matrix
+        cameras.to_world_coords_matrix = to_world_coords_matrix
+
+        # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+    # @profile
+    # @socketio.on("update-camera-settings")
+    def change_camera_settings(self,data):
+        cameras = Cameras.instance()
+        
+        cameras.edit_settings(data["exposure"], data["gain"])
+    # @profile
+    # @socketio.on("capture-points")
+    def capture_points(self,data):
+        start_or_stop = data["startOrStop"]
+        cameras = Cameras.instance()
+
+        if (start_or_stop == "start"):
+            cameras.start_capturing_points()
+            # socketio.emit("object-points", {
+            #                 "object_points":[0,0,1]
+                        
+            #             })
+            return
+        elif (start_or_stop == "stop"):
+            cameras.stop_capturing_points()
+    # @profile
+    # @socketio.on("calculate-camera-pose")
+    def calculate_camera_pose(self,data):
+        cameras = Cameras.instance()
+        image_points = np.array(data["cameraPoints"])
+        # Save image_points to a file
     
-#     cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
-#     # cameras.to_world_coords_matrix = new_to_world_coords_matrix
-#     # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
-#     swap_yz_4x4 = np.eye(4)
-#     swap_yz_4x4[:3, :3] = np.array([[1,0,0],[0,-1,0],[0,0,1]])
-#     cameras.to_world_coords_matrix = cameras.to_world_coords_matrix @ swap_yz_4x4 # i dont fucking know why
-    
-#     print("new_to_world_coords_matrix",new_to_world_coords_matrix.tolist())
-    
-#     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+        image_points_t = image_points.transpose((1, 0, 2))
 
+        camera_poses = [{
+            "R": np.eye(3),
+            "t": np.array([[0],[0],[0]], dtype=np.float32)
+        }]
+        for camera_i in range(0, cameras.num_cameras-1):
+            camera1_image_points = image_points_t[camera_i]
+            camera2_image_points = image_points_t[camera_i+1]
+            not_none_indicies = np.where(np.all(camera1_image_points != None, axis=1) & np.all(camera2_image_points != None, axis=1))[0]
+            camera1_image_points = np.take(camera1_image_points, not_none_indicies, axis=0).astype(np.float32)
+            camera2_image_points = np.take(camera2_image_points, not_none_indicies, axis=0).astype(np.float32)
 
+            F, _ = cv.findFundamentalMat(camera1_image_points, camera2_image_points, cv.FM_RANSAC, 1, 0.99999)
+            E = essential_from_fundamental(F, cameras.get_camera_params(0)["intrinsic_matrix"], cameras.get_camera_params(1)["intrinsic_matrix"])
+            possible_Rs, possible_ts = motion_from_essential(E)
 
-@socketio.on("acquire-floor")
-def acquire_floor(data):
-    cameras = Cameras.instance()
-    object_points = data["objectPoints"]
-    object_points = np.array([item for sublist in object_points for item in sublist])
+            R = None
+            t = None
+            max_points_infront_of_camera = 0
+            for i in range(0, 4):
+                object_points = triangulate_points(np.hstack([np.expand_dims(camera1_image_points, axis=1), np.expand_dims(camera2_image_points, axis=1)]), np.concatenate([[camera_poses[-1]], [{"R": possible_Rs[i], "t": possible_ts[i]}]]))
+                object_points_camera_coordinate_frame = np.array([possible_Rs[i].T @ object_point for object_point in object_points])
 
-    tmp_A = []
-    tmp_b = []
-    for i in range(len(object_points)):
-        tmp_A.append([object_points[i,0], object_points[i,1], 1])
-        tmp_b.append(object_points[i,2])
-    b = np.matrix(tmp_b).T
-    A = np.matrix(tmp_A)
+                points_infront_of_camera = np.sum(object_points[:,2] > 0) + np.sum(object_points_camera_coordinate_frame[:,2] > 0)
 
-    fit, residual, rnk, s = linalg.lstsq(A, b)
-    fit = fit.T[0]
+                if points_infront_of_camera > max_points_infront_of_camera:
+                    max_points_infront_of_camera = points_infront_of_camera
+                    R = possible_Rs[i]
+                    t = possible_ts[i]
 
-    plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
-    plane_normal = plane_normal / linalg.norm(plane_normal)
-    up_normal = np.array([[0],[0],[1]], dtype=np.float32)
+            R = R @ camera_poses[-1]["R"]
+            t = camera_poses[-1]["t"] + (camera_poses[-1]["R"] @ t)
 
-    plane = np.array([fit[0], fit[1], -1, fit[2]])
+            camera_poses.append({
+                "R": R,
+                "t": t
+            })
 
-    # https://math.stackexchange.com/a/897677/1012327
-    G = np.array([
-        [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
-        [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
-        [0, 0, 1]
-    ])
-    F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
-    R = F @ G @ linalg.inv(F)
+        camera_poses, output_data = bundle_adjustment(image_points, camera_poses)
+        # todo what to do with output_data
+        object_points = triangulate_points(image_points, camera_poses)
+        error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
+        return camera_poses, output_data
+        # socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
+    # @profile
+    # @socketio.on("locate-objects")
+    def start_or_stop_locating_objects(self,data):
+        cameras = Cameras.instance()
+        start_or_stop = data["startOrStop"]
 
-    R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
-    # Remove translation component from R by ensuring it's a pure rotation matrix
-    U, _, Vt = np.linalg.svd(R[:3, :3])
-    R = U @ Vt
-    # # Swap y and z axes in the rotation matrix
-    # swap_yz = np.array([
-    #     [1, 0, 0],
-    #     [0, 0, 1],
-    #     [0, 1, 0]
-    # ])
-    # R = R @ swap_yz
-    cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
+        if (start_or_stop == "start"):
+            cameras.start_locating_objects()
+            return
+        elif (start_or_stop == "stop"):
+            cameras.stop_locating_objects()
+    # @profile
+    # @socketio.on("determine-scale")
+    def determine_scale(self,data):
+        object_points = data["objectPoints"]
+        camera_poses = data["cameraPoses"]
+        actual_distance = 0.15
+        observed_distances = []
 
-    socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
+        for object_points_i in object_points:
+            if len(object_points_i) != 2:
+                continue
 
-# @socketio.on("acquire-floor")
-# def acquire_floor(data):
-#     cameras = Cameras.instance()
-#     object_points = data["objectPoints"]
-#     object_points = np.array([item for sublist in object_points for item in sublist])
+            object_points_i = np.array(object_points_i)
 
-#     tmp_A = []
-#     tmp_b = []
-#     for i in range(len(object_points)):
-#         tmp_A.append([object_points[i,0], object_points[i,1], 1])
-#         tmp_b.append(object_points[i,2])
-#     b = np.matrix(tmp_b).T
-#     A = np.matrix(tmp_A)
+            observed_distances.append(np.sqrt(np.sum((object_points_i[0] - object_points_i[1])**2)))
 
-#     fit, residual, rnk, s = linalg.lstsq(A, b)
-#     fit = fit.T[0]
+        scale_factor = actual_distance/np.mean(observed_distances)
+        for i in range(0, len(camera_poses)):
+            camera_poses[i]["t"] = (np.array(camera_poses[i]["t"]) * scale_factor).tolist()
 
-#     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
-#     plane_normal = plane_normal / linalg.norm(plane_normal)
-#     up_normal = np.array([[0],[0],[1]], dtype=np.float32)
+        # socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
 
-#     plane = np.array([fit[0], fit[1], -1, fit[2]])
+    # @profile
+    # @socketio.on("triangulate-points")
+    def live_mocap(self,data):
+        cameras = Cameras.instance()
+        start_or_stop = data["startOrStop"]
+        camera_poses = data["cameraPoses"]
+        cameras.to_world_coords_matrix = data["toWorldCoordsMatrix"]
 
-#     # https://math.stackexchange.com/a/897677/1012327
-#     G = np.array([
-#         [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
-#         [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
-#         [0, 0, 1]
-#     ])
-#     F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
-#     R = F @ G @ linalg.inv(F)
-
-#     R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
-#     # cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]]))) 
-#     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
-
-#     socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-
-
-@profile
-@socketio.on("set-origin")
-def set_origin(data):
-    cameras = Cameras.instance()
-
-    object_point = np.array(data["objectPoint"])
-    to_world_coords_matrix = np.array(data["toWorldCoordsMatrix"])
-    transform_matrix = np.eye(4)
-
-    object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
-    transform_matrix[:3, 3] = -object_point
-
-    to_world_coords_matrix = transform_matrix @ to_world_coords_matrix
-    cameras.to_world_coords_matrix = to_world_coords_matrix
-
-    socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-@profile
-@socketio.on("update-camera-settings")
-def change_camera_settings(data):
-    cameras = Cameras.instance()
-    
-    cameras.edit_settings(data["exposure"], data["gain"])
-@profile
-@socketio.on("capture-points")
-def capture_points(data):
-    start_or_stop = data["startOrStop"]
-    cameras = Cameras.instance()
-
-    if (start_or_stop == "start"):
-        cameras.start_capturing_points()
-        socketio.emit("object-points", {
-                        "object_points":[0,0,1]
-                    
-                    })
-        return
-    elif (start_or_stop == "stop"):
-        cameras.stop_capturing_points()
-@profile
-@socketio.on("calculate-camera-pose")
-def calculate_camera_pose(data):
-    cameras = Cameras.instance()
-    image_points = np.array(data["cameraPoints"])
-    # Save image_points to a file
-   
-    image_points_t = image_points.transpose((1, 0, 2))
-
-    camera_poses = [{
-        "R": np.eye(3),
-        "t": np.array([[0],[0],[0]], dtype=np.float32)
-    }]
-    for camera_i in range(0, cameras.num_cameras-1):
-        camera1_image_points = image_points_t[camera_i]
-        camera2_image_points = image_points_t[camera_i+1]
-        not_none_indicies = np.where(np.all(camera1_image_points != None, axis=1) & np.all(camera2_image_points != None, axis=1))[0]
-        camera1_image_points = np.take(camera1_image_points, not_none_indicies, axis=0).astype(np.float32)
-        camera2_image_points = np.take(camera2_image_points, not_none_indicies, axis=0).astype(np.float32)
-
-        F, _ = cv.findFundamentalMat(camera1_image_points, camera2_image_points, cv.FM_RANSAC, 1, 0.99999)
-        E = essential_from_fundamental(F, cameras.get_camera_params(0)["intrinsic_matrix"], cameras.get_camera_params(1)["intrinsic_matrix"])
-        possible_Rs, possible_ts = motion_from_essential(E)
-
-        R = None
-        t = None
-        max_points_infront_of_camera = 0
-        for i in range(0, 4):
-            object_points = triangulate_points(np.hstack([np.expand_dims(camera1_image_points, axis=1), np.expand_dims(camera2_image_points, axis=1)]), np.concatenate([[camera_poses[-1]], [{"R": possible_Rs[i], "t": possible_ts[i]}]]))
-            object_points_camera_coordinate_frame = np.array([possible_Rs[i].T @ object_point for object_point in object_points])
-
-            points_infront_of_camera = np.sum(object_points[:,2] > 0) + np.sum(object_points_camera_coordinate_frame[:,2] > 0)
-
-            if points_infront_of_camera > max_points_infront_of_camera:
-                max_points_infront_of_camera = points_infront_of_camera
-                R = possible_Rs[i]
-                t = possible_ts[i]
-
-        R = R @ camera_poses[-1]["R"]
-        t = camera_poses[-1]["t"] + (camera_poses[-1]["R"] @ t)
-
-        camera_poses.append({
-            "R": R,
-            "t": t
-        })
-
-    camera_poses = bundle_adjustment(image_points, camera_poses, socketio)
-
-    object_points = triangulate_points(image_points, camera_poses)
-    error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
-
-    socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
-@profile
-@socketio.on("locate-objects")
-def start_or_stop_locating_objects(data):
-    cameras = Cameras.instance()
-    start_or_stop = data["startOrStop"]
-
-    if (start_or_stop == "start"):
-        cameras.start_locating_objects()
-        return
-    elif (start_or_stop == "stop"):
-        cameras.stop_locating_objects()
-@profile
-@socketio.on("determine-scale")
-def determine_scale(data):
-    object_points = data["objectPoints"]
-    camera_poses = data["cameraPoses"]
-    actual_distance = 0.15
-    observed_distances = []
-
-    for object_points_i in object_points:
-        if len(object_points_i) != 2:
-            continue
-
-        object_points_i = np.array(object_points_i)
-
-        observed_distances.append(np.sqrt(np.sum((object_points_i[0] - object_points_i[1])**2)))
-
-    scale_factor = actual_distance/np.mean(observed_distances)
-    for i in range(0, len(camera_poses)):
-        camera_poses[i]["t"] = (np.array(camera_poses[i]["t"]) * scale_factor).tolist()
-
-    socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
-
-@profile
-@socketio.on("triangulate-points")
-def live_mocap(data):
-    cameras = Cameras.instance()
-    start_or_stop = data["startOrStop"]
-    camera_poses = data["cameraPoses"]
-    cameras.to_world_coords_matrix = data["toWorldCoordsMatrix"]
-
-    if (start_or_stop == "start"):
-        cameras.start_trangulating_points(camera_poses)
-        return
-    elif (start_or_stop == "stop"):
-        cameras.stop_trangulating_points()
+        if (start_or_stop == "start"):
+            cameras.start_trangulating_points(camera_poses)
+            return
+        elif (start_or_stop == "stop"):
+            cameras.stop_trangulating_points()
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=3001, debug=True)
+    print()
+    # socketio.run(app, port=3001, debug=True)

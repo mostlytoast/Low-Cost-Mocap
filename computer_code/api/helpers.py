@@ -144,7 +144,7 @@ class Cameras:
                                [-2,-1,-1,-1,-2]])
             frames[i] = cv.filter2D(frames[i], -1, kernel)
             frames[i] = cv.cvtColor(frames[i], cv.COLOR_RGB2BGR)
-
+        output = {}
         if (self.is_capturing_points):
             image_points = []
             for i in range(0, self.num_cameras):
@@ -153,7 +153,8 @@ class Cameras:
             
             if (any(np.all(point[0] != [None,None]) for point in image_points)):
                 if self.is_capturing_points and not self.is_triangulating_points:
-                    self.socketio.emit("image-points", [x[0] for x in image_points])
+                    output["image-points"] =[x[0] for x in image_points]
+                    # self.socketio.emit("image-points", [x[0] for x in image_points])
                 elif self.is_triangulating_points:
                     errors, object_points, frames = find_point_correspondance_and_object_points(image_points, self.camera_poses, frames)
                     for obj in object_points.tolist():
@@ -200,20 +201,19 @@ class Cameras:
                             obj_world = np.dot(self.to_world_coords_matrix, obj_hom)
                             obj_world = obj_world[:3] / obj_world[3]
                             print(f"norm x: {obj[0]*10:8.4f}, y: {obj[1]*10:8.4f}, z: {obj[2]*10:8.4f} world x: {obj_world[0]*10:8.4f}, y: {obj_world[1]*10:8.4f}, z: {obj_world[2]*10:8.4f}")
-                    self.socketio.emit("object-points", {
-                        "object_points": object_points.tolist(), 
-                        "errors": errors.tolist(), 
-                        "objects": [{k:(v.tolist() if isinstance(v, np.ndarray) else v) for (k,v) in object.items()} for object in objects], 
-                        "filtered_objects": filtered_objects
-                    })
-        
-        return frames
+                 
+                    output["object_points"]= object_points.tolist(), 
+                    output["errors"]= errors.tolist(), 
+                    output["objects"]= [{k:(v.tolist() if isinstance(v, np.ndarray) else v) for (k,v) in object.items()} for object in objects], 
+                    output["filtered_objects"]= filtered_objects
+                    
+        return frames,output
     # @profile
     def get_frames(self):
-        frames = self._camera_read()
+        frames, data= self._camera_read()
         #frames = [add_white_border(frame, 5) for frame in frames]
 
-        return np.hstack(frames)
+        return np.hstack(frames), data
     # @profile
     def _find_dot(self, img):
         # img = cv.GaussianBlur(img,(5,5),0)
@@ -410,8 +410,9 @@ def motion_from_essential(E: np.ndarray) -> tuple[list[np.ndarray], list[np.ndar
     return rotations_matrices, translations
 
 # @profile
-def bundle_adjustment(image_points, camera_poses, socketio):
+def bundle_adjustment(image_points, camera_poses):
     cameras = Cameras.instance()
+    data = {}
     # @profile
     def params_to_camera_poses(params):
         focal_distances = []
@@ -440,9 +441,12 @@ def bundle_adjustment(image_points, camera_poses, socketio):
         object_points = triangulate_points(image_points, camera_poses)
         errors = calculate_reprojection_errors(image_points, object_points, camera_poses)
         errors = errors.astype(np.float32)
-        socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
-        
-        return errors
+        # TODO replace socket with new implementation for front back coms
+        # socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
+        data = {"camera_poses": camera_pose_to_serializable(camera_poses)}
+        # TODO this data is not getting outside of this function how to fix? signals maybe 
+        # data_signal.emit(data)
+        return errors, data
 
     focal_distance = cameras.get_camera_params(0)["intrinsic_matrix"][0,0]
     init_params = np.array([focal_distance])
@@ -452,11 +456,11 @@ def bundle_adjustment(image_points, camera_poses, socketio):
         init_params = np.concatenate([init_params, [focal_distance]])
         init_params = np.concatenate([init_params, rot_vec])
         init_params = np.concatenate([init_params, camera_pose["t"].flatten()])
-
+    errors, data = residual_function
     res = optimize.least_squares(
-        residual_function, init_params, verbose=2, loss="cauchy", ftol=1E-2
+        errors, init_params, verbose=2, loss="cauchy", ftol=1E-2
     )
-    return params_to_camera_poses(res.x)[0]
+    return params_to_camera_poses(res.x)[0], data
     
 # @profile
 def triangulate_point(image_points, camera_poses):
