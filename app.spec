@@ -4,7 +4,7 @@
 a = Analysis(
     ['computer_code/api/app.py'],
     pathex=[],
-    binaries=[],
+    binaries = ([("v4l", "/usr/bin/v4l", "BINARY")])
     datas=[
         ('computer_code/api/camera-params.json', 'api'),
         ('computer_code/api/style.css', 'api')

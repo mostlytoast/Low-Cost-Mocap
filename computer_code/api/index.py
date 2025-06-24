@@ -2,39 +2,27 @@ from helpers import camera_pose_to_serializable, calculate_reprojection_errors, 
 import cv2 as cv
 import numpy as np
 from scipy import linalg
-
-from flask_cors import CORS
 import json
-
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
 import cv2
 import imutils
 from threading import Lock
-import index
 """_summary_ separate thread to get video from webcam 
 
 Returns:
     _type_: _description_ signal image 
 """
 cameras_init = False
-
 num_objects = 2
 class MyThread(QThread):
     frame_signal = Signal(QImage)
     data_signal = Signal(dict)
     def __init__(self):
         super().__init__()
-    
-        self.cap = None
         self._running = True
         self._lock = self.mutex()
-        self._pending_camera_id = None
-        self.index_instance = index
 
-    def set_camera_id(self, camera_id):
-        with self._lock:
-            self._pending_camera_id = camera_id
 
     def set_resolution(self, height, width):
         RuntimeWarning("not implemented")
@@ -46,10 +34,7 @@ class MyThread(QThread):
         while self._running:
 
             try:
-                
-                # output= self.camera_stream()
                 image, data= next(output)
-                # print(data)
                 frame = self.cvimage_to_label(image)
                 self.frame_signal.emit(frame)
                 self.data_signal.emit(data)
@@ -62,8 +47,6 @@ class MyThread(QThread):
         self._running = True
     def stop(self):
         self._running = False
-        # if self.cap is not None and self.cap.isOpened():
-        #     self.cap.release()
 
     def mutex(self):
         # Simple cross-thread lock for PyQt5 QThread
@@ -74,24 +57,14 @@ class MyThread(QThread):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = QImage(image, image.shape[1], image.shape[0], QImage.Format_RGB888)
         return image
-# from engineio.async_drivers import gevent
-# socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
-
 
     def camera_stream(self):
         cameras = Cameras.instance()
-        # cameras.set_socketio(socketio)
-        # cameras.set_ser(ser)
-        # cameras.set_serialLock(serialLock)
         cameras.set_num_objects(num_objects)
         self.i = 0
         def gen(cameras):
-         
             while True:
-           
-                frames, data = cameras.get_frames()
-                # jpeg_frame = cv.imencode('.jpg', frames)[1].tostring()
-                yield frames, data
+                yield cameras.get_frames()
           
         # TODO return fps
         return gen(cameras)
@@ -184,13 +157,10 @@ class MyThread(QThread):
             return
         elif (start_or_stop == "stop"):
             cameras.stop_capturing_points()
-    # @profile
-    # @socketio.on("calculate-camera-pose")
+
     def calculate_camera_pose(self,data):
         cameras = Cameras.instance()
         image_points = np.array(data["cameraPoints"])
-        # Save image_points to a file
-    
         image_points_t = image_points.transpose((1, 0, 2))
 
         camera_poses = [{
@@ -234,6 +204,7 @@ class MyThread(QThread):
         # todo what to do with output_data
         object_points = triangulate_points(image_points, camera_poses)
         error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
+        # TODO is there any point to run this calculate_reprojection_errors if output is not used? likely causing slow down 
         return camera_poses, output_data
         # socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
     # @profile
@@ -258,15 +229,13 @@ class MyThread(QThread):
         for object_points_i in object_points:
             if len(object_points_i) != 2:
                 continue
-
             object_points_i = np.array(object_points_i)
-
             observed_distances.append(np.sqrt(np.sum((object_points_i[0] - object_points_i[1])**2)))
 
         scale_factor = actual_distance/np.mean(observed_distances)
         for i in range(0, len(camera_poses)):
             camera_poses[i]["t"] = (np.array(camera_poses[i]["t"]) * scale_factor).tolist()
-
+        return (camera_poses)
         # socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
 
     # @profile
@@ -282,6 +251,7 @@ class MyThread(QThread):
             return
         elif (start_or_stop == "stop"):
             cameras.stop_trangulating_points()
+    
     def update_camera_params(self, filename):
         cameras = Cameras.instance()
         f = open(filename)
@@ -290,10 +260,6 @@ class MyThread(QThread):
         cameras.configure()
         print(cameras.camera_params)
         cameras.to_world_coords_matrix = data["to_world_coords_matrix"]
-        # camera_poses = data["camera_poses"]
+        cameras.camera_poses = data["camera_poses"]
         # TODO how do we do camera poses 
 
-
-if __name__ == '__main__':
-    print()
-    # socketio.run(app, port=3001, debug=True)

@@ -107,15 +107,6 @@ class Cameras:
             # convert back to json.
             json.dump(file_data, file, indent = 4)
 
-    def set_socketio(self, socketio):
-        self.socketio = socketio
-    
-    def set_ser(self, ser):
-        self.ser = ser
-
-    def set_serialLock(self, serialLock):
-        self.serialLock = serialLock
-
     def set_num_objects(self, num_objects):
         self.num_objects = num_objects
         self.drone_armed = [False for i in range(0, self.num_objects)]

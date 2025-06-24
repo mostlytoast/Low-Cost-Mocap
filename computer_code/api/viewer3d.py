@@ -1,9 +1,8 @@
 import moderngl
-from PyQt5 import QtOpenGL, QtWidgets, QtCore
+from PyQt5 import QtOpenGL, QtCore
 import numpy as np
-import openmesh as om
+# import openmesh as om
 from pyrr import Matrix44
-
 from ArcBall import ArcBallUtil
 
 
@@ -347,33 +346,33 @@ class QGLControllerWidget(QtOpenGL.QGLWidget):
             self.arc_ball.onScroll(delta)
 
 
-class MainWindow(QtWidgets.QMainWindow):
+# class MainWindow(QtWidgets.QMainWindow):
 
-    def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
-        self.resize(640, 480)
-        self.setWindowTitle('Mesh Viewer')
-        self.gl = QGLControllerWidget(self)
+#     def __init__(self):
+#         QtWidgets.QMainWindow.__init__(self)
+#         self.resize(640, 480)
+#         self.setWindowTitle('Mesh Viewer')
+#         self.gl = QGLControllerWidget(self)
 
-        self.setCentralWidget(self.gl)
-        self.menu = self.menuBar().addMenu("&File")
-        self.menu.addAction('&Open', self.openFile)
+#         self.setCentralWidget(self.gl)
+#         self.menu = self.menuBar().addMenu("&File")
+#         self.menu.addAction('&Open', self.openFile)
 
-        timer = QtCore.QTimer(self)
-        timer.setInterval(20)  # period, in milliseconds
-        timer.timeout.connect(self.gl.updateGL)
-        timer.start()
+#         timer = QtCore.QTimer(self)
+#         timer.setInterval(20)  # period, in milliseconds
+#         timer.timeout.connect(self.gl.updateGL)
+#         timer.start()
 
-    def openFile(self):
-        fname = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Open file', '', "Mesh files (*.obj *.off *.stl *.ply)")
-        mesh = om.read_trimesh(fname[0])
-        self.gl.set_mesh(mesh)
+#     def openFile(self):
+#         fname = QtWidgets.QFileDialog.getOpenFileName(
+#             self, 'Open file', '', "Mesh files (*.obj *.off *.stl *.ply)")
+#         mesh = om.read_trimesh(fname[0])
+#         self.gl.set_mesh(mesh)
 
 
-if __name__ == '__main__':
-    app = QtWidgets.QApplication([])
-    win = MainWindow()
+# if __name__ == '__main__':
+#     app = QtWidgets.QApplication([])
+#     win = MainWindow()
 
-    win.show()
-    app.exec()
+#     win.show()
+#     app.exec()

@@ -15,7 +15,7 @@ from PyQt5.QtGui import QPixmap, QImage
 import index
 from viewer3d import QGLControllerWidget
 import time
-from PyQt5 import QtOpenGL, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 import numpy as np
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -475,10 +475,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.gl_widget.add_point(position=object_pos,size=3)
 
         # im getting data {'object_points': ([],), 'errors': ([],), 'objects': ([],), 'filtered_objects': []}
+import cProfile
 
-if __name__ == "__main__":
-
+def main() -> None:
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+if __name__ == "__main__":
+    cProfile.run('main()')
