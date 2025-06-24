@@ -46,8 +46,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.has_world_calibration = False
         self.has_collected_points = False
         self.collecting_points = False
+        self.is_triangulating_points = False
         #data variables 
         self.captured_points_for_pose = []
+        self.camera_poses = []
+        self.object_points = []
+        self.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
+
         self.camera_thread = index.MyThread()
         self.camera_thread.frame_signal.connect(self.setImage)
         self.camera_thread.data_signal.connect(self.setData)
@@ -68,10 +73,19 @@ class MainWindow(QtWidgets.QMainWindow):
         timer.setInterval(20)  # period, in milliseconds
         timer.timeout.connect(self.gl_widget.updateGL)
         timer.start()
-        
+        # wait till window exists to create grid (will error out other wise)
+        QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
+        QtCore.QTimer.singleShot(0, self.test)
+
+        # QtCore.QTimer.singleShot(0, self.setup_scene)
+
         # 
         # 
         # self.register_socket_handlers()
+    def test(self):
+        self.gl_widget.add_point([1,2,3])
+        self.gl_widget.add_point([1,0,3])
+        self.gl_widget.add_point([1,5,3])
 
     def init_ui(self):
         
@@ -177,31 +191,46 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         # self.setCentralWidget(central_widget)
+    def setup_scene(self,data):
+        self.gl_widget.camera_vertices_list =[]
+        for camera_transform in data:
+            # todo apply the world transform to this 
+            
+            self.gl_widget.add_camera(transform=camera_transform)
+        
+        
 
-    # Function to update editable fields when selection changes
+    # Function to get camera config
     def openFile(self):
-        # fname = QtWidgets.QFileDialog.getOpenFileName(
-        #     self, 'Open file', '', "Mesh files (*.obj *.off *.stl *.ply)")
+        # TODO have to find way for this ro
+        fname = QtWidgets.QFileDialog.getOpenFileName(
+            self, 'Open file', '', "Camera Configuration files (*.txt)")
+        with open(fname[0],"r") as f:
+            self.config_data = f.read()
+        # todo might want to clear scene before hand?
+        # self.setup_scene()
         # mesh = om.read_trimesh(fname[0])
         # self.gl_widget.set_mesh(mesh)
-        self.gl_widget.create_grid()
+        # self.gl_widget.create_grid()
 
         # self.setLayout(self.layout)
 
     def toggle_live_triangulation(self):
-        # Example values for cameraPoses and toWorldCoordsMatrix
-        start_or_stop = "start"  # or "stop", depending on your logic
-        camera_poses = []  # Replace with actual camera poses data
-        to_world_coords_matrix = []  # Replace with actual matrix data
+        if not self.is_triangulating_points:
+            # self.captured_points_for_pose= []
+            # self.camera_thread.live_mocap({"startOrStop": "start"})
+            self.camera_thread.live_mocap({"startOrStop": "start","cameraPoses":self.camera_poses,"toWorldCoordsMatrix":self.to_world_coords_matrix})
 
-        self.sio.emit(
-            "triangulate-points",
-            {
-                "startOrStop": start_or_stop,
-                "cameraPoses": camera_poses,
-                "toWorldCoordsMatrix": to_world_coords_matrix,
-            },
-        )
+            self.is_triangulating_points = True
+            self.update_enabled_states()
+            self.live_triangulation.setText("Stop")
+
+
+        else:
+            self.live_triangulation.setText("Start")
+            self.camera_thread.live_mocap({"startOrStop": "stop","cameraPoses":self.camera_poses,"toWorldCoordsMatrix":self.to_world_coords_matrix})
+            self.is_triangulating_points = False
+            self.update_enabled_states()
 
         #         <Button
         #           size='sm'
@@ -222,6 +251,9 @@ class MainWindow(QtWidgets.QMainWindow):
         #           }>
         #           {isTriangulatingPoints ? "Stop" : "Start"}
         #         </Button>
+#          const startLiveMocap = (startOrStop: string) => {
+#     socket.emit("triangulate-points", { startOrStop, cameraPoses, toWorldCoordsMatrix })
+#   }
 
     def toggle_locate_objects(self):
         print()
@@ -304,11 +336,13 @@ class MainWindow(QtWidgets.QMainWindow):
 #     socket.emit("calculate-camera-pose", { cameraPoints })
         # TODO stop point capture (disable button)
         self.collecting_points = False
+        self.has_world_calibration = True
         # send data to calculate_camera_pose
         self.camera_poses, output_data = self.camera_thread.calculate_camera_pose({"cameraPoints":self.captured_points_for_pose})
         
         print("camera pose",self.camera_poses, output_data)
         self.update_enabled_states()
+        self.setup_scene(self.camera_poses)
 #   }
 
 
@@ -370,12 +404,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camera_stream_label.setPixmap(QPixmap.fromImage(image))
     @Slot(dict)
     def setData(self,data):
-        # print("im getting data",data)
+        print("im getting data",data)
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
             # print(len(self.captured_points_for_pose))
             self.calculate_pose.setText("calculate camera pose with "+str(len(self.captured_points_for_pose))+" points")
         # todo have to find way to append data in smart way 
+        if self.is_triangulating_points and "object_points" in data:
+            objects =  data.get("object_points")[0]
+            self.object_points.append(objects)
+            for object_pos in objects:
+
+                self.gl_widget.add_point(object_pos)
+
+        # im getting data {'object_points': ([],), 'errors': ([],), 'objects': ([],), 'filtered_objects': []}
 
 if __name__ == "__main__":
 

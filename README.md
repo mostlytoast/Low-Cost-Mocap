@@ -44,7 +44,8 @@ In another terminal window, run `./computer_code/venv/bin/python3 computer_code/
 
 ## other repositories used
 
-For 3d viewing i used the [PyQt5 Mesh Viewer](https://github.com/zishun/pyqt-meshviewer) by [zishun](https://github.com/zishun/pyqt-meshviewer/commits?author=zishun) with some extra modifications to support more features like zooming 
+For 3d viewing i used the [PyQt5 Mesh Viewer](https://github.com/zishun/pyqt-meshviewer) by [zishun](https://github.com/zishun/pyqt-meshviewer/commits?author=zishun) with some extra modifications to support more features like zoom, displaying grids, etc.
+
 
 ## Documentation
 
