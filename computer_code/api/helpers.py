@@ -4,13 +4,13 @@ import cv2 as cv
 from scipy.spatial.transform import Rotation
 import copy
 import json
-import os
+# import os
 import time
 import cv2 as cv
 from KalmanFilter import KalmanFilter
 from Singleton import Singleton
 import videoSubSystem 
-import sys
+# import sys
 # from time import sleep
 # from line_profiler import profile
 
@@ -47,12 +47,6 @@ class Cameras:
         self.num_objects = None
 
         self.kalman_filter = None
-
-        self.socketio = None
-        self.ser = None
-
-        self.serialLock = None
-
         global cameras_init
         cameras_init = True
 
@@ -79,14 +73,9 @@ class Cameras:
             # Try to use OpenCV's CAP_PROP_THREAD for multi-threaded capture (if supported)
             if hasattr(cv, 'CAP_PROP_THREAD'):
                 cap.set(cv.CAP_PROP_THREAD, 1)
-            # Try to reduce internal buffer size to minimize latency
-            # cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
-            # # Try to set camera to MJPG for faster decoding (already present)
-            # cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
             # Try to set a higher buffer size (may help with USB cameras)
             cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
             # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all
-            # cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
             cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
 
             print("res",camera_data["width"],camera_data["height"])

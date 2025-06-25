@@ -1,5 +1,6 @@
 import platform
 import subprocess
+import re
 
 
 def listWebcams():
@@ -90,13 +91,13 @@ def get_id_from_name(name):
 
 
 def getResolution(camera_id):
-    """_summary_
+    """gets resolutions available for specified camera 
 
     Args:
         camera_id (int): system id of camera 
 
     Returns:
-        list tuple : list of tuples with width and then height 
+        list (tuple) : list of tuples with width and then height 
     """
     # TODO have to use v4l2 to get list of supported resolution that user can select from and return that resolution as 2 vars width height
     # command to use
@@ -119,6 +120,64 @@ def getResolution(camera_id):
                     if "x" in size:
                         w, h = size.split("x")
                         resolutions.append((int(w), int(h)))
-
+        # Remove duplicates
+        resolutions = list(set(resolutions))
+        resolutions.sort()
         return resolutions
     return [(1920, 1080)]
+def getSettings(camera_id):
+    """returns low lying information about a camera such as max min exposure and auto_exposure settings for manual and auto
+
+    Args:
+        camera_id (int): system id of camera 
+
+    Returns:
+        dict: dictionary containing max min exposure and auto_exposure settings for manual and auto 
+        "manual_mode" : manual_mode,
+            "auto_exposure_mode": auto_exposure_mode,
+            "min_exposure": exposure_min,
+            "max_exposure": exposure_max
+    """
+    if platform.system().lower() == "linux":
+        command = "v4l2-ctl --all --device /dev/video" + str(camera_id) 
+        result = (
+            subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+            .stdout.decode("utf-8")
+            .split("\n")
+        )
+        if result[-1] == "":
+            result.pop()
+        # Parse auto_exposure modes
+        # auto_exposure_modes = {}
+        manual_mode = auto_exposure_mode = None
+        exposure_min = exposure_max = None
+        for line in result:
+            if "Manual Mode" in line:
+                mode_match = re.match(r"\s*(\d+):", line)
+                if mode_match:
+                    mode_id = int(mode_match.group(1))
+                    manual_mode = mode_id
+            if "Aperture Priority Mode" in line:
+                mode_match = re.match(r"\s*(\d+):", line)
+                if mode_match:
+                    mode_id = int(mode_match.group(1))
+                    auto_exposure_mode = mode_id
+            if "exposure_time_absolute" in line:
+                min_match = re.search(r"min=(\d+)", line)
+                max_match = re.search(r"value=(\d+)", line)
+                if min_match and max_match:
+                    exposure_min = int(min_match.group(1))
+                    exposure_max = int(max_match.group(1))
+                break
+
+        # Example return structure
+        return {
+            "manual_mode" : manual_mode,
+            "auto_exposure_mode": auto_exposure_mode,
+            "min_exposure": exposure_min,
+            "max_exposure": exposure_max
+        }
+
+if __name__ == "__main__":
+    print("test")
+    print(getSettings(get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.1.1):")))

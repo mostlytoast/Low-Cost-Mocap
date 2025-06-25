@@ -25,8 +25,9 @@ class MyThread(QThread):
         self._lock = self.mutex()
 
 
-    def set_resolution(self, height, width):
-        RuntimeWarning("not implemented")
+    # def set_resolution(self, height, width):
+        
+    #     RuntimeWarning("not implemented")
 
     def run(self):
         cameras = Cameras.instance()
