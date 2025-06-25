@@ -409,7 +409,15 @@ class setup_window(QWidget):
         except ValueError:
             pass  # Ignore invalid input
         self.parent = self.data
-
+    def get_current_selection(self):
+        
+        if self.added_webcam_list.selectedItems():
+            i = self.added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+        elif self.non_added_webcam_list.selectedItems():
+            i = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+        else:
+            i=0
+        return i
     def settings_ui(self):
         self.editable_fields_layout = QGridLayout()
         self.editable_fields_layout.setColumnStretch(0, 0)
@@ -423,14 +431,15 @@ class setup_window(QWidget):
         self.editable_fields_layout.setColumnMinimumWidth(1, 120)
 
         # Connect selection changes to update_settings_ui
-        self.added_webcam_list.itemSelectionChanged.connect(self.update_settings_ui)
+        self.added_webcam_list.itemSelectionChanged.connect(self.label_load)
         # self.non_added_webcam_list.itemSelectionChanged.connect(self.update_settings_ui)
 
         # Initial population
-        self.update_settings_ui()
-        # Dropdown to edit a variable (e.g., "rotation" of the first webcam)
-
-    def update_settings_ui(self):
+    #     self.update_settings_ui()
+    #     # Dropdown to edit a variable (e.g., "rotation" of the first webcam)
+    
+        
+    # def update_settings_ui(self):
         # Remove all widgets from the layout
         # while self.editable_fields_layout.count():
         #     item = self.editable_fields_layout.takeAt(0)
@@ -440,48 +449,45 @@ class setup_window(QWidget):
         # self.editable_labels.clear()
 
         # Determine which list and item is selected
-        selected_item = None
-        if self.added_webcam_list.selectedItems():
-            selected_item = self.added_webcam_list.selectedItems()[0]
-        elif self.non_added_webcam_list.selectedItems():
-            selected_item = self.non_added_webcam_list.selectedItems()[0]
-        self.idx = 0
-        data = {}
-        if not selected_item:
-            # show when there is no camera selected
-            data = {
-                "intrinsic_matrix": [
-                    [0.0, 0.0, 0.0],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                    ],
-                    [0.0, 0.0, 1.0],
-                ],
-                "distortion_coef": [[0.0, 0.0, 0.0, 0.0, 0.0]],
-                "rotation": 0,
-                "id": 0,
-                "name": "",
-                "width": 0,
-                "height": 0,
-            }
-        else:
-            self.idx = selected_item.data(Qt.UserRole)
-            data = self.data[self.idx]
+        # selected_item = None
+        # if self.added_webcam_list.selectedItems():
+        #     selected_item = self.added_webcam_list.selectedItems()[0]
+        # elif self.non_added_webcam_list.selectedItems():
+        #     selected_item = self.non_added_webcam_list.selectedItems()[0]
+        # self.idx = 0
+        # data = {}
+        # if not selected_item:
+        #     # show when there is no camera selected
+        #     data = {
+        #         "intrinsic_matrix": [
+        #             [0.0, 0.0, 0.0],
+        #             [
+        #                 0.0,
+        #                 0.0,
+        #                 0.0,
+        #             ],
+        #             [0.0, 0.0, 1.0],
+        #         ],
+        #         "distortion_coef": [[0.0, 0.0, 0.0, 0.0, 0.0]],
+        #         "rotation": 0,
+        #         "id": 0,
+        #         "name": "",
+        #         "width": 0,
+        #         "height": 0,
+        #     }
+        # else:
+        #     self.idx = selected_item.data(Qt.UserRole)
+        #     data = self.data[self.idx]
 
         # list non editable settings
         key = "intrinsic_matrix"
         row = 0
         for key in ["intrinsic_matrix", "distortion_coef", "name"]:
             label = QLabel()
-            def la(self):
-                return f"{str(self.data[1][key])}"
-            self.label_load(label,la)
-            # label = QLabel(f"{str(data[key])}")
-            
+            # def la(self):
+            #     return f"{str(self.data[self.get_current_selection()]["intrinsic_matrix"])}"
+            # self.label_load(label,la,)
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
             self.editable_fields_layout.addWidget(QLabel(key), row, 0)
             self.editable_fields_layout.addWidget(label, row, 1)
             row += 1
@@ -585,17 +591,17 @@ class setup_window(QWidget):
         settings.addWidget(self.gain_slider, 1, 1)
         self.webcam_settings_layout.addLayout(settings)
         
-    def label_load(self,item=None,label=None):
-        if not hasattr(self,"items"):
-            self.items = []
-        if not hasattr(self,"labels"):
-            self.labels = []
-        if item != None and label != None:
-            self.items.append(item)
-            self.labels.append(label)
-        for it, lab in zip(self.items, self.labels):
-            # TODO change based on type of item
-            it.setText(lab(self))
+    # def label_load(self,item=None,label=None):
+    #     if not hasattr(self,"items"):
+    #         self.items = []
+    #     if not hasattr(self,"labels"):
+    #         self.labels = []
+    #     if item != None and label != None:
+    #         self.items.append(item)
+    #         self.labels.append(label)
+    #     for it, lab in zip(self.items, self.labels):
+    #         # TODO change based on type of item
+    #         it.setText(lab(self))
         
 
     # def connect(self,item):
