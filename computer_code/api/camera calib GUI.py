@@ -432,11 +432,11 @@ class setup_window(QWidget):
 
     def update_settings_ui(self):
         # Remove all widgets from the layout
-        while self.editable_fields_layout.count():
-            item = self.editable_fields_layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
+        # while self.editable_fields_layout.count():
+        #     item = self.editable_fields_layout.takeAt(0)
+        #     widget = item.widget()
+        #     if widget is not None:
+        #         widget.deleteLater()
         # self.editable_labels.clear()
 
         # Determine which list and item is selected
@@ -474,7 +474,12 @@ class setup_window(QWidget):
         key = "intrinsic_matrix"
         row = 0
         for key in ["intrinsic_matrix", "distortion_coef", "name"]:
-            label = QLabel(f"{str(data[key])}")
+            label = QLabel()
+            def la(self):
+                return f"{str(self.data[1][key])}"
+            self.label_load(label,la)
+            # label = QLabel(f"{str(data[key])}")
+            
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
             self.editable_fields_layout.addWidget(QLabel(key), row, 0)
@@ -528,7 +533,7 @@ class setup_window(QWidget):
                 )
                 # item = self.combobox_resolution.item(self.combobox_resolution.count() - 1)
                 # item.setData(Qt.UserRole, resolution)
-        
+
         self.combobox_resolution.setCurrentText(
             str(data["width"]) + "x" + str(data["height"])
         )
@@ -579,6 +584,18 @@ class setup_window(QWidget):
         settings.addWidget(QLabel("Gain"), 1, 0)
         settings.addWidget(self.gain_slider, 1, 1)
         self.webcam_settings_layout.addLayout(settings)
+        
+    def label_load(self,item=None,label=None):
+        if not hasattr(self,"items"):
+            self.items = []
+        if not hasattr(self,"labels"):
+            self.labels = []
+        if item != None and label != None:
+            self.items.append(item)
+            self.labels.append(label)
+        for it, lab in zip(self.items, self.labels):
+            # TODO change based on type of item
+            it.setText(lab(self))
         
 
     # def connect(self,item):
