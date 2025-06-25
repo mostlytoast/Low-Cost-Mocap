@@ -142,10 +142,15 @@ class MyThread(QThread):
         return False, img
         
     def stop(self):
+        # # Send an empty frame (black image) through the signal
+        # empty_image = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        # empty_qimage = self.cvimage_to_label(empty_image)
+        # self.frame_signal.emit(empty_qimage)
+
         self._running = False
         if self.cap is not None and self.cap.isOpened():
             self.cap.release()
-
+        
     def mutex(self):
         # Simple cross-thread lock for PyQt5 QThread
         return Lock()

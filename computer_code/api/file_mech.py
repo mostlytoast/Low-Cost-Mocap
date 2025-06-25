@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QMessageBox
 )
-from helpers import camera_pose_to_serializable, camera_pose_from_serializable
+from helpers import camera_pose_to_serializable, camera_pose_from_serializable, Cameras
 import json
 class file_dialog(QFileDialog):
     """provides a uniform way for both the camera calibration and normal app to access saved data 
@@ -21,6 +21,8 @@ class file_dialog(QFileDialog):
         super(file_dialog, self).__init__(parent)
         self.save_path = ""
         self.parent = parent
+        self.cameras = Cameras.instance()
+
         
 
     def saveFile(self):
@@ -74,24 +76,24 @@ class file_dialog(QFileDialog):
     def load_config_params(self):
         with open(self.save_path,"r") as f:
             data = json.load(f)
-        self.parent.camera_params = data["camera_params"]
+        self.cameras.camera_params = data["camera_params"]
 
         # cameras.configure()
         
-        self.parent.to_world_coords_matrix = data["to_world_coords_matrix"]
-        self.parent.camera_poses = camera_pose_from_serializable(data["camera_poses"])
+        self.cameras.to_world_coords_matrix = data["to_world_coords_matrix"]
+        self.cameras.camera_poses = camera_pose_from_serializable(data["camera_poses"])
         # if hasattr(self.parent, "load_config()"):
         self.parent.updates_config(data["camera_params"], data["camera_poses"], data["to_world_coords_matrix"])
         # return data["camera_params"], data["camera_poses"], data["to_world_coords_matrix"]
         # TODO how do we do camera poses 
     def save_config_params(self):
         data = {}
-        data["camera_params"] = self.parent.camera_params
+        data["camera_params"] = self.cameras.camera_params
         try:
-            data["to_world_coords_matrix"] = self.parent.to_world_coords_matrix.tolist()
+            data["to_world_coords_matrix"] = self.cameras.to_world_coords_matrix.tolist()
         except:
             data["to_world_coords_matrix"]= []
-        data["camera_poses"] = camera_pose_to_serializable(self.parent.camera_poses)
+        data["camera_poses"] = camera_pose_to_serializable(self.cameras.camera_poses)
         with open(self.save_path,"w") as f:
             json.dump(data,f)
     # TODO clean up by moving into app.py and camera calib GUI.py

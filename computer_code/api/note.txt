@@ -1,8 +1,6 @@
-binaries = ([("v4l", "/usr/bin/v4l", "BINARY")],)
-
-
-improve file size 
-https://stackoverflow.com/questions/58496695/large-file-size-after-building-pyqt-to-exe-with-pyinstaller
-
-use nuitka 
-https://stackoverflow.com/questions/35841969/python-portable-pyinstaller
+def set_resolution(self, height, width):
+        if self.cap is not None and self.cap.isOpened():
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(width))
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(height))
+        else:
+            self.width = width

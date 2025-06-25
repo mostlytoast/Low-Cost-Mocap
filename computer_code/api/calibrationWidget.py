@@ -17,75 +17,117 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QStackedWidget,
     QDialog,
+    QSplitter,
     QDialogButtonBox
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-
-# import sys
-# import api.cameraThread
-# import videoSubSystem
-from PyQt5.QtWidgets import QSplitter
-from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QMessageBox
-
+import cameraThread
+import settingsWidget
+import alertWidget, videoSubSystem
+# TODO have singleton for camera with a current camera param that stores current camera setting and 
+# todo maybe also have this be singleton for setup data with a param for if it has been modified since saving 
 class CalibrateWidget(QWidget):
     def __init__(self, parent=None):
         super(CalibrateWidget, self).__init__(parent)
         self.parent = parent
+        self.index = 1
+        # self.list_of_rotations = ["0","90", "180", "270"]
 
-        # Create QStackedWidget to hold different UIs
-        self.stacked_widget = QStackedWidget(self)
+        self.camera_thread = cameraThread.MyThread(0)
+        self.camera_thread.frame_signal.connect(self.setImage)
+        self.data = (
+            parent.data
+        )  # Access parent's data list directly; modifications here affect parent
+        self.main_layout = QVBoxLayout()
+        self.webcam_settings_layout = QVBoxLayout()
+        self.webcam_preview_layout = QHBoxLayout()
+    
+        # Shortcuts for deleting items in each list
         
-        # Create the different UI pages
-        self.main_page = QWidget()
-        self.single_page = QWidget()
-        self.scratch_page = QWidget()
 
-        # Setup main page
-        main_layout = QVBoxLayout()
-        self.back_button = QPushButton("Back")
-        self.back_button.clicked.connect(self.go_back)
-        main_layout.addWidget(self.back_button)
-        self.main_page.setLayout(main_layout)
+    
+        self.open_btn = QPushButton("Open The Camera", clicked=self.open_camera)
+        self.webcam_settings_layout.addWidget(self.open_btn)
 
-        # Setup single page
-        single_layout = QVBoxLayout()
-        single_label = QLabel("Single UI Page")
-        single_layout.addWidget(single_label)
-        self.single_page.setLayout(single_layout)
+        self.settings_ui = settingsWidget.SettingsWidget(self)
+        
+        
+        def selection_update_labels():
+            if not self.camera_thread._running:
+                self.settings_ui.update_labels()
 
-        # Setup scratch page
-        scratch_layout = QVBoxLayout()
-        scratch_label = QLabel("Scratch UI Page")
-        scratch_layout.addWidget(scratch_label)
-        self.scratch_page.setLayout(scratch_layout)
-        self.layout = QVBoxLayout()
-        self.back_button = QPushButton("Back")
-        self.back_button.clicked.connect(parent.setup)
-        scratch_layout.addWidget(self.back_button)
-      
+        # self.added_webcam_list.itemSelectionChanged.connect(selection_update_labels)
+        self.webcam_settings_layout.addWidget(self.settings_ui)
+        # self.webcam_settings_layout.addLayout(self.editable_fields_layout)
 
-        # Add pages to stacked widget
-        self.stacked_widget.addWidget(self.main_page)    # index 0
-        self.stacked_widget.addWidget(self.single_page)  # index 1
-        self.stacked_widget.addWidget(self.scratch_page) # index 2
+        # Use a QSplitter to allow resizing between settings and preview
 
-        # Set layout for this widget
-        layout = QVBoxLayout()
-        layout.addWidget(self.stacked_widget)
-        self.setLayout(layout)
+        self.webcam_settings_widget = QWidget()
+        self.webcam_settings_widget.setLayout(self.webcam_settings_layout)
+        self.webcam_settings_widget.setMinimumWidth(300)  # Minimum width
+        self.webcam_settings_widget.setMaximumWidth(500)  # Optional: Maximum width
 
-    def show_main(self):
-        self.stacked_widget.setCurrentIndex(0)
+        self.label = QLabel()
+        self.label.setAlignment(Qt.AlignRight)
+        self.label.setMinimumSize(800, 600)
+        # self.label.setBackgroundRole()
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.webcam_settings_widget)
+        splitter.addWidget(self.label)
+        splitter.setSizes([200, 400])  # Initial sizes
 
-    def show_single(self):
-        self.stacked_widget.setCurrentIndex(1)
+        self.webcam_preview_layout.addWidget(splitter)
 
-    def show_scratch(self):
-        self.stacked_widget.setCurrentIndex(2)
+        self.camera_thread = cameraThread.MyThread(0)
+        self.camera_thread.frame_signal.connect(self.setImage)
+        self.back_btn = QPushButton("go back", clicked=self.go_back)
+        self.webcam_settings_layout.addWidget(self.back_btn)
+        self.main_layout.addLayout(self.webcam_preview_layout)
+        # Set main_layout on a QWidget and set as central widget
+
+        self.setLayout(self.main_layout)
+
+        # self.setCentralWidget(central_widget)
+
+    # Function to update editable fields when selection changes
+
+    def get_index(self):
+        if self.added_webcam_list.selectedItems():
+            i = self.added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+        elif self.non_added_webcam_list.selectedItems():
+            i = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+        else:
+            i = 0
+        return i
+    @Slot(QImage)
+    def setImage(self, image):
+        self.label.setPixmap(QPixmap.fromImage(image))
+    
 
     def go_back(self):
-        if self.parent is not None and hasattr(self.parent, "setup"):
-            self.parent.setup()
+        # self.camera_thread.stop()
+        # if self.parent is not None and hasattr(self.parent, "show_setup"):
+        self.parent.show_setup()
+    def get_index(self):
+        return self.index
+    def open_camera(self):
+
+        name = self.data[self.get_index()]["name"]
+        if not name:
+            return
+        camera_id = int(videoSubSystem.get_id_from_name(name))
+        if (camera_id) == -1:
+            print("stop")
+            alert = alertWidget.alert_widget(
+                "this camera could not be accessed", "ok", "", style=self.styleSheet()
+            )
+            alert.exec()
+            return
+
+        print(camera_id)
+        self.camera_thread.set_camera_id(camera_id)
+
+        self.camera_thread.start()
+        # self.update_labels()
