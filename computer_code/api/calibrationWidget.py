@@ -30,40 +30,62 @@ from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMessageBox
 
-class calibrate_widget(QWidget):
+class CalibrateWidget(QWidget):
     def __init__(self, parent=None):
-        super(calibrate_widget, self).__init__(parent)
+        super(CalibrateWidget, self).__init__(parent)
         self.parent = parent
+
+        # Create QStackedWidget to hold different UIs
+        self.stacked_widget = QStackedWidget(self)
+        
+        # Create the different UI pages
+        self.main_page = QWidget()
+        self.single_page = QWidget()
+        self.scratch_page = QWidget()
+
+        # Setup main page
+        main_layout = QVBoxLayout()
+        self.back_button = QPushButton("Back")
+        self.back_button.clicked.connect(self.go_back)
+        main_layout.addWidget(self.back_button)
+        self.main_page.setLayout(main_layout)
+
+        # Setup single page
+        single_layout = QVBoxLayout()
+        single_label = QLabel("Single UI Page")
+        single_layout.addWidget(single_label)
+        self.single_page.setLayout(single_layout)
+
+        # Setup scratch page
+        scratch_layout = QVBoxLayout()
+        scratch_label = QLabel("Scratch UI Page")
+        scratch_layout.addWidget(scratch_label)
+        self.scratch_page.setLayout(scratch_layout)
         self.layout = QVBoxLayout()
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(parent.setup)
-        self.layout.addWidget(self.back_button)
-        self.setLayout(self.layout)
+        scratch_layout.addWidget(self.back_button)
+      
 
-    def single_ui(self):
-        print()
-        
+        # Add pages to stacked widget
+        self.stacked_widget.addWidget(self.main_page)    # index 0
+        self.stacked_widget.addWidget(self.single_page)  # index 1
+        self.stacked_widget.addWidget(self.scratch_page) # index 2
 
-    def scratch_ui(self):
-        # self.layout = QVBoxLayout()
-        self.back_button = QPushButton("Back4444")
-        self.back_button.clicked.connect(self.parent.setup)
-        
-        self.layout.addWidget(self.back_button)
-        # self.setLayout(self.layout)
+        # Set layout for this widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.stacked_widget)
+        self.setLayout(layout)
 
+    def show_main(self):
+        self.stacked_widget.setCurrentIndex(0)
 
-    # def go_back(self):
-    #     # Assumes parent is MainWindow and has a QStackedWidget as central_widget
-    #     parent = self.parent
-    #     if hasattr(parent, "central_widget"):
-    #         for i in range(parent.central_widget.count()):
-    #             widget = parent.central_widget.widget(i)
-    #             if isinstance(widget, setup_window):
-    #                 parent.central_widget.setCurrentWidget(widget)
-    #                 break
-    # def calib(self):
-    #     parent = self.parent
-    #     if hasattr(parent, "central_widget"):
-    #         parent.central_widget.setCurrentWidget(self)
+    def show_single(self):
+        self.stacked_widget.setCurrentIndex(1)
 
+    def show_scratch(self):
+        self.stacked_widget.setCurrentIndex(2)
+
+    def go_back(self):
+        if self.parent is not None and hasattr(self.parent, "setup"):
+            self.parent.setup()

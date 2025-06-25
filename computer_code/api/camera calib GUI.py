@@ -1,4 +1,5 @@
 import json
+import sys
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -18,27 +19,22 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QDialog,
     QDialogButtonBox,
+    QSlider
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-
+import file_mech
+import numpy as np
 # import sys
 import cameraThread
 import videoSubSystem
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMessageBox
-from viewer3d import QGLControllerWidget
+
 
 import calibrationWidget
-import moderngl
-from PyQt5 import QtOpenGL, QtWidgets, QtCore
-# import numpy as np
-import openmesh as om
-# from pyrr import Matrix44
-
-from ArcBall import ArcBallUtil
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -52,7 +48,10 @@ class MainWindow(QMainWindow):
         # self.central_widget.addWidget(login_widget)
 
         # self.setWindowTitle("Camera Setup")
-
+        self.file = file_mech.file_dialog(self)
+        self.camera_poses = []
+        self.to_world_coords_matrix = np.eye(4)
+        self.camera_params = []
         self.initUI()
         self.save_path = ""
 
@@ -109,6 +108,7 @@ class MainWindow(QMainWindow):
                 "added": True,
             },
         ]
+        
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
@@ -119,18 +119,18 @@ class MainWindow(QMainWindow):
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
-        save_as_action = QAction("save as", self)
-        save_as_action.triggered.connect(self.save_as)
+        save_as_action = QAction("Save &as", self)
+        save_as_action.triggered.connect(self.file.save_as)
         file_menu.addAction(save_as_action)
 
-        save_action = QAction("save", self)
-        save_action.triggered.connect(self.save)
+        save_action = QAction("&Save", self)
+        save_action.triggered.connect(self.file.saveFile)
         file_menu.addAction(save_action)
         save_action.setShortcut("Ctrl+S")
         save_action.setStatusTip("Save File")
 
-        open_action = QAction("open", self)
-        open_action.triggered.connect(self.open)
+        open_action = QAction("&Open", self)
+        open_action.triggered.connect(self.file.openFile)
         file_menu.addAction(open_action)
         open_action.setShortcut("Ctrl+O")
         open_action.setStatusTip("Open File")
@@ -174,10 +174,10 @@ class MainWindow(QMainWindow):
 
     def calib_scratch(self):
         # todo ask to save when settings are un modified
-        calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
+        calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
         self.central_widget.addWidget(calibrate_widget_instance)
         self.central_widget.setCurrentWidget(calibrate_widget_instance)
-        calibrate_widget_instance.scratch_ui()
+        calibrate_widget_instance.show_scratch()
 
     def calib_single(self):
         # todo ask to save when settings are un modified
@@ -194,61 +194,78 @@ class MainWindow(QMainWindow):
         # calibrate_widget_instance.copy()
 
     def setup(self):
-        setup_widget = setup_window(self)
-        self.central_widget.addWidget(setup_widget)
-        self.central_widget.setCurrentWidget(setup_widget)
+        self.setup_widget = setup_window(self)
+        self.central_widget.addWidget(self.setup_widget)
+        self.central_widget.setCurrentWidget(self.setup_widget)
+        self.setup_widget.update_list()
+    def updates_config(self, camera_params, camera_poses, to_world_coords_matrix):
+        """_summary_ gets updated config data from file_mech  and updates the backend 
 
-    def save(self):
-        if self.save_path == "":
+        Args:
+            camera_params (_type_): _description_
+            camera_poses (_type_): _description_
+            to_world_coords_matrix (_type_): _description_
+        """
+        # TODO find way to have list update when open new file in calib view 
 
-            file_path, _ = QFileDialog.getSaveFileName(
-                self, "Save File", "", "Json Files (*.json);;All Files (*.*)"
-            )
-            if file_path and not file_path.lower().endswith(".json"):
-                file_path += ".json"
-            if file_path:
-                print(f"Selected file: {file_path}")
-                self.save_path = file_path
-        # double check
-        if self.save_path != "":
-            try:
-                with open(self.save_path, "w") as f:
-                    json.dump(self.data, f, indent=4)
-            except Exception as e:
-                msg = QMessageBox(self)
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText(f"Can't save file: {e}")
+        self.camera_params = camera_params
+        self.setup_widget.data  = camera_params
+        self.camera_poses  = camera_poses
+        self.to_world_coords_matrix = to_world_coords_matrix
+        self.setup_widget.update_list()
+        # self.camera_thread.update_camera_params(camera_params)
+        # self.update_enabled_states()
+    # def save(self):
+    #     if self.save_path == "":
 
-                msg.setStandardButtons(QMessageBox.Ok)
-                msg.exec_()
-                self.save_path = ""  # delete path so can save new files in future
+    #         file_path, _ = QFileDialog.getSaveFileName(
+    #             self, "Save File", "", "Json Files (*.json);;All Files (*.*)"
+    #         )
+    #         if file_path and not file_path.lower().endswith(".json"):
+    #             file_path += ".json"
+    #         if file_path:
+    #             print(f"Selected file: {file_path}")
+    #             self.save_path = file_path
+    #     # double check
+    #     if self.save_path != "":
+    #         try:
+    #             with open(self.save_path, "w") as f:
+    #                 json.dump(self.data, f, indent=4)
+    #         except Exception as e:
+    #             msg = QMessageBox(self)
+    #             msg.setIcon(QMessageBox.Critical)
+    #             msg.setWindowTitle("Error")
+    #             msg.setText(f"Can't save file: {e}")
 
-    def save_as(self):
-        self.save_path = ""
-        self.save()
+    #             msg.setStandardButtons(QMessageBox.Ok)
+    #             msg.exec_()
+    #             self.save_path = ""  # delete path so can save new files in future
 
-    def open(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select File", "", "Json Files (*.json);;All Files (*.*)"
-        )
-        if file_path:
-            print(f"Selected file: {file_path}")
-            self.save_path = file_path
-        # double check
-        if self.save_path != "":
-            try:
-                with open(self.save_path, "r") as f:
-                    self.data = json.load(f)
-                    self.update_list()  # update list with new data
-            except Exception as e:
-                msg = QMessageBox(self)
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText(f"Can't read file: {e}")
-                msg.setStandardButtons(QMessageBox.Ok)
-                msg.exec_()
-        self.save_path = ""  # delete path so can open new files in future
+    # def save_as(self):
+    #     self.save_path = ""
+    #     self.save()
+
+    # def open(self):
+    #     file_path, _ = QFileDialog.getOpenFileName(
+    #         self, "Select File", "", "Json Files (*.json);;All Files (*.*)"
+    #     )
+    #     if file_path:
+    #         print(f"Selected file: {file_path}")
+    #         self.save_path = file_path
+    #     # double check
+    #     if self.save_path != "":
+    #         try:
+    #             with open(self.save_path, "r") as f:
+    #                 self.data = json.load(f)
+    #                 self.update_list()  # update list with new data
+    #         except Exception as e:
+    #             msg = QMessageBox(self)
+    #             msg.setIcon(QMessageBox.Critical)
+    #             msg.setWindowTitle("Error")
+    #             msg.setText(f"Can't read file: {e}")
+    #             msg.setStandardButtons(QMessageBox.Ok)
+    #             msg.exec_()
+    #     self.save_path = ""  # delete path so can open new files in future
 
 
 class setup_window(QWidget):
@@ -391,6 +408,7 @@ class setup_window(QWidget):
             # self.editable_labels["rotation"].setText(f"rotation: {value}")
         except ValueError:
             pass  # Ignore invalid input
+        self.parent = self.data
 
     def settings_ui(self):
         self.editable_fields_layout = QGridLayout()
@@ -510,26 +528,66 @@ class setup_window(QWidget):
                 )
                 # item = self.combobox_resolution.item(self.combobox_resolution.count() - 1)
                 # item.setData(Qt.UserRole, resolution)
-
+        
         self.combobox_resolution.setCurrentText(
             str(data["width"]) + "x" + str(data["height"])
         )
-
-        self.combobox_resolution.currentIndexChanged.connect(
-            lambda i, key="width": self.on_data_change(
-                self.idx, key, self.combobox_resolution.itemData(i)[0]
-            )
-        )
-        self.combobox_resolution.currentIndexChanged.connect(
-            lambda i, key="height": self.on_data_change(
-                self.idx, key, self.combobox_resolution.itemData(i)[1]
-            )
-        )
+        
+        def change_resolution(i):
+            selected_item.data(Qt.UserRole)
+            # access the resolution selection list that called this function
+            value = self.sender().itemData(i)
+            self.camera_thread.set_resolution(value[0],value[1])
+            idx = selected_item.data(Qt.UserRole)
+            self.data[idx]["width"] = int(value[0])
+            self.data[idx]["height"] =  int(value[1])
+            print(self.data[idx])
+            # self.parent = self.data
+        self.combobox_resolution.currentIndexChanged.connect(change_resolution)
+        
+        # self.combobox_resolution.currentIndexChanged.connect(
+        #     lambda i: change_resolution(
+        #         self.idx, self.combobox_resolution.itemData(i)
+        #     )
+        # )
         self.editable_fields_layout.addWidget(QLabel("resolution"), row, 0)
-
         self.editable_fields_layout.addWidget(self.combobox_resolution, row, 1)
         row += 1
+        self.webcam_settings_layout.addLayout(self.editable_fields_layout)
+        self.exposure_slider = QSlider(Qt.Horizontal)
+        self.exposure_slider.setMinimum(0)
+        self.exposure_slider.setMaximum(100)
+        self.exposure_slider.setValue(100)
+        self.exposure_slider.setFixedHeight(20)
+        self.exposure_slider.sliderReleased.connect(
+            lambda i, key="width": change_resolution(
+                self.idx, key, self.combobox_resolution.itemData(i)
+            )
+        )
+      
+        self.gain_slider = QSlider(Qt.Horizontal)
+        self.gain_slider.setMinimum(0)
+        self.gain_slider.setMaximum(100)
+        self.gain_slider.setValue(0)
+        self.gain_slider.setFixedHeight(30)
+        # # self.gain_slider.setUpdatesEnabled()
+        
+        
+        settings = QGridLayout()
+        settings.addWidget(QLabel("Exposure"), 0, 0)
+        settings.addWidget(self.exposure_slider, 0, 1)
+        settings.addWidget(QLabel("Gain"), 1, 0)
+        settings.addWidget(self.gain_slider, 1, 1)
+        self.webcam_settings_layout.addLayout(settings)
+        
 
+    # def connect(self,item):
+    #     self.combobox_resolution.currentIndexChanged.connect(
+    #         lambda i, key="width": change_resolution(
+    #             self.idx, key, self.combobox_resolution.itemData(i)
+    #         )
+    #     )
+        # # 
     def remove_webcam(self):
         selected_items = self.added_webcam_list.selectedItems()
         for item in selected_items:
@@ -543,6 +601,7 @@ class setup_window(QWidget):
             self.non_added_webcam_list.takeItem(self.non_added_webcam_list.row(item))
             self.added_webcam_list.addItem(item)
             self.data[item.data(Qt.UserRole)]["added"] = True
+        
 
     def update_list(self):
         self.added_webcam_list.clear()
@@ -552,18 +611,19 @@ class setup_window(QWidget):
             # get targeted list
             target_list = (
                 self.added_webcam_list
-                if webcam["added"]
+                if webcam.get("added",False)
                 else self.non_added_webcam_list
             )
             target_list.addItem(webcam["name"])
             item = target_list.item(target_list.count() - 1)
-            if not webcam["calibrated"]:
+            if not webcam.get("calibrated",False):
                 item.setForeground(Qt.gray)
                 item.setToolTip("not calibrated")
-            if not webcam["connected"]:
+            if not webcam.get("connected",False):
                 item.setForeground(Qt.red)
                 item.setToolTip("not connected")
             item.setData(Qt.UserRole, index)
+        # 
 
     def reload_cameras(self):
         """_summary_ reloads the list of cameras connected to the system"""
@@ -599,7 +659,7 @@ class setup_window(QWidget):
                 if current_webcams["name"] == attached_webcam[0]:
                     current_webcams["connected"] = True
                     break
-
+        
         self.update_list()
 
     @Slot(QImage)
@@ -630,7 +690,7 @@ class setup_window(QWidget):
         self.camera_thread.set_camera_id(camera_id)
 
         self.camera_thread.start()
-
+        
 
 class alert_widget(QDialog):
     def __init__(
@@ -665,5 +725,5 @@ if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
     window.show()
-    app.exec_()
+    sys.exit(app.exec_())
     # TODO have to find a way to reallocate a camera that moved to a different port with its original calibration settings ex move camera to new usb port and hit reload now have two webcams one without settings

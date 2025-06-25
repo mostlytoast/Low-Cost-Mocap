@@ -19,17 +19,18 @@ import sys
 class Cameras:
     # @profile
     def __init__(self):
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            dirname = os.path.dirname(sys._MEIPASS)
-            dirname+="_internal/api"
-            print("package",dirname)
-        else:
-            dirname = os.path.dirname(__file__)
-        filename = os.path.join(dirname, "camera-params.json")
-        f = open(filename)
-        self.camera_params = json.load(f)
+        # if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        #     dirname = os.path.dirname(sys._MEIPASS)
+        #     dirname+="_internal/api"
+        #     print("package",dirname)
+        # else:
+        #     dirname = os.path.dirname(__file__)
+        # filename = os.path.join(dirname, "camera-params.json")
+        # f = open(filename)
+        # self.camera_params = json.load(f)
+        self.camera_params = []
         # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
-        self.configure()
+        
         # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
         # print(self.num_cameras)
         self.is_capturing_points = False
@@ -54,6 +55,7 @@ class Cameras:
 
         global cameras_init
         cameras_init = True
+
     def configure(self):
         self.cameras = []
         # todo have default to specific resolution of cameras 
@@ -94,18 +96,18 @@ class Cameras:
 
             self.cameras.append(cap)
 
-    # function to add to JSON
-    def write_json(new_data, filename='data.json'):
-        # https://www.geeksforgeeks.org/python/append-to-json-file-using-python/
-        with open(filename,'r+') as file:
-            # First we load existing data into a dict.
-            file_data = json.load(file)
-            # Join new_data with file_data inside emp_details
-            file_data["emp_details"].append(new_data)
-            # Sets file's current position at offset.
-            file.seek(0)
-            # convert back to json.
-            json.dump(file_data, file, indent = 4)
+    # # function to add to JSON
+    # def write_json(new_data, filename='data.json'):
+    #     # https://www.geeksforgeeks.org/python/append-to-json-file-using-python/
+    #     with open(filename,'r+') as file:
+    #         # First we load existing data into a dict.
+    #         file_data = json.load(file)
+    #         # Join new_data with file_data inside emp_details
+    #         file_data["emp_details"].append(new_data)
+    #         # Sets file's current position at offset.
+    #         file.seek(0)
+    #         # convert back to json.
+    #         json.dump(file_data, file, indent = 4)
 
     def set_num_objects(self, num_objects):
         self.num_objects = num_objects
@@ -747,6 +749,13 @@ def camera_pose_to_serializable(camera_poses):
     for i in range(0, len(camera_poses)):
         camera_poses[i] = {k: v.tolist() for (k, v) in camera_poses[i].items()}
 
+    return camera_poses
+
+
+
+def camera_pose_from_serializable(camera_poses):
+    for i in range(0, len(camera_poses)):
+        camera_poses[i] = {k: np.array(v) for (k, v) in camera_poses[i].items()}
     return camera_poses
 # @profile
 def cartesian_product(x, y):

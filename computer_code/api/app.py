@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSlider,
     QGridLayout,
+    QAction
 )
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import Qt
@@ -17,7 +18,8 @@ from viewer3d import QGLControllerWidget
 import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
-import openmesh as om
+import file_mech
+# import openmesh as om
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -38,20 +40,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.captured_points_for_pose = []
         self.camera_poses = []
         self.object_points = []
+
         self.last_time = 0
         # self.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
         self.to_world_coords_matrix = np.eye(4)
-        # self.cameraPoses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
-        self.cameraPoses = [{"R": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "t": [0, 0, 0]}]
+        self.camera_params = []
+        # self.camera_poses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
+
 
         self.camera_thread = index.MyThread()
         self.camera_thread.frame_signal.connect(self.setImage)
         self.camera_thread.data_signal.connect(self.setData)
-
+        self.file = file_mech.file_dialog(self)
         self.central_widget = QWidget()
         self.layout = QVBoxLayout()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
+
         # self.resize(640, 480)
         # TODO probs just include in this file and not as separate css
         dirname = ""
@@ -62,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("package", dirname)
         else:
             dirname = os.path.dirname(__file__)
+
         # dirname = os.path.dirname(sys._MEIPASS)
         filename = os.path.join(dirname, "style.css")
         f = open(filename)
@@ -83,6 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toggle_stream_btn = QPushButton("Start Camera Stream")
         self.toggle_stream_btn.clicked.connect(self.toggle_camera_stream)
         self.toggle_stream_btn.setFixedHeight(30)
+        # self.toggle_stream_btn.setEnabled(False)
 
         stream_preview.addWidget(self.camera_stream_label)
         stream_preview.addWidget(self.toggle_stream_btn)
@@ -126,42 +133,42 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tracking_group.addWidget(QLabel("Live triangulation"), 1, 0)
         self.live_triangulation = QPushButton("start")
         self.live_triangulation.clicked.connect(self.toggle_live_triangulation)
-        self.live_triangulation.setEnabled(False)
+        # self.live_triangulation.setEnabled(False)
 
         self.tracking_group.addWidget(self.live_triangulation, 1, 1)
         self.tracking_group.addWidget(QLabel("Locate Objects"), 2, 0)
         self.locate_objects = QPushButton("start")
         self.locate_objects.clicked.connect(self.toggle_locate_objects)
-        self.locate_objects.setEnabled(False)
+        # self.locate_objects.setEnabled(False)
 
         self.tracking_group.addWidget(self.locate_objects, 2, 1)
         self.tracking_group.addWidget(QLabel("set Scale Using Points"), 3, 0)
         self.set_scale = QPushButton("start")
         self.set_scale.clicked.connect(self.toggle_set_scale)
-        self.set_scale.setEnabled(False)
+        # self.set_scale.setEnabled(False)
 
         self.tracking_group.addWidget(self.set_scale, 3, 1)
         self.tracking_group.addWidget(QLabel("Acquire floor"), 4, 0)
         self.acquire_floor = QPushButton("start")
         self.acquire_floor.clicked.connect(self.toggle_acquire_floor)
-        self.acquire_floor.setEnabled(False)
+        # self.acquire_floor.setEnabled(False)
 
         self.tracking_group.addWidget(self.acquire_floor, 4, 1)
         self.tracking_group.addWidget(QLabel("set origin"), 5, 0)
         self.set_origin = QPushButton("start")
         self.set_origin.clicked.connect(self.toggle_set_origin)
-        self.set_origin.setEnabled(False)
+        # self.set_origin.setEnabled(False)
 
         self.tracking_group.addWidget(self.set_origin, 5, 1)
         self.tracking_group.addWidget(QLabel("Collect points"), 6, 0)
         self.collect_points = QPushButton("start")
         self.collect_points.clicked.connect(self.toggle_collect_points)
-        self.collect_points.setEnabled(False)
+        # self.collect_points.setEnabled(False)
         self.tracking_group.addWidget(self.collect_points, 6, 1)
 
         self.calculate_pose = QPushButton("calculate with 0 points")
         self.calculate_pose.clicked.connect(self.toggle_calculate_pose)
-        self.calculate_pose.setEnabled(False)
+        # self.calculate_pose.setEnabled(False)
         self.tracking_group.setColumnMinimumWidth(0, 20)
         self.tracking_group.setColumnMinimumWidth(1, 20)
         self.tracking_group.addWidget(self.calculate_pose, 7, 1)
@@ -176,9 +183,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.tracking_layout.addWidget(self.gl_widget, 0, 1)
         self.layout.addLayout(self.tracking_layout)
+        menubar = self.menuBar()
+        file_menu = menubar.addMenu("File")
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
 
-        self.menu = self.menuBar().addMenu("&File")
-        self.menu.addAction("&Open", self.openFile)
+        save_as_action = QAction("Save &as", self)
+        save_as_action.triggered.connect(self.file.save_as)
+        file_menu.addAction(save_as_action)
+
+        save_action = QAction("&Save", self)
+        save_action.triggered.connect(self.file.saveFile)
+        file_menu.addAction(save_action)
+        save_action.setShortcut("Ctrl+S")
+        save_action.setStatusTip("Save File")
+
+        open_action = QAction("&Open", self)
+        open_action.triggered.connect(self.file.openFile)
+        file_menu.addAction(open_action)
+        open_action.setShortcut("Ctrl+O")
+        open_action.setStatusTip("Open File")
+
         timer = QtCore.QTimer(self)
         timer.setInterval(20)  # period, in milliseconds
         timer.timeout.connect(self.gl_widget.updateGL)
@@ -186,6 +212,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # wait till window exists to create grid (will error out other wise)
         QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
         QtCore.QTimer.singleShot(0, self.test_points)
+
+        self.update_enabled_states()
 
     def test_points(self):
         # mesh = om.read_trimesh(
@@ -237,13 +265,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.gl_widget.add_camera(transform=world_camera_transform)
             # self.gl_widget.add_camera(transform=camera_transform)
 
-    # Function to get camera config
-    def openFile(self):
-        # TODO have to find way for this ro
-        fname = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open file", "", "Camera Configuration files (*.json)"
-        )
-        self.camera_thread.update_camera_params(filename=fname[0])
+    # Function to get camera and setup config
+    # def openFile(self):
+    #     # TODO have to find way for this ro
+    #     fname = QtWidgets.QFileDialog.getOpenFileName(
+    #         self, "Open file", "", "Camera Configuration files (*.json)"
+    #     )
+    #     self.camera_thread.update_camera_params(filename=fname[0])
+    # Function to save camera and setup config
+    
+    
 
     def toggle_live_triangulation(self):
         self.is_triangulating_points = not self.is_triangulating_points
@@ -323,7 +354,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def toggle_camera_stream(self):
 
         # TODO cant start then stop camera stream causes paused image
-        if not self.camera_stream_running:
+        if not self.camera_stream_running :
             self.camera_stream_running = True
             self.update_enabled_states()
             self.toggle_stream_btn.setText("Stop Camera Stream")
@@ -356,10 +387,29 @@ class MainWindow(QtWidgets.QMainWindow):
             and self.has_world_calibration
             and len(self.object_points) > 0
         )
+        self.toggle_stream_btn.setEnabled(self.camera_params!=[])
+        self.update_camera_btn.setEnabled(self.camera_params!=[])
+        self.exposure_slider.setEnabled(self.camera_params!=[])
+
+        self.gain_slider.setEnabled(self.camera_params!=[])
 
         self.collect_points.setEnabled(self.camera_stream_running)
 
         self.calculate_pose.setEnabled(len(self.captured_points_for_pose) > 0)
+    def updates_config(self, camera_params, camera_poses, to_world_coords_matrix):
+        """_summary_ gets updated config data from file_mech  and updates the backend 
+
+        Args:
+            camera_params (_type_): _description_
+            camera_poses (_type_): _description_
+            to_world_coords_matrix (_type_): _description_
+        """
+        self.camera_params  = camera_params
+        self.camera_poses  = camera_poses
+        self.to_world_coords_matrix = to_world_coords_matrix
+        self.camera_thread.update_camera_params(camera_params)
+        self.update_enabled_states()
+
 
     @Slot(QImage)
     def setImage(self, image):

@@ -190,7 +190,8 @@ def default_setup():
                 rotation, camera_number, camera_name, camera_index, width, height
             )
             output.append(data)
-            with open("computer_code/api/camera-params.json", "w") as f:
+            with open("computer_code/api/"
+            ".json", "w") as f:
                 json.dump(output, f, indent=4)
         break
 
