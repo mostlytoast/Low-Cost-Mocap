@@ -95,18 +95,20 @@ class CalibrateWidget(QWidget):
         self.sensitivity_slider.setMinimum(1)
         self.sensitivity_slider.minimum
 
-        
+        # todo improve formatting so change in numbers does not cause layout issues 
         def set_sensitivity(val):
+            new_val=val
             if self.sender() != None:
                 outMax = .02
                 outMin = .001
-                val = outMin + (float(val - self.sender().minimum()) / float(self.sender().maximum() - self.sender().minimum()) * (outMax - outMin))
+                new_val = outMin + (float(val - self.sender().minimum()) / float(self.sender().maximum() - self.sender().minimum()) * (outMax - outMin))
                 # val = 0.02 - ((val - self.sender().minimum()) / (self.sender().maximum() - self.sender().minimum())) * (0.02 - 0.001)
-            self.camera_thread.sensitivity = val
-            self.sensitivity_label.setText(f"sensitivity {val}")
+            self.camera_thread.sensitivity = new_val
+            self.sensitivity_label.setText(f"sensitivity {val:8.0f}")
         self.sensitivity_slider.valueChanged.connect(set_sensitivity)
         # set default
-        set_sensitivity(.01)
+        self.sensitivity_slider.setValue(500)
+        # set_sensitivity(50)
         self.capture_settings_layout.addWidget(self.sensitivity_slider,0,2)
 
 
@@ -129,7 +131,7 @@ class CalibrateWidget(QWidget):
             # todo map the values properly 
             val = (val/10) + 1
             self.camera_thread.auto_time = val
-            self.timer_label.setText(f"auto capture {val} seconds")
+            self.timer_label.setText(f"auto capture {val:8.1f} seconds")
 
         self.timer_slider.valueChanged.connect(set_auto_timer)
          # set default time 
@@ -217,7 +219,7 @@ class CalibrateWidget(QWidget):
         print(camera_id)
         self.camera_thread.set_camera_id(self.cameras.current_cam)
         self.camera_thread.start()
-        self.update_labels()
+        # self.update_labels()
         self.settings_ui.update_labels()
         self.update_labels()
 
