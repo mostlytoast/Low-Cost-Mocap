@@ -1,0 +1,130 @@
+# PynSource Version 1.2
+{'type':'meta', 'info1':'Lorem ipsum dolor sit amet, consectetur adipiscing elit is latin. Comments are saved.'}
+{'type':'umlshape', 'id':'alert_widget', 'x':140, 'y':89, 'width':130, 'height':104, 'attrs': 'buttonBox', 'meths': '__init__|accept'}
+{'type':'umlshape', 'id':'QDialog', 'x':10, 'y':51, 'width':80, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QDialogButtonBox', 'x':102, 'y':10, 'width':170, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'MainWindow', 'x':49, 'y':1754, 'width':185, 'height':1064, 'attrs': 'acquire_floor|calculate_pose|calibrate_scratch_action|calibrate_single_action|calibrate_widget_instance|camera_params|camera_poses|camera_stream_label|camera_stream_running|camera_stream_thread|camera_thread|cameras|captured_points_for_pose|central_widget|collect_points|collecting_points|copy_calibration_action|data|exposure_slider|file|fps|fps_label|gain_slider|gl_widget|has_collected_points|has_world_calibration|is_locating_objects|is_triangulating_points|last_time|layout|live_triangulation|locate_objects|object_points|save_path|set_origin|set_scale|setup_widget|stacked_widget|styleText|to_world_coords_matrix|toggle_stream_btn|tracking_group|tracking_layout|update_camera_btn', 'meths': '__init__|calib_copy|calib_scratch|calib_single|initUI|init_ui|login|setData|setImage|setup_scene|show_setup|test_points|toggle_acquire_floor|toggle_calculate_pose|toggle_camera_stream|toggle_collect_points|toggle_live_triangulation|toggle_locate_objects|toggle_set_origin|toggle_set_scale|update_camera_settings|update_enabled_states|updates_config'}
+{'type':'umlshape', 'id':'QtWidgets.QMainWindow', 'x':174, 'y':913, 'width':220, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'file_mech.file_dialog', 'x':317, 'y':224, 'width':220, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QVBoxLayout', 'x':417, 'y':834, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'np.eye', 'x':303, 'y':303, 'width':70, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QGridLayout', 'x':606, 'y':2724, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'index.MyThread', 'x':256, 'y':382, 'width':150, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QPushButton', 'x':382, 'y':291, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QWidget', 'x':439, 'y':800, 'width':80, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QGLControllerWidget', 'x':819, 'y':910, 'width':200, 'height':704, 'attrs': 'arc_ball|aspect_ratio|camera_vao|camera_vbo|camera_vertex_count|camera_vertices_list|center|color|ctx|grid_vao|grid_vbo|grid_vertex_count|has_camera|has_points|light|mesh|mvp|parent|point_color|point_colors|point_size|point_vao|point_vbo|point_vertex_count|points_list|prog|scale|vao', 'meths': '__init__|add_camera|add_point|camera_helper|create_grid|init_arcball|initializeGL|mouseMoveEvent|mousePressEvent|mouseReleaseEvent|paintGL|resizeGL|set_mesh|update_camera|wheelEvent'}
+{'type':'umlshape', 'id':'QLabel', 'x':439, 'y':879, 'width':70, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QSlider', 'x':2, 'y':397, 'width':80, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'ArcBall', 'x':1134, 'y':17, 'width':94, 'height':209, 'attrs': 'AdjustHeight|AdjustWidth|EnVec|Epsilon|StVec', 'meths': '__init__|_mapToSphere|click|drag|setBounds'}
+{'type':'umlshape', 'id':'ArcBallUtil', 'x':552, 'y':135, 'width':227, 'height':254, 'attrs': 'LastRot|ThisQuat|ThisRot|Transform|isDragging', 'meths': 'Matrix3fSetRotationFromQuat4f|Matrix4fSetRotationFromMatrix3f|__init__|onClickLeftDown|onClickLeftUp|onDrag|onScroll|resetRotation'}
+{'type':'umlshape', 'id':'np.zeros', 'x':1417, 'y':300, 'width':90, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'np.matmul', 'x':19, 'y':164, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'np.identity', 'x':269, 'y':53, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QMainWindow', 'x':169, 'y':243, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'calibrationWidget.CalibrateWidget', 'x':54, 'y':958, 'width':340, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QAction', 'x':322, 'y':2757, 'width':80, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'setupWidget.setup_window', 'x':129, 'y':879, 'width':250, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QStackedWidget', 'x':132, 'y':322, 'width':150, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'MyThread', 'x':1596, 'y':1918, 'width':220, 'height':764, 'attrs': '_lock|_pending_camera_id|_running|auto_exposure|camera_id|cap|data_signal|detect_board|exposure|frame_signal|gain|height|i|max_exposure|min_exposure|rotation|sensitivity|width', 'meths': '__init__|acquire_floor|auto_capture|calculate_camera_pose|camera_stream|capture|capture_points|change_camera_settings|cvimage_to_label|detect_chessboard|determine_scale|enable|find_chessboard|gen|live_mocap|mutex|run|set_camera_id|set_camera_settings|set_exposure|set_find_chessboard|set_gain|set_origin|set_resolution|set_rotation|set_sensitivity|start_or_stop_locating_objects|stop|update_camera_params'}
+{'type':'umlshape', 'id':'QThread', 'x':1484, 'y':2166, 'width':80, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'cv2.VideoCapture', 'x':1342, 'y':2277, 'width':170, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'Data', 'x':133, 'y':1184, 'width':164, 'height':104, 'attrs': 'camera_poses|to_world_coords_matrix', 'meths': '__init__'}
+{'type':'umlshape', 'id':'file_dialog', 'x':1704, 'y':1282, 'width':136, 'height':194, 'attrs': 'cameras|parent|save_path', 'meths': '__init__|load_config_params|openFile|saveFile|save_as|save_config_params'}
+{'type':'umlshape', 'id':'QFileDialog', 'x':1658, 'y':1201, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'SimpleWindow', 'x':130, 'y':480, 'width':130, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'Cameras', 'x':1908, 'y':598, 'width':185, 'height':494, 'attrs': 'added_cameras|camera_params|camera_poses|cameras|current_cam|drone_armed|is_capturing_points|is_detecting_chessboard|is_locating_objects|is_triangulating_points|kalman_filter|num_cameras|num_objects|to_world_coords_matrix', 'meths': '__init__|_camera_read|_find_dot|configure|edit_settings|get_camera_params|get_frames|set_camera_params|set_num_objects|start_capturing_points|start_locating_objects|start_trangulating_points|stop_capturing_points|stop_locating_objects|stop_trangulating_points'}
+{'type':'umlshape', 'id':'KalmanFilter', 'x':1613, 'y':677, 'width':171, 'height':209, 'attrs': 'heading_low_pass_filter|kalmans|low_pass_filter_xy|low_pass_filter_z|num_objects|prev_measurement_time|prev_positions', 'meths': '__init__|predict_location|reset'}
+{'type':'umlshape', 'id':'time.time', 'x':570, 'y':46, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'np.array', 'x':694, 'y':46, 'width':90, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'cv.KalmanFilter', 'x':1817, 'y':298, 'width':160, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'LowPassFilter', 'x':1817, 'y':377, 'width':140, 'height':194, 'attrs': 'b|buffer_size|buffered_data|cutoff_frequency|dims|order|sampling_frequency', 'meths': '__init__|filter'}
+{'type':'umlshape', 'id':'np.vstack', 'x':2007, 'y':377, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'np.empty', 'x':2007, 'y':456, 'width':90, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'SettingsWidget', 'x':1126, 'y':1970, 'width':164, 'height':344, 'attrs': 'camera_data|cameras|editable_fields_layout|exposure_slider|gain_slider|layout|line_edit_id|list_camera_data|list_of_rotations|parent|res_combo|rot_combo', 'meths': '__init__|change_exposure|change_gain|change_id|change_resolution|change_rot|update_labels'}
+{'type':'umlshape', 'id':'QLineEdit', 'x':1, 'y':318, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QComboBox', 'x':54, 'y':239, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'setup_window', 'x':461, 'y':1964, 'width':192, 'height':509, 'attrs': 'add_button|added_webcam_list|camera_thread|cameras|delete_shortcut1|delete_shortcut2|label|main_layout|move_buttons_layout|non_added_webcam_list|open_btn|reload_button|settings_ui|setup_button|webcam_list_layout|webcam_preview_layout|webcam_settings_layout|webcam_settings_widget', 'meths': '__init__|add_camera|add_webcam|get_index|handle_added_selection|handle_non_added_selection|open_camera|reload_cameras|remove_webcam|selection_update_labels|setImage|update_list'}
+{'type':'umlshape', 'id':'QListWidget', 'x':844, 'y':2086, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'cameraThread.MyThread', 'x':809, 'y':2215, 'width':220, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QShortcut', 'x':841, 'y':1667, 'width':100, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'QHBoxLayout', 'x':1072, 'y':1259, 'width':120, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'settingsWidget.SettingsWidget', 'x':679, 'y':2362, 'width':300, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'Window', 'x':1134, 'y':328, 'width':70, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'Singleton', 'x':1552, 'y':266, 'width':129, 'height':149, 'attrs': '_decorated|_instance', 'meths': '__call__|__init__|__instancecheck__|instance'}
+{'type':'umlshape', 'id':'LoginWidget', 'x':1072, 'y':1341, 'width':120, 'height':89, 'attrs': 'button', 'meths': '__init__'}
+{'type':'umlshape', 'id':'LoggedWidget', 'x':1134, 'y':442, 'width':130, 'height':89, 'attrs': 'label', 'meths': '__init__'}
+{'type':'umlshape', 'id':'TestGenerateCalibrationData', 'x':1088, 'y':858, 'width':318, 'height':79, 'attrs': '', 'meths': 'test_generate_calibration_data_write_to_json|test_resolutions'}
+{'type':'umlshape', 'id':'unittest.TestCase', 'x':1262, 'y':762, 'width':180, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'TestIndexSystem', 'x':1072, 'y':967, 'width':283, 'height':184, 'attrs': '', 'meths': 'check_floor|points_are_flat|test_1|test_2|test_3|test_4|test_5|test_acquire_floor_handles_empty_points|test_acquire_floor_rotation'}
+{'type':'umlshape', 'id':'camThread', 'x':1930, 'y':1293, 'width':100, 'height':119, 'attrs': 'camID|previewName', 'meths': '__init__|run'}
+{'type':'umlshape', 'id':'threading.Thread', 'x':1881, 'y':1219, 'width':170, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'TestVideoSubSystem', 'x':861, 'y':583, 'width':332, 'height':229, 'attrs': '', 'meths': 'test_find_camera_detects_difference|test_find_camera_multiple_new_devices|test_find_camera_no_difference|test_getResolution_handles_trailing_newline|test_getResolution_no_discrete_sizes|test_getResolution_returns_correct_resolution|test_getResolution_single_resolution|test_get_id_from_name|test_listWebcams_handles_no_devices|test_listWebcams_handles_single_device|test_listWebcams_returns_expected_output_linux|test_resolutions_work'}
+{'type':'umlshape', 'id':'QtOpenGL.QGLWidget', 'x':1134, 'y':276, 'width':190, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'umlshape', 'id':'moderngl.create_context', 'x':309, 'y':1338, 'width':240, 'height':29, 'attrs': '', 'meths': ''}
+{'type':'edge', 'id':'alert_widget_to_QDialog', 'source':'alert_widget', 'target':'QDialog', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'QDialogButtonBox_to_alert_widget', 'source':'QDialogButtonBox', 'target':'alert_widget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'MainWindow_to_QtWidgets.QMainWindow', 'source':'MainWindow', 'target':'QtWidgets.QMainWindow', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'file_mech.file_dialog_to_MainWindow', 'source':'file_mech.file_dialog', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QVBoxLayout_to_MainWindow', 'source':'QVBoxLayout', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.eye_to_MainWindow', 'source':'np.eye', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QGridLayout_to_MainWindow', 'source':'QGridLayout', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'index.MyThread_to_MainWindow', 'source':'index.MyThread', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QPushButton_to_MainWindow', 'source':'QPushButton', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QWidget_to_MainWindow', 'source':'QWidget', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QGLControllerWidget_to_MainWindow', 'source':'QGLControllerWidget', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QLabel_to_MainWindow', 'source':'QLabel', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QSlider_to_MainWindow', 'source':'QSlider', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'ArcBallUtil_to_ArcBall', 'source':'ArcBallUtil', 'target':'ArcBall', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'np.zeros_to_ArcBall', 'source':'np.zeros', 'target':'ArcBall', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.matmul_to_ArcBallUtil', 'source':'np.matmul', 'target':'ArcBallUtil', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.identity_to_ArcBallUtil', 'source':'np.identity', 'target':'ArcBallUtil', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'MainWindow_to_QMainWindow', 'source':'MainWindow', 'target':'QMainWindow', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'calibrationWidget.CalibrateWidget_to_MainWindow', 'source':'calibrationWidget.CalibrateWidget', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QAction_to_MainWindow', 'source':'QAction', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'setupWidget.setup_window_to_MainWindow', 'source':'setupWidget.setup_window', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QStackedWidget_to_MainWindow', 'source':'QStackedWidget', 'target':'MainWindow', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'MyThread_to_QThread', 'source':'MyThread', 'target':'QThread', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'cv2.VideoCapture_to_MyThread', 'source':'cv2.VideoCapture', 'target':'MyThread', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'file_dialog_to_QFileDialog', 'source':'file_dialog', 'target':'QFileDialog', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'SimpleWindow_to_QMainWindow', 'source':'SimpleWindow', 'target':'QMainWindow', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'KalmanFilter_to_Cameras', 'source':'KalmanFilter', 'target':'Cameras', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'time.time_to_KalmanFilter', 'source':'time.time', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.array_to_KalmanFilter', 'source':'np.array', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.eye_to_KalmanFilter', 'source':'np.eye', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'cv.KalmanFilter_to_KalmanFilter', 'source':'cv.KalmanFilter', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'LowPassFilter_to_KalmanFilter', 'source':'LowPassFilter', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.zeros_to_KalmanFilter', 'source':'np.zeros', 'target':'KalmanFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.vstack_to_LowPassFilter', 'source':'np.vstack', 'target':'LowPassFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.empty_to_LowPassFilter', 'source':'np.empty', 'target':'LowPassFilter', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'SettingsWidget_to_QWidget', 'source':'SettingsWidget', 'target':'QWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'QSlider_to_SettingsWidget', 'source':'QSlider', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QLabel_to_SettingsWidget', 'source':'QLabel', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QGridLayout_to_SettingsWidget', 'source':'QGridLayout', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QLineEdit_to_SettingsWidget', 'source':'QLineEdit', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QComboBox_to_SettingsWidget', 'source':'QComboBox', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QVBoxLayout_to_SettingsWidget', 'source':'QVBoxLayout', 'target':'SettingsWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'setup_window_to_QWidget', 'source':'setup_window', 'target':'QWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'QVBoxLayout_to_setup_window', 'source':'QVBoxLayout', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QListWidget_to_setup_window', 'source':'QListWidget', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QPushButton_to_setup_window', 'source':'QPushButton', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'cameraThread.MyThread_to_setup_window', 'source':'cameraThread.MyThread', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QLabel_to_setup_window', 'source':'QLabel', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QShortcut_to_setup_window', 'source':'QShortcut', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QWidget_to_setup_window', 'source':'QWidget', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QHBoxLayout_to_setup_window', 'source':'QHBoxLayout', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'settingsWidget.SettingsWidget_to_setup_window', 'source':'settingsWidget.SettingsWidget', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QGridLayout_to_setup_window', 'source':'QGridLayout', 'target':'setup_window', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'Window_to_QWidget', 'source':'Window', 'target':'QWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'LoginWidget_to_QWidget', 'source':'LoginWidget', 'target':'QWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'LoggedWidget_to_QWidget', 'source':'LoggedWidget', 'target':'QWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'QLabel_to_LoggedWidget', 'source':'QLabel', 'target':'LoggedWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'QPushButton_to_LoginWidget', 'source':'QPushButton', 'target':'LoginWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'TestGenerateCalibrationData_to_unittest.TestCase', 'source':'TestGenerateCalibrationData', 'target':'unittest.TestCase', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'TestIndexSystem_to_unittest.TestCase', 'source':'TestIndexSystem', 'target':'unittest.TestCase', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'camThread_to_threading.Thread', 'source':'camThread', 'target':'threading.Thread', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'TestVideoSubSystem_to_unittest.TestCase', 'source':'TestVideoSubSystem', 'target':'unittest.TestCase', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'QGLControllerWidget_to_QtOpenGL.QGLWidget', 'source':'QGLControllerWidget', 'target':'QtOpenGL.QGLWidget', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'moderngl.create_context_to_QGLControllerWidget', 'source':'moderngl.create_context', 'target':'QGLControllerWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.array_to_QGLControllerWidget', 'source':'np.array', 'target':'QGLControllerWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'ArcBallUtil_to_QGLControllerWidget', 'source':'ArcBallUtil', 'target':'QGLControllerWidget', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'np.zeros_to_QGLControllerWidget', 'source':'np.zeros', 'target':'QGLControllerWidget', 'uml_edge_type': 'composition'}
