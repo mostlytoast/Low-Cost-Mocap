@@ -34,7 +34,7 @@ class CalibrateWidget(QWidget):
         super(CalibrateWidget, self).__init__(parent)
         self.parent = parent
         self.cameras = Cameras.instance()
-        self.index = 1
+        self.index = 0
         # self.list_of_rotations = ["0","90", "180", "270"]
 
         self.camera_thread = cameraThread.MyThread(0)
@@ -52,15 +52,16 @@ class CalibrateWidget(QWidget):
         self.main_layout.addWidget(self.current_camera_label)
 
     
-        self.open_btn = QPushButton("Open The Camera", clicked=self.open_camera)
+        self.open_btn = QPushButton("Open The Camera")
+        self.open_btn.clicked.connect(self.open_camera)
         self.webcam_settings_layout.addWidget(self.open_btn)
 
         self.settings_ui = settingsWidget.SettingsWidget(self)
         
         
-        def selection_update_labels():
-            if not self.camera_thread._running:
-                self.settings_ui.update_labels()
+        # def selection_update_labels():
+        #     if not self.camera_thread._running:
+        #         self.settings_ui.update_labels()
         # self.settings_ui.update.connect(self.update_labels)
         # self.added_webcam_list.itemSelectionChanged.connect(selection_update_labels)
         self.webcam_settings_layout.addWidget(self.settings_ui)
@@ -79,20 +80,61 @@ class CalibrateWidget(QWidget):
         self.preview_capture_settings_layout = QVBoxLayout()
         self.capture_settings_layout = QGridLayout()
         self.capture_btn = QPushButton("capture")
-        self.capture_btn.clicked.connect(self.camera_thread.capture)
+        def capture_toggle():
+            self.camera_thread.take_capture_state = not self.camera_thread.take_capture_state 
+            self.update_labels()
+
+        self.capture_btn.clicked.connect(capture_toggle)
         self.capture_settings_layout.addWidget(self.capture_btn,0,0)
 
+        self.sensitivity_label = QLabel()
+        self.capture_settings_layout.addWidget(self.sensitivity_label,0,1)
         self.sensitivity_slider = QSlider(Qt.Horizontal)
-        self.sensitivity_slider.setMaximum(10)
+        
+        self.sensitivity_slider.setMaximum(1000)
         self.sensitivity_slider.setMinimum(1)
-        self.sensitivity_slider.valueChanged.connect(self.camera_thread.set_sensitivity)
-        self.capture_settings_layout.addWidget(self.sensitivity_slider,0,1)
+        self.sensitivity_slider.minimum
+
+        
+        def set_sensitivity(val):
+            if self.sender() != None:
+                outMax = .02
+                outMin = .001
+                val = outMin + (float(val - self.sender().minimum()) / float(self.sender().maximum() - self.sender().minimum()) * (outMax - outMin))
+                # val = 0.02 - ((val - self.sender().minimum()) / (self.sender().maximum() - self.sender().minimum())) * (0.02 - 0.001)
+            self.camera_thread.sensitivity = val
+            self.sensitivity_label.setText(f"sensitivity {val}")
+        self.sensitivity_slider.valueChanged.connect(set_sensitivity)
+        # set default
+        set_sensitivity(.01)
+        self.capture_settings_layout.addWidget(self.sensitivity_slider,0,2)
+
+
         self.auto_btn = QPushButton("auto capture")
-        self.auto_btn.clicked.connect(self.camera_thread.auto_capture)
+        def auto_capture_toggle():
+            self.camera_thread.auto_capture_state = not self.camera_thread.auto_capture_state
+            self.update_labels()
+        self.auto_btn.clicked.connect(auto_capture_toggle)
         self.capture_settings_layout.addWidget(self.auto_btn,1,0)
 
+        self.timer_label = QLabel()
+        self.capture_settings_layout.addWidget(self.timer_label,1,1)
         self.timer_slider = QSlider(Qt.Horizontal)
-        self.capture_settings_layout.addWidget(self.timer_slider,1,1)
+        max = 100
+        self.timer_slider.setMaximum(max)
+        self.timer_slider.setMinimum(1)
+       
+    
+        def set_auto_timer(val):
+            # todo map the values properly 
+            val = (val/10) + 1
+            self.camera_thread.auto_time = val
+            self.timer_label.setText(f"auto capture {val} seconds")
+
+        self.timer_slider.valueChanged.connect(set_auto_timer)
+         # set default time 
+        set_auto_timer(20)
+        self.capture_settings_layout.addWidget(self.timer_slider,1,2)
 
 
         self.preview_capture_settings_layout.addWidget(self.label)
@@ -117,32 +159,49 @@ class CalibrateWidget(QWidget):
         # Set main_layout on a QWidget and set as central widget
 
         self.setLayout(self.main_layout)
+        self.update_labels()
 
         # self.setCentralWidget(central_widget)
 
     # Function to update editable fields when selection changes
-
-    def get_index(self):
-        if self.added_webcam_list.selectedItems():
-            i = self.added_webcam_list.selectedItems()[0].data(Qt.UserRole)
-        elif self.non_added_webcam_list.selectedItems():
-            i = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+    def update_labels(self):
+        # todo not updating when change id number
+        
+        idx = self.index
+        if 0 <= idx < len(self.cameras.camera_params):
+            cam = self.cameras.camera_params[idx]
+            self.current_camera_label.setText(f"current camera: {cam['name']} id {cam['id']}")
         else:
-            i = 0
-        return i
+            self.current_camera_label.setText("current camera: None")
+
+        self.capture_btn.setEnabled(self.camera_thread._running and not self.camera_thread.auto_capture_state)
+        self.sensitivity_slider.setEnabled(self.camera_thread._running )
+        auto = self.camera_thread._running 
+        self.auto_btn.setEnabled(auto)
+        self.timer_slider.setEnabled(auto)
+
+   
     @Slot(QImage)
     def setImage(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
     
 
     def go_back(self):
-        # self.camera_thread.stop()
-        # if self.parent is not None and hasattr(self.parent, "show_setup"):
-        self.parent.show_setup()
+        alert = alertWidget.alert_widget(
+                "are you sure you want to leave calibration ", "yes", "no", style=self.styleSheet(),
+                title="exit before finishing?")
+        alert.exec()
+        
+        if alert.result() == alert.Accepted:
+            # self.camera_thread.stop()
+            # if self.parent is not None and hasattr(self.parent, "show_setup"):
+            self.parent.show_setup()
     def get_index(self):
-        return self.index
+        return self.cameras.added_cameras[self.index]
     def open_camera(self):
-
+        
+        if len(self.cameras.camera_params) == 0:
+            return
         name = self.cameras.camera_params[self.get_index()]["name"]
         if not name:
             return
@@ -160,8 +219,9 @@ class CalibrateWidget(QWidget):
         self.camera_thread.start()
         self.update_labels()
         self.settings_ui.update_labels()
+        self.update_labels()
 
-    def update_labels(self):
-        # todo not updating when change id number
-        self.current_camera_label.setText(f"current camera: {self.cameras.camera_params[self.get_index()]["name"] } id {self.cameras.camera_params[self.get_index()]["id"]}")
+        
+
+   
         

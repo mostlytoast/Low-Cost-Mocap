@@ -23,22 +23,23 @@ from PyQt5.QtWidgets import (
 
 class alert_widget(QDialog):
     def __init__(
-        self, msg, accept_msg="ok", reject_msg="cancel", style=None, parent=None
+        self, msg, accept_msg="ok", reject_msg="", style=None, parent=None, title = "error"
     ):
         super(alert_widget, self).__init__(parent)
         if style:
             self.setStyleSheet(style)
 
-        self.setWindowTitle("HELLO!")
+        self.setWindowTitle(title)
 
         QBtn = QDialogButtonBox.Ok
+        if reject_msg != "":
+            QBtn = QBtn | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.button(QDialogButtonBox.Ok).setText(accept_msg)
         if reject_msg != "":
-            QBtn = QBtn | QDialogButtonBox.Cancel
             self.buttonBox.rejected.connect(self.reject)
-            self.buttonBox.button(QDialogButtonBox.cancel).setText(reject_msg)
+            self.buttonBox.button(QDialogButtonBox.Cancel).setText(reject_msg)
 
         layout = QVBoxLayout()
         message = QLabel(msg)

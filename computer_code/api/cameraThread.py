@@ -13,6 +13,7 @@ Returns:
     _type_: _description_ signal image 
 """
 from helpers import find_chessboard
+import time
 class MyThread(QThread):
     frame_signal = Signal(QImage)
 
@@ -33,8 +34,11 @@ class MyThread(QThread):
         self.auto_exposure = 1 #
         self.rotation = 0
         self.sensitivity = 0.005
-    def set_sensitivity(self,sensitivity):
-        self.sensitivity = sensitivity/10000
+        self.auto_time = 5
+        self.buffer = []
+        self.prev_time = None
+        self.auto_capture_state = False
+        self.take_capture_state = False
     def set_rotation(self, rot):
         self.rotation = rot
     def set_camera_id(self, camera_id):
@@ -51,17 +55,16 @@ class MyThread(QThread):
         self.min_exposure = settings["min_exposure"]
         self.auto_exposure = settings["manual_mode"] 
 
-    def capture(self):
-        if self.cap is not None and self.cap.isOpened():
-            global buffer
-            ret, frame = self.cap.read()
-            if ret:
-                if 'buffer' not in globals():
-                    buffer = []
-                buffer.append(frame)
-                print("buffer", len(buffer))
-    def auto_capture(self):
-        print()
+    def capture(self,frame):
+        if self.prev_time == None:
+            self.prev_time = time.time()
+        time_passed = time.time() - self.prev_time
+        if (time_passed >= self.auto_time and self.auto_capture_state) or self.take_capture_state:
+            self.buffer.append(frame)
+            print("buffer", len(self.buffer))
+            self.take_capture_state = False
+            self.prev_time = time.time()
+   
     def set_exposure(self, exposure):
         if self.cap is not None and self.cap.isOpened():
             self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, self.auto_exposure)
@@ -109,7 +112,7 @@ class MyThread(QThread):
                             #         image = self.cvimage_to_label(image)
                             #         self.frame_signal.emit(image)
                             # else:
-                        
+                        self.capture(frame)
                         image = np.rot90(image, k=self.rotation)
                         
                         image = self.cvimage_to_label(image)

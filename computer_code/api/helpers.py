@@ -303,6 +303,7 @@ def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
     # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
     thread = threading.Thread(target=detect_chessboard)
     thread.start()
+    print("time",timeout)
     thread.join(timeout)
     if thread.is_alive():
         # Timeout reached, stop thread (can't kill thread, just ignore result)

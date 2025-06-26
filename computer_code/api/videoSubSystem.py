@@ -164,7 +164,7 @@ def getSettings(camera_id):
                     auto_exposure_mode = mode_id
             if "exposure_time_absolute" in line:
                 min_match = re.search(r"min=(\d+)", line)
-                max_match = re.search(r"value=(\d+)", line)
+                max_match = re.search(r"max=(\d+)", line)
                 if min_match and max_match:
                     exposure_min = int(min_match.group(1))
                     exposure_max = int(max_match.group(1))
@@ -174,8 +174,9 @@ def getSettings(camera_id):
         return {
             "manual_mode" : manual_mode,
             "auto_exposure_mode": auto_exposure_mode,
-            "min_exposure": exposure_min,
-            "max_exposure": exposure_max
+            # todo seams that everything defaults to 1 to 100
+            "min_exposure": 1,
+            "max_exposure": 100
         }
 
 if __name__ == "__main__":

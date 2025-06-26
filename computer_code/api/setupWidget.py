@@ -162,16 +162,24 @@ class setup_window(QWidget):
     def remove_webcam(self):
         selected_items = self.added_webcam_list.selectedItems()
         for item in selected_items:
+            cam_id =item.data(Qt.UserRole)
             self.added_webcam_list.takeItem(self.added_webcam_list.row(item))
             self.non_added_webcam_list.addItem(item)
-            self.cameras.camera_params[item.data(Qt.UserRole)]["added"] = False
+            self.cameras.camera_params[cam_id]["added"] = False
+            self.cameras.added_cameras.remove(cam_id)
+            print(self.cameras.added_cameras)
+
 
     def add_webcam(self):
         selected_items = self.non_added_webcam_list.selectedItems()
         for item in selected_items:
+            cam_id =item.data(Qt.UserRole)
             self.non_added_webcam_list.takeItem(self.non_added_webcam_list.row(item))
             self.added_webcam_list.addItem(item)
-            self.cameras.camera_params[item.data(Qt.UserRole)]["added"] = True
+            self.cameras.camera_params[cam_id]["added"] = True
+            self.cameras.added_cameras.append(cam_id)
+            print(self.cameras.added_cameras)
+
 
     def update_list(self):
         self.added_webcam_list.clear()
@@ -269,3 +277,4 @@ class setup_window(QWidget):
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()
             )
             alert.exec()
+    
