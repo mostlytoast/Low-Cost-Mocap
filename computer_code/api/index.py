@@ -9,25 +9,27 @@ import cv2
 import imutils
 from threading import Lock
 from skspatial.objects import Plane, Points
-"""_summary_ separate thread to get video from webcam 
 
-Returns:
-    _type_: _description_ signal image 
-"""
 cameras_init = False
 num_objects = 2
 class MyThread(QThread):
+    """separate thread to handle camera input 
+
+    Args:
+        QThread (_type_): _description_
+
+    Returns:
+        _type_: _description_
+
+    Yields:
+        _type_: _description_
+    """
     frame_signal = Signal(QImage)
     data_signal = Signal(dict)
     def __init__(self):
         super().__init__()
         self._running = True
         self._lock = self.mutex()
-
-
-    # def set_resolution(self, height, width):
-        
-    #     RuntimeWarning("not implemented")
 
     def run(self):
         cameras = Cameras.instance()
@@ -117,37 +119,7 @@ class MyThread(QThread):
         new_to_world_coords_matrix = np.eye(4)
         new_to_world_coords_matrix[:3, :3] = R
         new_to_world_coords_matrix[:3, 3] = translation
-        # Swap y and z axes in the transformation matrix
-        # swap_yz = np.array([
-        #     [1, 0, 0, 0],
-        #     [0, 0, 1, 0],
-        #     [0, 1, 0, 0],
-        #     [0, 0, 0, 1]
-        # ])
-        # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
-
-    
-
-        # Swap y and z axes in the transformation matrix
-        # swap_yz = np.array([
-        #     [1, 0, 0, 0],
-        #     [0, 0, 1, 0],
-        #     [0, 1, 0, 0],
-        #     [0, 0, 0, 1]
-        # ])
-        # new_to_world_coords_matrix = new_to_world_coords_matrix @ swap_yz
-        
-        
-        # perm = [0, 2, 1, 3]
-        # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix[perm, :][:, perm]
-
         cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
-        # cameras.to_world_coords_matrix = new_to_world_coords_matrix
-        # Convert the 3x3 matrix to a 4x4 matrix for proper multiplication
-        # swap_yz_4x4 = np.eye(4)
-        # swap_yz_4x4[:3, :3] = np.array([[1,0,0],[0,-1,0],[0,0,1]])
-        # cameras.to_world_coords_matrix = cameras.to_world_coords_matrix @ swap_yz_4x4 # i dont fucking know why
-            #     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
         self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
 
@@ -207,33 +179,23 @@ class MyThread(QThread):
         object_point = np.array(object_point)
         to_world_coords_matrix = np.array(toWorldCoordsMatrix)
         transform_matrix = np.eye(4)
-
-        # object_point[1], object_point[2] = object_point[2], object_point[1] # i dont fucking know why
         transform_matrix[:3, 3] = -object_point
 
         to_world_coords_matrix = transform_matrix @ to_world_coords_matrix
         cameras.to_world_coords_matrix = to_world_coords_matrix
         self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
         
-        # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-    # @profile
-    # @socketio.on("update-camera-settings")
     def change_camera_settings(self,data):
         cameras = Cameras.instance()
         
         cameras.edit_settings(data["exposure"], data["gain"])
-    # @profile
-    # @socketio.on("capture-points")
+
     def capture_points(self,data):
         start_or_stop = data["startOrStop"]
         cameras = Cameras.instance()
 
         if (start_or_stop == "start"):
             cameras.start_capturing_points()
-            # socketio.emit("object-points", {
-            #                 "object_points":[0,0,1]
-                        
-            #             })
             return
         elif (start_or_stop == "stop"):
             cameras.stop_capturing_points()
@@ -289,24 +251,15 @@ class MyThread(QThread):
         error = np.mean(calculate_reprojection_errors(image_points, object_points, camera_poses))
         self.data_signal.emit({"camera_poses": camera_pose_to_serializable(camera_poses)})
         
-        # return camera_poses, output_data
-        # socketio.emit("camera-pose", {"camera_poses": camera_pose_to_serializable(camera_poses)})
-    # @profile
-    # @socketio.on("locate-objects")
     def start_or_stop_locating_objects(self,start_or_stop):
         cameras = Cameras.instance()
-        # start_or_stop = data["startOrStop"]
-
         if (start_or_stop == "start"):
             cameras.start_locating_objects()
             return
         elif (start_or_stop == "stop"):
             cameras.stop_locating_objects()
-    # @profile
-    # @socketio.on("determine-scale")
+ 
     def determine_scale(self,object_points, camera_poses):
-        # object_points = data["objectPoints"]
-        # camera_poses = data["cameraPoses"]
         actual_distance = 0.15
         observed_distances = []
 
@@ -320,16 +273,9 @@ class MyThread(QThread):
         for i in range(0, len(camera_poses)):
             camera_poses[i]["t"] = (np.array(camera_poses[i]["t"]) * scale_factor).tolist()
         self.data_signal.emit({"error": None, "camera_poses": camera_poses})
-        # return (camera_poses)
-    
-        # socketio.emit("camera-pose", {"error": None, "camera_poses": camera_poses})
-
-    # @profile
-    # @socketio.on("triangulate-points")
+ 
     def live_mocap(self,start_or_stop, camera_poses, to_world_coords_matrix):
         cameras = Cameras.instance()
-        # start_or_stop = data["startOrStop"]
-        # camera_poses = data["cameraPoses"]
         cameras.to_world_coords_matrix = to_world_coords_matrix
 
         if (start_or_stop == "start"):
@@ -337,6 +283,7 @@ class MyThread(QThread):
             return
         elif (start_or_stop == "stop"):
             cameras.stop_trangulating_points()
+
     def update_camera_params(self,camera_params):
         cameras = Cameras.instance()
         cameras.camera_params = camera_params

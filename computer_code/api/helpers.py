@@ -1,3 +1,4 @@
+import threading
 import numpy as np
 from scipy import linalg, optimize #, signal
 import cv2 as cv
@@ -276,7 +277,40 @@ class Cameras:
         
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
+def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
+    # while self._running:
+    #     with self._lock:
+    display_img = img.copy()
+    # Try to find the checkerboard corners and draw them
+    gray = cv.cvtColor(display_img, cv.COLOR_BGR2GRAY)
+    found = [False]
+    corners = [None]
+    def detect_chessboard():
+            ret, detected_corners = cv.findChessboardCorners(
+            gray,
+            checkerboard,
+            cv.CALIB_CB_FAST_CHECK
+            )
+            if ret:
+                found[0] = True
+                corners[0] = cv.cornerSubPix(
+                    gray, detected_corners, (11, 11), (-1, -1),
+                    criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, int(checkerboard_dimension), 0.001)
+                )
 
+    # Set timeout in seconds
+    # timeout = self.sensitivity 
+    # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
+    thread = threading.Thread(target=detect_chessboard)
+    thread.start()
+    thread.join(timeout)
+    if thread.is_alive():
+        # Timeout reached, stop thread (can't kill thread, just ignore result)
+        pass
+    if found[0]:
+        cv.drawChessboardCorners(display_img, checkerboard, corners[0], True)
+        return True, display_img
+    return False, img
 # @profile
 def calculate_reprojection_errors(image_points, object_points, camera_poses):
     errors = np.array([])

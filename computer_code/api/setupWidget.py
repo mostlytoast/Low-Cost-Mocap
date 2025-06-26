@@ -19,14 +19,13 @@ from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 
-import numpy as np
+
 
 # import sys
 import cameraThread
 import settingsWidget
 import videoSubSystem
 from PyQt5.QtWidgets import QSplitter
-from PyQt5.QtGui import QIntValidator
 from helpers import  Cameras
         
 

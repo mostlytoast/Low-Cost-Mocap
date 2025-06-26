@@ -14,10 +14,7 @@ import file_mech
 import numpy as np
 
 # import sys
-import cameraThread
-import videoSubSystem
-from PyQt5.QtWidgets import QSplitter
-from PyQt5.QtGui import QIntValidator
+
 
 import calibrationWidget
 import setupWidget

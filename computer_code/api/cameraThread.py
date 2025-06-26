@@ -12,7 +12,7 @@ import numpy as np
 Returns:
     _type_: _description_ signal image 
 """
-
+from helpers import find_chessboard
 class MyThread(QThread):
     frame_signal = Signal(QImage)
 
@@ -104,7 +104,7 @@ class MyThread(QThread):
                     if ret:
                         image = frame
                         if  self.detect_board:
-                            find, image = self.find_chessboard(frame,(9, 6),21.86)
+                            find, image = find_chessboard(frame,(9, 6),21.86, self.sensitivity)
                             #     if find:
                             #         image = self.cvimage_to_label(image)
                             #         self.frame_signal.emit(image)
@@ -118,40 +118,7 @@ class MyThread(QThread):
             self.msleep(10)  # avoid busy loop
     def set_find_chessboard(self, state):
         self.detect_board = state
-    def find_chessboard(self,img,checkerboard, checkerboard_dimension):
-        # while self._running:
-        #     with self._lock:
-        display_img = img.copy()
-        # Try to find the checkerboard corners and draw them
-        gray = cv2.cvtColor(display_img, cv2.COLOR_BGR2GRAY)
-        found = [False]
-        corners = [None]
-        def detect_chessboard():
-                ret, detected_corners = cv2.findChessboardCorners(
-                gray,
-                checkerboard,
-                cv2.CALIB_CB_FAST_CHECK
-                )
-                if ret:
-                    found[0] = True
-                    corners[0] = cv2.cornerSubPix(
-                        gray, detected_corners, (11, 11), (-1, -1),
-                        criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, int(checkerboard_dimension), 0.001)
-                    )
-
-        # Set timeout in seconds
-        timeout = self.sensitivity 
-        # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
-        thread = threading.Thread(target=detect_chessboard)
-        thread.start()
-        thread.join(timeout)
-        if thread.is_alive():
-            # Timeout reached, stop thread (can't kill thread, just ignore result)
-            pass
-        if found[0]:
-            cv2.drawChessboardCorners(display_img, checkerboard, corners[0], True)
-            return True, display_img
-        return False, img
+    
         
     def stop(self):
         # # Send an empty frame (black image) through the signal
