@@ -2,26 +2,13 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
-    QListWidget,
-    # QListWidgetItem,
-    QShortcut,
-    QHBoxLayout,
-    QVBoxLayout,
-    QWidget,
+
     QAction,
-    QPushButton,
-    QLabel,
-    QComboBox,
-    QLineEdit,
-    QGridLayout,
+
     QStackedWidget,
-    QDialog,
-    QDialogButtonBox,
-    QSlider,
+
 )
-from PyQt5.QtGui import QKeySequence, QImage, QPixmap
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import pyqtSlot as Slot
+
 from helpers import Cameras
 import file_mech
 import numpy as np

@@ -188,3 +188,4 @@ class SettingsWidget(QWidget):
         self.exposure_slider.setMaximum(data.get("max_exposure", 100))
         self.exposure_slider.setValue(int(data.get("exposure", 100)))
         self.gain_slider.setValue(int(data.get("gain", 100)))
+        # self.parent.update_labels()

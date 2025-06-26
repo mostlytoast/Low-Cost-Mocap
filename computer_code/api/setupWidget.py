@@ -156,6 +156,7 @@ class setup_window(QWidget):
             i = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
         else:
             i = 0
+        
         return i
 
 
@@ -246,21 +247,26 @@ class setup_window(QWidget):
         self.label.setPixmap(QPixmap.fromImage(image))
     
     def open_camera(self):
+        try:
+            name = self.cameras.camera_params[self.get_index()]["name"]
+            if not name:
+                return
+            camera_id = int(videoSubSystem.get_id_from_name(name))
+            if (camera_id) == -1:
+                print("stop")
+                alert = alertWidget.alert_widget(
+                "this camera could not be accessed", "ok", "", style=self.styleSheet()
+                )
+                alert.exec()
+                return
+            self.cameras.current_cam = camera_id
+            print(camera_id)
+            self.camera_thread.set_camera_id(self.cameras.current_cam)
 
-        name = self.cameras.camera_params[self.get_index()]["name"]
-        if not name:
-            return
-        camera_id = int(videoSubSystem.get_id_from_name(name))
-        if (camera_id) == -1:
-            print("stop")
+            self.camera_thread.start()
+            self.settings_ui.update_labels()
+        except:
             alert = alertWidget.alert_widget(
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()
             )
             alert.exec()
-            return
-
-        print(camera_id)
-        self.camera_thread.set_camera_id(camera_id)
-
-        self.camera_thread.start()
-        self.settings_ui.update_labels()

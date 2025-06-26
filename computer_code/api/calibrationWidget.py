@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QFileDialog,
     QStackedWidget,
-    QDialog,
+    QSlider,
     QSplitter,
     QDialogButtonBox
 )
@@ -26,12 +26,14 @@ from PyQt5.QtCore import pyqtSlot as Slot
 import cameraThread
 import settingsWidget
 import alertWidget, videoSubSystem
+from helpers import Cameras
 # TODO have singleton for camera with a current camera param that stores current camera setting and 
 # todo maybe also have this be singleton for setup data with a param for if it has been modified since saving 
 class CalibrateWidget(QWidget):
     def __init__(self, parent=None):
         super(CalibrateWidget, self).__init__(parent)
         self.parent = parent
+        self.cameras = Cameras.instance()
         self.index = 1
         # self.list_of_rotations = ["0","90", "180", "270"]
 
@@ -45,7 +47,9 @@ class CalibrateWidget(QWidget):
         self.webcam_preview_layout = QHBoxLayout()
     
         # Shortcuts for deleting items in each list
-        
+        self.current_camera_label=QLabel()
+        self.current_camera_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.main_layout.addWidget(self.current_camera_label)
 
     
         self.open_btn = QPushButton("Open The Camera", clicked=self.open_camera)
@@ -57,7 +61,7 @@ class CalibrateWidget(QWidget):
         def selection_update_labels():
             if not self.camera_thread._running:
                 self.settings_ui.update_labels()
-
+        # self.settings_ui.update.connect(self.update_labels)
         # self.added_webcam_list.itemSelectionChanged.connect(selection_update_labels)
         self.webcam_settings_layout.addWidget(self.settings_ui)
         # self.webcam_settings_layout.addLayout(self.editable_fields_layout)
@@ -72,10 +76,35 @@ class CalibrateWidget(QWidget):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignRight)
         self.label.setMinimumSize(800, 600)
+        self.preview_capture_settings_layout = QVBoxLayout()
+        self.capture_settings_layout = QGridLayout()
+        self.capture_btn = QPushButton("capture")
+        self.capture_btn.clicked.connect(self.camera_thread.capture)
+        self.capture_settings_layout.addWidget(self.capture_btn,0,0)
+
+        self.sensitivity_slider = QSlider(Qt.Horizontal)
+        self.sensitivity_slider.setMaximum(10)
+        self.sensitivity_slider.setMinimum(1)
+        self.sensitivity_slider.valueChanged.connect(self.camera_thread.set_sensitivity)
+        self.capture_settings_layout.addWidget(self.sensitivity_slider,0,1)
+        self.auto_btn = QPushButton("auto capture")
+        self.auto_btn.clicked.connect(self.camera_thread.auto_capture)
+        self.capture_settings_layout.addWidget(self.auto_btn,1,0)
+
+        self.timer_slider = QSlider(Qt.Horizontal)
+        self.capture_settings_layout.addWidget(self.timer_slider,1,1)
+
+
+        self.preview_capture_settings_layout.addWidget(self.label)
+        self.preview_capture_settings_layout.addLayout(self.capture_settings_layout)
+
         # self.label.setBackgroundRole()
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.webcam_settings_widget)
-        splitter.addWidget(self.label)
+        # To add widgets to a QSplitter, wrap the layout in a QWidget first
+        preview_widget = QWidget()
+        preview_widget.setLayout(self.preview_capture_settings_layout)
+        splitter.addWidget(preview_widget)
         splitter.setSizes([200, 400])  # Initial sizes
 
         self.webcam_preview_layout.addWidget(splitter)
@@ -114,7 +143,7 @@ class CalibrateWidget(QWidget):
         return self.index
     def open_camera(self):
 
-        name = self.data[self.get_index()]["name"]
+        name = self.cameras.camera_params[self.get_index()]["name"]
         if not name:
             return
         camera_id = int(videoSubSystem.get_id_from_name(name))
@@ -125,9 +154,14 @@ class CalibrateWidget(QWidget):
             )
             alert.exec()
             return
-
+        self.cameras.current_cam = camera_id
         print(camera_id)
-        self.camera_thread.set_camera_id(camera_id)
-
+        self.camera_thread.set_camera_id(self.cameras.current_cam)
         self.camera_thread.start()
-        # self.update_labels()
+        self.update_labels()
+        self.settings_ui.update_labels()
+
+    def update_labels(self):
+        # todo not updating when change id number
+        self.current_camera_label.setText(f"current camera: {self.cameras.camera_params[self.get_index()]["name"] } id {self.cameras.camera_params[self.get_index()]["id"]}")
+        

@@ -33,8 +33,10 @@ class Cameras:
         
         # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
         # print(self.num_cameras)
+        self.current_cam = 0 #index for current camera that is open (in regards to the camera_params)
+        self.is_detecting_chessboard = False
         self.is_capturing_points = False
-
+        self.added_cameras = [] # list of active cameras 
         self.is_triangulating_points = False
         self.camera_poses = None
 

@@ -32,7 +32,9 @@ class MyThread(QThread):
         self.gain = 0
         self.auto_exposure = 1 #
         self.rotation = 0
-       
+        self.sensitivity = 0.005
+    def set_sensitivity(self,sensitivity):
+        self.sensitivity = sensitivity/10000
     def set_rotation(self, rot):
         self.rotation = rot
     def set_camera_id(self, camera_id):
@@ -49,7 +51,17 @@ class MyThread(QThread):
         self.min_exposure = settings["min_exposure"]
         self.auto_exposure = settings["manual_mode"] 
 
-
+    def capture(self):
+        if self.cap is not None and self.cap.isOpened():
+            global buffer
+            ret, frame = self.cap.read()
+            if ret:
+                if 'buffer' not in globals():
+                    buffer = []
+                buffer.append(frame)
+                print("buffer", len(buffer))
+    def auto_capture(self):
+        print()
     def set_exposure(self, exposure):
         if self.cap is not None and self.cap.isOpened():
             self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, self.auto_exposure)
@@ -128,7 +140,7 @@ class MyThread(QThread):
                     )
 
         # Set timeout in seconds
-        timeout = 0.008
+        timeout = self.sensitivity 
         # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
         thread = threading.Thread(target=detect_chessboard)
         thread.start()

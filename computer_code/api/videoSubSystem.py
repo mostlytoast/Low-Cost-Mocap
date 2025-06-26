@@ -169,7 +169,7 @@ def getSettings(camera_id):
                     exposure_min = int(min_match.group(1))
                     exposure_max = int(max_match.group(1))
                 break
-
+        # TODO have it return current exposure to and then use that to set the data fields 
         # Example return structure
         return {
             "manual_mode" : manual_mode,
