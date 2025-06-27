@@ -1,4 +1,5 @@
 
+import time
 from PyQt5.QtWidgets import (
   
     QListWidget,
@@ -12,6 +13,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QLineEdit,
     QGridLayout,
+    QSizePolicy,
  
     QSlider,
 )
@@ -19,26 +21,29 @@ from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 
-
+import ViewportLabel
 
 # import sys
-import cameraThread
-import settingsWidget
-import videoSubSystem
+
 from PyQt5.QtWidgets import QSplitter
 from helpers import  Cameras
         
-
+from cameraThread import MyThread
+import settingsWidget
+import videoSubSystem
 import alertWidget
 
 
 class setup_window(QWidget):
     def __init__(self, parent=None):
+
         super(setup_window, self).__init__(parent)
         # self.list_of_rotations = ["0","90", "180", "270"]
 
-        self.camera_thread = cameraThread.MyThread(0)
+        self.camera_thread = MyThread.instance()
         self.camera_thread.frame_signal.connect(self.setImage)
+        # self.camera_thread.set_find_chessboard(False)
+        self.current_index = -1
         self.cameras = Cameras.instance()
         self.main_layout = QVBoxLayout()
         self.webcam_settings_layout = QVBoxLayout()
@@ -126,19 +131,24 @@ class setup_window(QWidget):
         self.webcam_settings_widget.setMinimumWidth(300)  # Minimum width
         self.webcam_settings_widget.setMaximumWidth(500)  # Optional: Maximum width
 
-        self.label = QLabel()
-        self.label.setAlignment(Qt.AlignRight)
+        self.label = ViewportLabel.Label()
+   
+        # self.label.setAlignment(Qt.AlignRight)
         self.label.setMinimumSize(800, 600)
+        # self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # self.label.setBackgroundRole()
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.webcam_settings_widget)
         splitter.addWidget(self.label)
-        splitter.setSizes([200, 400])  # Initial sizes
+        # splitter.setSizes([200, 400])  # Initial sizes
+        splitter.setStretchFactor(0, 1)  # webcam_settings_widget
+        splitter.setStretchFactor(1, 3)  # label
 
         self.webcam_preview_layout.addWidget(splitter)
 
-        self.camera_thread = cameraThread.MyThread(0)
-        self.camera_thread.frame_signal.connect(self.setImage)
+        # self.camera_thread = cameraThread.MyThread(0)
+        # self.camera_thread.frame_signal.connect(self.setImage)
         self.main_layout.addLayout(self.webcam_preview_layout)
         # Set main_layout on a QWidget and set as central widget
 
@@ -150,13 +160,13 @@ class setup_window(QWidget):
 
     def get_index(self):
         if self.added_webcam_list.selectedItems():
-            i = self.added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+            self.current_index= self.added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+            
         elif self.non_added_webcam_list.selectedItems():
-            i = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
-        else:
-            i = 0
+            self.current_index = self.non_added_webcam_list.selectedItems()[0].data(Qt.UserRole)
+    
         
-        return i
+        return self.current_index
 
 
     def remove_webcam(self):
@@ -209,7 +219,12 @@ class setup_window(QWidget):
         # TODO have to find way of adding newly added cameras in system to list
         def add_camera(attached_webcam):
             cam_id = videoSubSystem.get_id_from_name(attached_webcam[0])
-            res = videoSubSystem.getResolution(cam_id)[0]
+            
+            res = videoSubSystem.getResolution(cam_id)
+            if len(res) > 0:
+                res = res[0]
+            else:
+                res = [1080,1920]
             settings = videoSubSystem.getSettings(cam_id)
 
             self.cameras.camera_params.append(
@@ -250,11 +265,19 @@ class setup_window(QWidget):
         self.cameras.configure()
 
         self.update_list()
+    def update_labels(self):
+        self.settings_ui.update_labels()
 
     @Slot(QImage)
     def setImage(self, image):
+
         self.label.setPixmap(QPixmap.fromImage(image))
-    
+        # time_now = time.time()
+        # if self.last_time != 0:
+        #     self.fps = 1 / (time_now - self.last_time)
+        #     self.fps_label.setText("FPS " + str(round(self.fps)))
+        #     print("fps", self.fps)
+        # self.last_time = time_now
     def open_camera(self):
         try:
             name = self.cameras.camera_params[self.get_index()]["name"]
@@ -268,10 +291,11 @@ class setup_window(QWidget):
                 )
                 alert.exec()
                 return
+            self.cameras.current_cam = camera_id
             # self.cameras.current_cam = camera_id
             print("cam id", camera_id)
             self.camera_thread.set_camera_id(self.get_index())
-            self.cameras.current_cam = camera_id
+            
             self.camera_thread.start()
             self.settings_ui.update_labels()
         except:

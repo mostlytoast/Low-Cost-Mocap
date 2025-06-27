@@ -2,9 +2,9 @@ import threading
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
 import cv2
-import imutils
-from threading import Lock
 
+from threading import Lock
+from Singleton import Singleton
 import numpy as np
 
 """_summary_ separate thread to get video from webcam 
@@ -14,13 +14,14 @@ Returns:
 """
 from helpers import find_chessboard, Cameras
 import time
+@Singleton
 class MyThread(QThread):
     frame_signal = Signal(QImage)
 
-    def __init__(self, camera_id):
+    def __init__(self):
         super().__init__()
         
-        self.camera_id = camera_id
+        self.camera_id = 0
         self.cap = None
         self._running = False
         self._lock = self.mutex()
@@ -49,21 +50,12 @@ class MyThread(QThread):
         self.dimension = dimension
         self.objp = np.zeros((1, self.checkerboard[0] * self.checkerboard[1], 3), np.float32)
         self.objp[0, :, :2] = np.mgrid[0 : self.checkerboard[0], 0 : self.checkerboard[1]].T.reshape(-1, 2)
-    def set_rotation(self, rot):
-        self.rotation = rot
+
     def set_camera_id(self, camera_id):
         # self.camera_id = camera_id
         with self._lock:
             self._pending_camera_id = camera_id
-    def set_camera_settings(self, settings):
-        """set the camera settings received from videosubsystem.getSettings()
-
-        Args:
-            settings (_type_): _description_
-        """
-        self.max_exposure = settings["max_exposure"]
-        self.min_exposure = settings["min_exposure"]
-        self.auto_exposure = settings["manual_mode"] 
+  
     def calc_calib(self):
         gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         
@@ -86,8 +78,6 @@ class MyThread(QThread):
             self.prev_time = time.time()
             self.objpoints.append(self.objp)
     
-
-    
     def run(self):
         self._running = True
         cameras = Cameras.instance()
@@ -96,12 +86,13 @@ class MyThread(QThread):
         # self.cap = cv2.VideoCapture(self.camera_id)
         # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
 
-        cameras.set_resolution(self.camera_id,self.width,self.height)
+        # cameras.set_resolution(self.camera_id,self.width,self.height)
         while self._running:
             with self._lock:
+   
                 if self._pending_camera_id is not None:
-                    if self.cap is not None and self.cap.isOpened():
-                        self.cap.release()
+                    # if self.cap is not None and self.cap.isOpened():
+                    #     self.cap.release()
                     self.camera_id = self._pending_camera_id
                     self.cap = cameras.cameras[self.camera_id]
                    
@@ -110,34 +101,44 @@ class MyThread(QThread):
                     self._pending_camera_id = None
 
                 if self.cap is not None and self.cap.isOpened():
+                    # print("hi")
+
                     ret, frame = self.cap.read()
                     if ret:
-                        image = frame
-                        if  self.detect_board:
-                            find, image, corners = find_chessboard(frame,self.checkerboard,self.dimension, self.sensitivity)
-                            if find:
-                                self.img = image
-                                self._capture(corners)
-                        image = np.rot90(image, k=self.rotation)
-                        image = self.cvimage_to_label(image)
-                        self.frame_signal.emit(image)
+                        
+                        frame = self.chessboard(frame)
+                        # 
+                        frame = np.rot90(frame, k=cameras.camera_params[self.camera_id].get("rotation",0))
+                        frame = self.cvimage_to_label(frame)
+                        self.frame_signal.emit(frame)
+                # else:
+                    # print("cant")
 
             self.msleep(10)  # avoid busy loop
     def set_find_chessboard(self, state):
         self.detect_board = state
-    
-        
+
+    def chessboard(self,frame):
+        if  self.detect_board:
+            find, frame, corners = find_chessboard(frame,self.checkerboard,self.dimension, self.sensitivity)
+            if find:
+                self.img = frame
+                self._capture(corners)
+        return frame
     def stop(self):
         # # Send an empty frame (black image) through the signal
         # empty_image = np.zeros((self.height, self.width, 3), dtype=np.uint8)
         # empty_qimage = self.cvimage_to_label(empty_image)
         # self.frame_signal.emit(empty_qimage)
-
+        cameras = Cameras.instance()
+        cap = cameras.cameras[self.camera_id]
         self._running = False
-        if self.cap is not None and self.cap.isOpened():
-            self.cap.release()
+        if cap is not None and cap.isOpened():
+            cap.release()
+        return True
         
     def mutex(self):
+
         # Simple cross-thread lock for PyQt5 QThread
         return Lock()
 

@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 
 )
 
+from cameraThread import MyThread
 from helpers import Cameras
 import file_mech
 import numpy as np
@@ -96,6 +97,7 @@ class MainWindow(QMainWindow):
 
         self.stacked_widget.addWidget(self.setup_widget)
         self.stacked_widget.setCurrentWidget(self.setup_widget)
+        self.show_setup()
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_list()
 
@@ -112,10 +114,13 @@ class MainWindow(QMainWindow):
     def calib_scratch(self):
         if self.check_for_webcams():
             # # todo ask to save when settings are un modified
-            self.stacked_widget.setCurrentIndex(0)
+            # self.setup_widget.camera_thread.stop()
             self.calibrate_widget_instance.update_labels()
+            self.setup_widget.update_labels()
+            self.stacked_widget.setCurrentIndex(0)
+            self.camera_thread = MyThread.instance()
+            self.camera_thread.set_find_chessboard(True)
             self.calibrate_widget_instance.open_camera()
-            self.setup_widget.camera_thread.stop()
             # self.stacked_widget.setCurrentWidget(self.calibrate_widget_instance)
             # self.calibrate_widget_instance.show_scratch()
             print()
@@ -140,9 +145,13 @@ class MainWindow(QMainWindow):
 
     def show_setup(self):
         
-        self.calibrate_widget_instance.camera_thread.stop()
-        self.setup_widget.update_list()
+        # self.calibrate_widget_instance.camera_thread.stop()
+        self.camera_thread = MyThread.instance()
+        self.camera_thread.set_find_chessboard(False)
+        self.calibrate_widget_instance.update_labels()
+        self.setup_widget.update_labels()
         self.stacked_widget.setCurrentIndex(1)
+       
         
         
 

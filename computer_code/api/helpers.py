@@ -15,18 +15,18 @@ import videoSubSystem
 # from time import sleep
 # from line_profiler import profile
 
-class Params:
-    def __init__(self):
-        self.camera_id = 0
-        self.width= 800
-        self.height = 600
-        self.exposure = 0
-        self.gain = 0 
-        self.name = ""
-        self.system_id 
-        self.intrinsic_matrix
-        self.distortion_coef
-        self.rotation 
+# class Params:
+#     def __init__(self):
+#         self.camera_id = 0
+#         self.width= 800
+#         self.height = 600
+#         self.exposure = 0
+#         self.gain = 0 
+#         self.name = ""
+#         self.system_id 
+#         self.intrinsic_matrix
+#         self.distortion_coef
+#         self.rotation 
 
 @Singleton
 class Cameras:
@@ -84,26 +84,23 @@ class Cameras:
 
             self.cameras.append(cap)
 
-    # # function to add to JSON
-    # def write_json(new_data, filename='data.json'):
-    #     # https://www.geeksforgeeks.org/python/append-to-json-file-using-python/
-    #     with open(filename,'r+') as file:
-    #         # First we load existing data into a dict.
-    #         file_data = json.load(file)
-    #         # Join new_data with file_data inside emp_details
-    #         file_data["emp_details"].append(new_data)
-    #         # Sets file's current position at offset.
-    #         file.seek(0)
-    #         # convert back to json.
-    #         json.dump(file_data, file, indent = 4)
     def set_rotation(self, i, rot):
         # i = self.camera_list[i]
-        self.camera_params[i]["rotation"] = rot
+        cameras = Cameras.instance()
+        camera_params[i]["rotation"] = rot
+    def set_camera_settings(self, i,settings):
+        """set the camera settings received from videosubsystem.getSettings()
 
+        Args:
+            settings (_type_): _description_
+        """
+        for key in ["max_exposure", "min_exposure", "manual_mode"]:
+            self.camera_params[i][key] = settings[key]
     def set_exposure(self, i, exposure):
         # convert system id to internal id 
         # i = self.camera_list[i]
-        self.camera_params[i]["exposure"] = exposure
+        cameras = Cameras.instance()
+        cameras.camera_params[i]["exposure"] = exposure
         if i > len(self.cameras):
             return
         if self.cameras[i] is not None and self.cameras[i].isOpened():
@@ -124,15 +121,17 @@ class Cameras:
     def set_resolution(self, i, height, width):
         # convert system id to internal id 
         # i = self.camera_list[i]
-        self.camera_params[i]["height"] = height
-        self.camera_params[i]["width"] = width
+
+        cameras = Cameras.instance()
+        cameras.camera_params[i]["height"] = height
+        cameras.camera_params[i]["width"] = width
 
         if i > len(self.cameras):
             return
 
-        if self.cameras[i] is not None and self.cameras[i].isOpened():
-            self.cameras[i].set(cv.CAP_PROP_FRAME_WIDTH, float(width))
-            self.cameras[i].set(cv.CAP_PROP_FRAME_HEIGHT, float(height))
+        if cameras.cameras[i] is not None and cameras.cameras[i].isOpened():
+            cameras.cameras[i].set(cv.CAP_PROP_FRAME_WIDTH, float(width))
+            cameras.cameras[i].set(cv.CAP_PROP_FRAME_HEIGHT, float(height))
 
     def set_num_objects(self, num_objects):
         self.num_objects = num_objects

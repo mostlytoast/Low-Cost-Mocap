@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-import cameraThread
+from cameraThread import MyThread
 import settingsWidget
 import alertWidget, videoSubSystem
 from helpers import Cameras
@@ -40,8 +40,11 @@ class CalibrateWidget(QWidget):
         self.has_enough_captures = False
         self.on_last_camera=False
         # Camera thread setup
-        self.camera_thread = cameraThread.MyThread(0)
+        self.camera_thread = MyThread.instance()
+
         self.camera_thread.frame_signal.connect(self.setImage)
+        self.camera_thread.set_find_chessboard(True)
+
 
         # Main layout
         self.main_layout = QVBoxLayout()
@@ -157,6 +160,7 @@ class CalibrateWidget(QWidget):
 
     def _finish_calibration(self):
         self.camera_thread.calc_calib()
+        
         self.parent.show_setup()
         print()
     def _capture_toggle(self):
@@ -263,10 +267,9 @@ class CalibrateWidget(QWidget):
             )
             alert.exec()
             return
-        self.cameras.current_cam = self.get_index()
-        print(camera_id)
+        self.cameras.current_cam = camera_id
+        print("camera_id",camera_id)
         self.camera_thread.set_camera_id(self.get_index())
-
         self.camera_thread.start()
         # self.update_labels()
         self.settings_ui.update_labels()

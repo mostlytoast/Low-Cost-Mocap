@@ -88,10 +88,10 @@ class SettingsWidget(QWidget):
             idx = self.parent.get_index()
 
             cameras = Cameras.instance()
-            data = self.cameras.camera_params[idx]
+            data = cameras.camera_params[idx]
             value = self.sender().text()
             data["id"] = value
-            print(self.cameras.camera_params)
+            print(cameras.camera_params[idx])
 
         self.line_edit_id = QLineEdit(self)
         self.line_edit_id.setValidator(QIntValidator(1, 2147483647, self))
@@ -111,9 +111,9 @@ class SettingsWidget(QWidget):
             value = self.sender().itemData(i)
             if value != None:
                 idx = self.parent.get_index()
-                cameras.set_resolution(cameras.current_cam,value[0], value[1])
-                self.cameras.camera_params[idx]["width"] = int(value[0])
-                self.cameras.camera_params[idx]["height"] = int(value[1])
+                cameras.set_resolution(idx,value[0], value[1])
+                # self.cameras.camera_params[idx]["width"] = int(value[0])
+                # self.cameras.camera_params[idx]["height"] = int(value[1])
                 print(self.cameras.camera_params[idx])
             # self.parent = self.cameras.camera_params
 
@@ -127,7 +127,7 @@ class SettingsWidget(QWidget):
         def change_exposure(i):
             cameras = Cameras.instance()
             idx = self.parent.get_index()
-            cameras.set_exposure(cameras.current_cam,i)
+            cameras.set_exposure(idx,i)
             print(self.cameras.camera_params[idx])
 
         self.exposure_slider = QSlider(Qt.Horizontal)
