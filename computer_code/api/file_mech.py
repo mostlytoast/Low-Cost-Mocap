@@ -93,7 +93,11 @@ class file_dialog(QFileDialog):
             data["to_world_coords_matrix"] = self.cameras.to_world_coords_matrix.tolist()
         except:
             data["to_world_coords_matrix"]= []
-        data["camera_poses"] = camera_pose_to_serializable(self.cameras.camera_poses)
+        if (self.cameras.camera_poses != None):
+            data["camera_poses"] = camera_pose_to_serializable(self.cameras.camera_poses)
+        else: 
+            data["camera_poses"] = []
+
         with open(self.save_path,"w") as f:
             json.dump(data,f)
     # TODO clean up by moving into app.py and camera calib GUI.py

@@ -167,7 +167,7 @@ class setup_window(QWidget):
             self.non_added_webcam_list.addItem(item)
             self.cameras.camera_params[cam_id]["added"] = False
             self.cameras.added_cameras.remove(cam_id)
-            print(self.cameras.added_cameras)
+            print("added cameras", self.cameras.added_cameras)
 
 
     def add_webcam(self):
@@ -178,7 +178,7 @@ class setup_window(QWidget):
             self.added_webcam_list.addItem(item)
             self.cameras.camera_params[cam_id]["added"] = True
             self.cameras.added_cameras.append(cam_id)
-            print(self.cameras.added_cameras)
+            print("added cameras", self.cameras.added_cameras)
 
 
     def update_list(self):
@@ -233,6 +233,7 @@ class setup_window(QWidget):
         if self.cameras.camera_params == []:
             for attached_webcam in attached_webcams:
                 add_camera(attached_webcam)
+            
         # self.update_list()
 
         else:
@@ -246,6 +247,7 @@ class setup_window(QWidget):
                     if current_webcams["name"] == attached_webcam[0]:
                         current_webcams["connected"] = True
                         break
+        self.cameras.configure()
 
         self.update_list()
 
@@ -266,10 +268,10 @@ class setup_window(QWidget):
                 )
                 alert.exec()
                 return
+            # self.cameras.current_cam = camera_id
+            print("cam id", camera_id)
+            self.camera_thread.set_camera_id(self.get_index())
             self.cameras.current_cam = camera_id
-            print(camera_id)
-            self.camera_thread.set_camera_id(self.cameras.current_cam)
-
             self.camera_thread.start()
             self.settings_ui.update_labels()
         except:

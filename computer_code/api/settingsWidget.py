@@ -70,11 +70,13 @@ class SettingsWidget(QWidget):
             self.rot_combo.addItem(rot, i)
 
         def change_rot(i):
-            data = self.cameras.camera_params[self.parent.get_index()]
+            cameras = Cameras.instance()
+            idx = self.parent.get_index()
+            data = self.cameras.camera_params[idx]
             value = self.sender().itemData(i)
             data["rotation"] = value
-            self.parent.camera_thread.set_rotation(value)
-            print(self.cameras.camera_params)
+            cameras.set_rotation(idx,value)
+            print(self.cameras.camera_params[idx])
 
         self.rot_combo.currentIndexChanged.connect(change_rot)
         self.editable_fields_layout.addWidget(QLabel("rotation"), row, 0)
@@ -83,7 +85,10 @@ class SettingsWidget(QWidget):
 
         # edit id
         def change_id():
-            data = self.cameras.camera_params[self.parent.get_index()]
+            idx = self.parent.get_index()
+
+            cameras = Cameras.instance()
+            data = self.cameras.camera_params[idx]
             value = self.sender().text()
             data["id"] = value
             print(self.cameras.camera_params)
@@ -101,11 +106,12 @@ class SettingsWidget(QWidget):
         self.res_combo.setEditable(True)
 
         def change_resolution(i):
+            cameras = Cameras.instance()
             # access the resolution selection list that called this function
             value = self.sender().itemData(i)
             if value != None:
-                self.parent.camera_thread.set_resolution(value[0], value[1])
                 idx = self.parent.get_index()
+                cameras.set_resolution(cameras.current_cam,value[0], value[1])
                 self.cameras.camera_params[idx]["width"] = int(value[0])
                 self.cameras.camera_params[idx]["height"] = int(value[1])
                 print(self.cameras.camera_params[idx])
@@ -119,9 +125,9 @@ class SettingsWidget(QWidget):
 
         # exposure
         def change_exposure(i):
-            self.parent.camera_thread.set_exposure(i)
+            cameras = Cameras.instance()
             idx = self.parent.get_index()
-            self.cameras.camera_params[idx]["exposure"] = int(i)
+            cameras.set_exposure(cameras.current_cam,i)
             print(self.cameras.camera_params[idx])
 
         self.exposure_slider = QSlider(Qt.Horizontal)
@@ -132,8 +138,11 @@ class SettingsWidget(QWidget):
         self.gain_slider = QSlider(Qt.Horizontal)
 
         def change_gain(i):
-            self.parent.camera_thread.set_gain(i)
+            cameras = Cameras.instance()
+
             idx = self.parent.get_index()
+            cameras.set_gain(idx,i)
+            
             self.cameras.camera_params[idx]["gain"] = int(i)
             print(self.cameras.camera_params[idx])
 
@@ -154,6 +163,8 @@ class SettingsWidget(QWidget):
         self.setLayout(self.layout)
 
     def update_labels(self):
+        if self.parent.get_index() == -1:
+            return
         data = self.cameras.camera_params[self.parent.get_index()]
         # camera data
         for key in self.list_camera_data:

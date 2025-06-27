@@ -12,13 +12,14 @@ import numpy as np
 Returns:
     _type_: _description_ signal image 
 """
-from helpers import find_chessboard
+from helpers import find_chessboard, Cameras
 import time
 class MyThread(QThread):
     frame_signal = Signal(QImage)
 
     def __init__(self, camera_id):
         super().__init__()
+        
         self.camera_id = camera_id
         self.cap = None
         self._running = False
@@ -35,13 +36,23 @@ class MyThread(QThread):
         self.rotation = 0
         self.sensitivity = 0.005
         self.auto_time = 5
-        self.buffer = []
+        self.imgpoints = []
+        self.objpoints = []
+        self.img = None
         self.prev_time = None
         self.auto_capture_state = False
         self.take_capture_state = False
+        self.set_checkerboard()
+        
+    def set_checkerboard(self, checkerboard = (9, 6), dimension = 21.86):
+        self.checkerboard = checkerboard
+        self.dimension = dimension
+        self.objp = np.zeros((1, self.checkerboard[0] * self.checkerboard[1], 3), np.float32)
+        self.objp[0, :, :2] = np.mgrid[0 : self.checkerboard[0], 0 : self.checkerboard[1]].T.reshape(-1, 2)
     def set_rotation(self, rot):
         self.rotation = rot
     def set_camera_id(self, camera_id):
+        # self.camera_id = camera_id
         with self._lock:
             self._pending_camera_id = camera_id
     def set_camera_settings(self, settings):
@@ -50,56 +61,52 @@ class MyThread(QThread):
         Args:
             settings (_type_): _description_
         """
-        
         self.max_exposure = settings["max_exposure"]
         self.min_exposure = settings["min_exposure"]
         self.auto_exposure = settings["manual_mode"] 
+    def calc_calib(self):
+        gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+        
+        ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
+            self.objpoints, self.imgpoints, gray.shape[::-1], None, None
+        )
+        cameras = Cameras.instance() 
+        cameras.camera_params[self.camera_id]["intrinsic_matrix"] = mtx.tolist()
+        cameras.camera_params[self.camera_id]["distortion_coef"] = dist.tolist()
 
-    def capture(self,frame):
+    def _capture(self,corners):
         if self.prev_time == None:
             self.prev_time = time.time()
         time_passed = time.time() - self.prev_time
-        if (time_passed >= self.auto_time and self.auto_capture_state) or self.take_capture_state:
-            self.buffer.append(frame)
-            print("buffer", len(self.buffer))
+        # take picture if a board is in view and either capture button clicked or auto auto capture says so 
+        if ((time_passed >= self.auto_time and self.auto_capture_state) or self.take_capture_state):
+            self.imgpoints.append(corners)
+            print("imgpoints", len(self.imgpoints))
             self.take_capture_state = False
             self.prev_time = time.time()
-   
-    def set_exposure(self, exposure):
-        if self.cap is not None and self.cap.isOpened():
-            self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, self.auto_exposure)
-            self.cap.set(cv2.CAP_PROP_EXPOSURE, exposure)
-        else:
-            self.exposure = exposure
-    def set_gain(self, gain):
-        if self.cap is not None and self.cap.isOpened():
-            self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, self.auto_exposure)
-            self.cap.set(cv2.CAP_PROP_GAIN, gain)  # gain = [gain] * self.num_cameras
-        else:
-            self.gain = gain
-
-    def set_resolution(self, height, width):
-        if self.cap is not None and self.cap.isOpened():
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(width))
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(height))
-        else:
-            self.width = width
-            self.height = height
+            self.objpoints.append(self.objp)
+    
 
     
     def run(self):
         self._running = True
-        self.cap = cv2.VideoCapture(self.camera_id)
-        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
-        self.set_resolution(self.width,self.height)
+        cameras = Cameras.instance()
+        self.cap = cameras.cameras[self.camera_id]
+
+        # self.cap = cv2.VideoCapture(self.camera_id)
+        # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
+
+        cameras.set_resolution(self.camera_id,self.width,self.height)
         while self._running:
             with self._lock:
                 if self._pending_camera_id is not None:
                     if self.cap is not None and self.cap.isOpened():
                         self.cap.release()
                     self.camera_id = self._pending_camera_id
-                    self.cap = cv2.VideoCapture(self.camera_id)
-                    self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
+                    self.cap = cameras.cameras[self.camera_id]
+                   
+
+                    # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
                     self._pending_camera_id = None
 
                 if self.cap is not None and self.cap.isOpened():
@@ -107,14 +114,11 @@ class MyThread(QThread):
                     if ret:
                         image = frame
                         if  self.detect_board:
-                            find, image = find_chessboard(frame,(9, 6),21.86, self.sensitivity)
-                            #     if find:
-                            #         image = self.cvimage_to_label(image)
-                            #         self.frame_signal.emit(image)
-                            # else:
-                        self.capture(frame)
+                            find, image, corners = find_chessboard(frame,self.checkerboard,self.dimension, self.sensitivity)
+                            if find:
+                                self.img = image
+                                self._capture(corners)
                         image = np.rot90(image, k=self.rotation)
-                        
                         image = self.cvimage_to_label(image)
                         self.frame_signal.emit(image)
 

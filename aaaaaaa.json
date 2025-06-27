@@ -1,0 +1,38 @@
+{
+    "camera_params": [
+        {
+            "intrinsic_matrix": [],
+            "distortion_coef": [],
+            "rotation": 0,
+            "id": null,
+            "name": "Microsoft\u00ae LifeCam HD-3000: Mi (usb-0000:02:00.0-1.1):",
+            "width": 160,
+            "height": 120,
+            "connected": true,
+            "calibrated": false,
+            "added": false,
+            "manual_mode": 1,
+            "auto_exposure_mode": 3,
+            "min_exposure": 1,
+            "max_exposure": 100
+        },
+        {
+            "intrinsic_matrix": [],
+            "distortion_coef": [],
+            "rotation": 0,
+            "id": null,
+            "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-1.4):",
+            "width": 320,
+            "height": 240,
+            "connected": true,
+            "calibrated": false,
+            "added": true,
+            "manual_mode": 1,
+            "auto_exposure_mode": 3,
+            "min_exposure": 1,
+            "max_exposure": 100
+        }
+    ],
+    "to_world_coords_matrix": [],
+    "camera_poses": []
+}

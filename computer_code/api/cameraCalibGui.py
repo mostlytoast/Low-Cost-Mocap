@@ -34,56 +34,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         # TODO need new data structure that better supports edits
-        self.data = [
-            {
-                "intrinsic_matrix": [
-                    [677.8118436477158, 0.0, 369.67423322200443],
-                    [0.0, 682.103355075851, 283.2898247123011],
-                    [0.0, 0.0, 1.0],
-                ],
-                "distortion_coef": [
-                    [
-                        0.07002292606292972,
-                        -0.40894724240016145,
-                        -0.020332839259062062,
-                        0.00025543761137419597,
-                        1.157665841456218,
-                    ]
-                ],
-                "rotation": 0,
-                "id": 3,
-                "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-1.4):",
-                "width": 800,
-                "height": 600,
-                "connected": False,
-                "calibrated": False,
-                "added": False,
-            },
-            {
-                "intrinsic_matrix": [
-                    [679.654681050567, 0.0, 404.0916055013056],
-                    [0.0, 678.2903122373327, 280.39271414461007],
-                    [0.0, 0.0, 1.0],
-                ],
-                "distortion_coef": [
-                    [
-                        0.04194078685957363,
-                        -0.007168281261102275,
-                        -0.009100180545490017,
-                        0.004533057678646769,
-                        -0.17059294063428096,
-                    ]
-                ],
-                "rotation": 0,
-                "id": 2,
-                "name": "Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-2.1.1):",
-                "width": 800,
-                "height": 600,
-                "connected": False,
-                "calibrated": False,
-                "added": True,
-            },
-        ]
+     
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
@@ -145,7 +96,9 @@ class MainWindow(QMainWindow):
 
         self.stacked_widget.addWidget(self.setup_widget)
         self.stacked_widget.setCurrentWidget(self.setup_widget)
+        self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_list()
+
     def check_for_webcams(self):
         """make sure that we have cameras to use for calib otherwise give error popup and return false"""
         if len(self.cameras.added_cameras) == 0:
@@ -156,11 +109,12 @@ class MainWindow(QMainWindow):
             return False
         return True
             
-
     def calib_scratch(self):
         if self.check_for_webcams():
             # # todo ask to save when settings are un modified
             self.stacked_widget.setCurrentIndex(0)
+            self.calibrate_widget_instance.update_labels()
+            self.calibrate_widget_instance.open_camera()
             self.setup_widget.camera_thread.stop()
             # self.stacked_widget.setCurrentWidget(self.calibrate_widget_instance)
             # self.calibrate_widget_instance.show_scratch()
@@ -185,7 +139,9 @@ class MainWindow(QMainWindow):
         # calibrate_widget_instance.copy()
 
     def show_setup(self):
+        
         self.calibrate_widget_instance.camera_thread.stop()
+        self.setup_widget.update_list()
         self.stacked_widget.setCurrentIndex(1)
         
         

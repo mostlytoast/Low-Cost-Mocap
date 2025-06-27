@@ -15,25 +15,27 @@ import videoSubSystem
 # from time import sleep
 # from line_profiler import profile
 
+class Params:
+    def __init__(self):
+        self.camera_id = 0
+        self.width= 800
+        self.height = 600
+        self.exposure = 0
+        self.gain = 0 
+        self.name = ""
+        self.system_id 
+        self.intrinsic_matrix
+        self.distortion_coef
+        self.rotation 
 
 @Singleton
 class Cameras:
     # @profile
     def __init__(self):
-        # if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        #     dirname = os.path.dirname(sys._MEIPASS)
-        #     dirname+="_internal/api"
-        #     print("package",dirname)
-        # else:
-        #     dirname = os.path.dirname(__file__)
-        # filename = os.path.join(dirname, "camera-params.json")
-        # f = open(filename)
-        # self.camera_params = json.load(f)
+        
         self.camera_params = []
         # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
-        
-        # self.num_cameras = len(self.cameras.exposure) ## 'cv2.VideoCapture' object has no attribute 'exposure'
-        # print(self.num_cameras)
+        self.cameras = []
         self.current_cam = 0 #index for current camera that is open (in regards to the camera_params)
         self.is_detecting_chessboard = False
         self.is_capturing_points = False
@@ -45,8 +47,6 @@ class Cameras:
 
         self.to_world_coords_matrix = None
 
-        self.drone_armed = []
-
         self.num_objects = None
 
         self.kalman_filter = None
@@ -54,7 +54,6 @@ class Cameras:
         cameras_init = True
 
     def configure(self):
-        self.cameras = []
         # todo have default to specific resolution of cameras 
         # self.cameras = Camera(fps=90, resolution=Camera.RES_SMALL, gain=10, exposure=100)
 
@@ -65,9 +64,6 @@ class Cameras:
             camera_id = videoSubSystem.get_id_from_name(camera_data["name"])
             
             camera_list.append(camera_id)
-        # camera_list = list(set(camera_list)) #remove duplicates 
-        # for cameras in camera_list:
-
             # Use the CAP_V4L2 backend for better performance on Linux if available
             cap = cv.VideoCapture(camera_id, cv.CAP_V4L2)
             # Try to use multi-threaded capture if available (OpenCV 4.5+)
@@ -100,6 +96,43 @@ class Cameras:
     #         file.seek(0)
     #         # convert back to json.
     #         json.dump(file_data, file, indent = 4)
+    def set_rotation(self, i, rot):
+        # i = self.camera_list[i]
+        self.camera_params[i]["rotation"] = rot
+
+    def set_exposure(self, i, exposure):
+        # convert system id to internal id 
+        # i = self.camera_list[i]
+        self.camera_params[i]["exposure"] = exposure
+        if i > len(self.cameras):
+            return
+        if self.cameras[i] is not None and self.cameras[i].isOpened():
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, self.camera_params[i].get("manual_mode",1))
+            self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)
+            
+    def set_gain(self, i, gain):
+        # convert system id to internal id 
+        # i = self.camera_list[i]
+        self.camera_params[i]["gain"] = gain
+        if i > len(self.cameras):
+            return
+        if self.cameras[i] is not None and self.cameras[i].isOpened():
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, self.camera_params[i].get("manual_mode",1))
+            self.cameras[i].set(cv.CAP_PROP_GAIN, gain)  # gain = [gain] * self.num_cameras
+        
+
+    def set_resolution(self, i, height, width):
+        # convert system id to internal id 
+        # i = self.camera_list[i]
+        self.camera_params[i]["height"] = height
+        self.camera_params[i]["width"] = width
+
+        if i > len(self.cameras):
+            return
+
+        if self.cameras[i] is not None and self.cameras[i].isOpened():
+            self.cameras[i].set(cv.CAP_PROP_FRAME_WIDTH, float(width))
+            self.cameras[i].set(cv.CAP_PROP_FRAME_HEIGHT, float(height))
 
     def set_num_objects(self, num_objects):
         self.num_objects = num_objects
@@ -108,7 +141,9 @@ class Cameras:
     def edit_settings(self, exposure, gain): #updated to work with opencv
         for i in range (0,self.num_cameras):
             # TODO have to find way to get settings from v4l2-ctl -d /dev/video4 --list-formats-ext and get them saved here v4l2-ctl -d /dev/video4 --all (via json folder maybe)
-            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 1)
+            # self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 1)
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, self.camera_params[i].get("manual_mode",1))
+
             print("Auto-exposure disabled:", self.cameras[i].get(cv.CAP_PROP_AUTO_EXPOSURE))
             print(exposure)
             success = self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)
@@ -303,15 +338,15 @@ def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
     # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
     thread = threading.Thread(target=detect_chessboard)
     thread.start()
-    print("time",timeout)
+    # print("time",timeout)
     thread.join(timeout)
     if thread.is_alive():
         # Timeout reached, stop thread (can't kill thread, just ignore result)
         pass
     if found[0]:
         cv.drawChessboardCorners(display_img, checkerboard, corners[0], True)
-        return True, display_img
-    return False, img
+        return True, display_img,corners[0]
+    return False, img,corners[0]
 # @profile
 def calculate_reprojection_errors(image_points, object_points, camera_poses):
     errors = np.array([])
