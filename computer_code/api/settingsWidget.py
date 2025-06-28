@@ -127,6 +127,7 @@ class SettingsWidget(QWidget):
         def change_exposure(i):
             cameras = Cameras.instance()
             idx = self.parent.get_index()
+            
             cameras.set_exposure(idx,i)
             print(self.cameras.camera_params[idx])
 
@@ -163,9 +164,17 @@ class SettingsWidget(QWidget):
         self.setLayout(self.layout)
 
     def update_labels(self):
-        if self.parent.get_index() == -1:
-            return
+        has_camera =self.parent.get_index() != -1
+
+        self.rot_combo.setEnabled(has_camera)
+        self.line_edit_id.setEnabled(has_camera)
+        self.res_combo.setEnabled(has_camera)
+        self.exposure_slider.setEnabled(has_camera)
+        self.gain_slider.setEnabled(has_camera)
+        if not has_camera:
+            return 
         data = self.cameras.camera_params[self.parent.get_index()]
+        print("update settings", data)
         # camera data
         for key in self.list_camera_data:
             self.camera_data[key].setText(f"{str(data[key])}")
@@ -186,6 +195,7 @@ class SettingsWidget(QWidget):
             self.res_combo.addItem(
                 str(resolution[0]) + "x" + str(resolution[1]), resolution
             )
+            print(resolution)
             if resolution[0] == data.get("width") and resolution[1] == data.get(
                 "height"
             ):
@@ -199,4 +209,10 @@ class SettingsWidget(QWidget):
         self.exposure_slider.setMaximum(data.get("max_exposure", 100))
         self.exposure_slider.setValue(int(data.get("exposure", 100)))
         self.gain_slider.setValue(int(data.get("gain", 100)))
-        # self.parent.update_labels()
+
+class ExposureGainSettings(QWidget):
+    def __init__(self, parent=None):
+        super(ExposureGainSettings, self).__init__(parent)
+        self.parent = parent
+        self.cameras= Cameras.instance()
+        self.layout = QVBoxLayout()

@@ -2,11 +2,8 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
-
     QAction,
-
     QStackedWidget,
-
 )
 
 from cameraThread import MyThread
@@ -20,6 +17,7 @@ import alertWidget
 import calibrationWidget
 import setupWidget
 
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -30,12 +28,9 @@ class MainWindow(QMainWindow):
         self.stacked_widget = QStackedWidget(self)
         self.setCentralWidget(self.stacked_widget)
         self.initUI()
-        
-        
 
     def initUI(self):
         # TODO need new data structure that better supports edits
-     
 
         self.menubar = self.menuBar()
         file_menu = self.menubar.addMenu("File")
@@ -45,7 +40,7 @@ class MainWindow(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-        
+
         save_as_action = QAction("Save &as", self)
         save_as_action.triggered.connect(self.file.save_as)
         file_menu.addAction(save_as_action)
@@ -91,7 +86,7 @@ class MainWindow(QMainWindow):
             self.styleText = style.read()
             self.setStyleSheet(self.styleText)
         self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
-        # todo singleton for camera data 
+        # todo singleton for camera data
         self.setup_widget = setupWidget.setup_window(self)
         self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
@@ -105,12 +100,15 @@ class MainWindow(QMainWindow):
         """make sure that we have cameras to use for calib otherwise give error popup and return false"""
         if len(self.cameras.added_cameras) == 0:
             alert = alertWidget.alert_widget(
-                "you need to add cameras to the 'added cameras list' before you can start calibration", "ok", "", style=self.styleSheet()
-                )
+                "you need to add cameras to the 'added cameras list' before you can start calibration",
+                "ok",
+                "",
+                style=self.styleSheet(),
+            )
             alert.exec()
             return False
         return True
-            
+
     def calib_scratch(self):
         if self.check_for_webcams():
             # # todo ask to save when settings are un modified
@@ -133,27 +131,23 @@ class MainWindow(QMainWindow):
         # calibrate_widget_instance.single_ui()
         print()
 
-
     def calib_copy(self):
         # todo ask to save when settings are un modified
         # calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
         # self.stacked_widget.addWidget(calibrate_widget_instance)
         # self.stacked_widget.setCurrentWidget(calibrate_widget_instance)
         print()
-    
+
         # calibrate_widget_instance.copy()
 
     def show_setup(self):
-        
+
         # self.calibrate_widget_instance.camera_thread.stop()
         self.camera_thread = MyThread.instance()
         self.camera_thread.set_find_chessboard(False)
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_labels()
         self.stacked_widget.setCurrentIndex(1)
-       
-        
-        
 
     def updates_config(self, camera_params, camera_poses, to_world_coords_matrix):
         """_summary_ gets updated config data from file_mech  and updates the backend
@@ -172,13 +166,11 @@ class MainWindow(QMainWindow):
         self.setup_widget.update_list()
 
 
-
-
-
 if __name__ == "__main__":
     app = QApplication([])
+
     window = MainWindow()
     window.show()
-    
+
     sys.exit(app.exec_())
     # TODO have to find a way to reallocate a camera that moved to a different port with its original calibration settings ex move camera to new usb port and hit reload now have two webcams one without settings

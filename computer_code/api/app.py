@@ -114,9 +114,9 @@ class MainWindow(QtWidgets.QMainWindow):
         settings.addWidget(self.gain_slider, 1, 1)
         stream_preview.addLayout(settings)
 
-        self.update_camera_btn = QPushButton("Update Camera Settings")
-        self.update_camera_btn.clicked.connect(self.update_camera_settings)
-        self.update_camera_btn.setFixedHeight(30)
+        # self.update_camera_btn = QPushButton("Update Camera Settings")
+        # self.update_camera_btn.clicked.connect(self.update_camera_settings)
+        # self.update_camera_btn.setFixedHeight(30)
 
         stream_preview.addWidget(self.update_camera_btn)
         self.layout.addLayout(stream_preview)

@@ -14,14 +14,13 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QGridLayout,
     QSizePolicy,
- 
+
     QSlider,
 )
-from PyQt5.QtGui import QKeySequence, QImage, QPixmap
+from PyQt5.QtGui import QKeySequence, QImage, QPixmap, QPalette
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-
-import ViewportLabel
+from  ViewportLabel import Label
 
 # import sys
 
@@ -38,7 +37,6 @@ class setup_window(QWidget):
     def __init__(self, parent=None):
 
         super(setup_window, self).__init__(parent)
-        # self.list_of_rotations = ["0","90", "180", "270"]
 
         self.camera_thread = MyThread.instance()
         self.camera_thread.frame_signal.connect(self.setImage)
@@ -125,22 +123,22 @@ class setup_window(QWidget):
         # self.webcam_settings_layout.addLayout(self.editable_fields_layout)
 
         # Use a QSplitter to allow resizing between settings and preview
-
+#./computer_code/venv/bin/python3  -m PyQtInspect --direct --show-pqi-stack --qt-support=pyqt5 --file computer_code/api/index.py
         self.webcam_settings_widget = QWidget()
         self.webcam_settings_widget.setLayout(self.webcam_settings_layout)
         self.webcam_settings_widget.setMinimumWidth(300)  # Minimum width
         self.webcam_settings_widget.setMaximumWidth(500)  # Optional: Maximum width
 
-        # self.label = ViewportLabel.Label()
-        self.label = QLabel()
-        # self.label.setAlignment(Qt.AlignRight)
-        self.label.setMinimumSize(800, 600)
-        # self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.current_camera_label = Label()
+        # self.current_camera_label = QLabel()
+        # self.current_camera_label.setAlignment(Qt.AlignRight)
+        self.current_camera_label.setMinimumSize(800, 600)
+        # self.current_camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # self.label.setBackgroundRole()
+        # self.current_camera_label.setBackgroundRole(QPalette. ("112233"))
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.webcam_settings_widget)
-        splitter.addWidget(self.label)
+        splitter.addWidget(self.current_camera_label)
         # splitter.setSizes([200, 400])  # Initial sizes
         splitter.setStretchFactor(0, 1)  # webcam_settings_widget
         splitter.setStretchFactor(1, 3)  # label
@@ -267,11 +265,13 @@ class setup_window(QWidget):
         self.update_list()
     def update_labels(self):
         self.settings_ui.update_labels()
+        if self.get_index() == -1:
+            self.current_camera_label.setText("camera view")
 
     @Slot(QImage)
     def setImage(self, image):
 
-        self.label.setPixmap(QPixmap.fromImage(image))
+        self.current_camera_label.setPixmap(QPixmap.fromImage(image))
         # time_now = time.time()
         # if self.last_time != 0:
         #     self.fps = 1 / (time_now - self.last_time)

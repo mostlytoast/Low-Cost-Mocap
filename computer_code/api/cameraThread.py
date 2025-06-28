@@ -28,14 +28,6 @@ class MyThread(QThread):
         self._lock = self.mutex()
         self._pending_camera_id = None
         self.detect_board = True
-        self.width =800
-        self.height = 600
-        self.exposure = 100
-        self.max_exposure = 0 
-        self.min_exposure = 100
-        self.gain = 0
-        self.auto_exposure = 1 #
-        self.rotation = 0
         self.sensitivity = 0.005
         self.auto_time = 5
         self.imgpoints = []
@@ -54,13 +46,11 @@ class MyThread(QThread):
         self.objp[0, :, :2] = np.mgrid[0 : self.checkerboard[0], 0 : self.checkerboard[1]].T.reshape(-1, 2)
 
     def set_camera_id(self, camera_id):
-        # self.camera_id = camera_id
         with self._lock:
             self._pending_camera_id = camera_id
   
     def calc_calib(self):
         gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
-        
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
             self.objpoints, self.imgpoints, gray.shape[::-1], None, None
         )
@@ -78,6 +68,7 @@ class MyThread(QThread):
             os.makedirs(folder, exist_ok=True)
             filename = f'cam_{self.camera_id}/image_{self.count}.jpg'
             cv2.imwrite(str(filename),img)
+            # if(corners != []):
             self.imgpoints.append(corners)
             print("imgpoints", len(self.imgpoints))
             self.take_capture_state = False
@@ -89,37 +80,21 @@ class MyThread(QThread):
         self._running = True
         cameras = Cameras.instance()
         self.cap = cameras.cameras[self.camera_id]
-
-        # self.cap = cv2.VideoCapture(self.camera_id)
-        # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
-
-        # cameras.set_resolution(self.camera_id,self.width,self.height)
         while self._running:
             with self._lock:
    
                 if self._pending_camera_id is not None:
-                    # if self.cap is not None and self.cap.isOpened():
-                    #     self.cap.release()
                     self.camera_id = self._pending_camera_id
                     self.cap = cameras.cameras[self.camera_id]
-                   
-
-                    # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
                     self._pending_camera_id = None
 
                 if self.cap is not None and self.cap.isOpened():
-                    # print("hi")
-
                     ret, frame = self.cap.read()
                     if ret:
-                        
                         frame = self.chessboard(frame)
-                        # 
                         frame = np.rot90(frame, k=cameras.camera_params[self.camera_id].get("rotation",0))
                         frame = self.cvimage_to_label(frame)
                         self.frame_signal.emit(frame)
-                # else:
-                    # print("cant")
 
             self.msleep(10)  # avoid busy loop
     def set_find_chessboard(self, state):
@@ -133,10 +108,6 @@ class MyThread(QThread):
                 self._capture(corners,frame)
         return frame
     def stop(self):
-        # # Send an empty frame (black image) through the signal
-        # empty_image = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        # empty_qimage = self.cvimage_to_label(empty_image)
-        # self.frame_signal.emit(empty_qimage)
         cameras = Cameras.instance()
         cap = cameras.cameras[self.camera_id]
         self._running = False

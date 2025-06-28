@@ -106,8 +106,9 @@ class Cameras:
         if i > len(self.cameras):
             return
         if self.cameras[i] is not None and self.cameras[i].isOpened():
-            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, self.camera_params[i].get("manual_mode",1))
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 1)
             self.cameras[i].set(cv.CAP_PROP_EXPOSURE, exposure)
+            print("set exposure")
             
     def set_gain(self, i, gain):
         # convert system id to internal id 
@@ -116,11 +117,11 @@ class Cameras:
         if i > len(self.cameras):
             return
         if self.cameras[i] is not None and self.cameras[i].isOpened():
-            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, self.camera_params[i].get("manual_mode",1))
+            self.cameras[i].set(cv.CAP_PROP_AUTO_EXPOSURE, 1)
             self.cameras[i].set(cv.CAP_PROP_GAIN, gain)  # gain = [gain] * self.num_cameras
         
 
-    def set_resolution(self, i, height, width):
+    def set_resolution(self, i, width, height):
         # convert system id to internal id 
         # i = self.camera_list[i]
 

@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy as np
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
@@ -71,7 +72,7 @@ class TestMainWindow(unittest.TestCase):
             fnames.append(f"{os.path.dirname(__file__)}/calibImg/image_{i}.jpg")
             print(fnames[i])
             self.assertTrue(os.path.exists(fnames[i]))
-        with pyvirtualcam.Camera(width=640, height=480, fps=20) as cam:
+        with pyvirtualcam.Camera(width=1280, height=800, fps=20) as cam:
             img = cv2.imread(fnames[0])
             cam.send(img)
             window = MainWindow()
@@ -103,9 +104,10 @@ class TestMainWindow(unittest.TestCase):
 
             # print(window.stacked_widget.currentIndex())
             thread = MyThread.instance()
+            # modify settings 
             window.calibrate_widget_instance.cameras.camera_params[cam_index]["exposure"]=12
             window.calibrate_widget_instance.cameras.camera_params[cam_index]["gain"]=39
-
+            thread.sensitivity = 0.1
             self.assertTrue(window.stacked_widget.currentIndex() == 0)
             for i,frames in enumerate(fnames):
                 
@@ -113,21 +115,28 @@ class TestMainWindow(unittest.TestCase):
                 img = cv2.imread(frames)
                 cam.send(img)
                 window.calibrate_widget_instance.capture_btn.click()
-                print("img",thread.imgpoints)
-                while(True):
-                    if len( window.calibrate_widget_instance.camera_thread.imgpoints) >i:
-                        break
+                print("img",len(thread.imgpoints))
+                time.sleep(2)
+                # while(True):
+                #     if len( window.calibrate_widget_instance.camera_thread.imgpoints) >i:
+                #         break
 
-            window.calibrate_widget_instance.next_finish_btn.click()
+            # window.calibrate_widget_instance.next_finish_btn.click()
+            window.calibrate_widget_instance._finish_calibration()
             output = window.calibrate_widget_instance.cameras.camera_params[window.camera_thread.camera_id].get("intrinsic_matrix")
             
             assert(output != [])
-            
-                # mock_alert_instance.exec.assert_called_once()
 
-    # def find_action(window,title)->QAction:
         
-    
+    def test_exposure(self):
+        # mock_camera_instance = MagicMock()
+        # mock_camera_instance.added_cameras = []
+        # mock_cameras.instance.return_value = mock_camera_instance
+        with pyvirtualcam.Camera(width=1280, height=800, fps=20) as cam:
+            cam.send(img)
+            window = MainWindow()
+            window = MainWindow()
+        
     def tearDown(self):
         # Avoid hanging widgets between tests
         for widget in QApplication.topLevelWidgets():

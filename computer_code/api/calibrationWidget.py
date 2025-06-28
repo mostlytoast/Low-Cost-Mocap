@@ -24,6 +24,7 @@ from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 from cameraThread import MyThread
+from  ViewportLabel import Label
 import settingsWidget
 import alertWidget, videoSubSystem
 from helpers import Cameras
@@ -51,9 +52,12 @@ class CalibrateWidget(QWidget):
         self.setLayout(self.main_layout)
 
         # Current camera label
-        self.current_camera_label = QLabel()
-        self.current_camera_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        self.main_layout.addWidget(self.current_camera_label)
+        # self.label = Label()
+        # self.label.setMinimumSize(800, 600)
+
+        # self.label = QLabel()
+        # self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        # self.main_layout.addWidget(self.label)
 
         # Webcam settings widget and layout
         self.webcam_settings_layout = QVBoxLayout()
@@ -64,12 +68,6 @@ class CalibrateWidget(QWidget):
 
         # Settings UI
         self.settings_ui = settingsWidget.SettingsWidget(self)
-
-        # Webcam control buttons
-        # self.open_btn = QPushButton()
-        # self.open_btn.clicked.connect(self.open_camera)
-        # self.webcam_settings_layout.addWidget(self.open_btn)
-
         self.webcam_settings_layout.addWidget(self.settings_ui)
 
         self.back_btn = QPushButton("go back", clicked=self.go_back)
@@ -81,8 +79,8 @@ class CalibrateWidget(QWidget):
 
         # Preview and capture settings layout
         self.preview_capture_settings_layout = QVBoxLayout()
-        self.label = QLabel()
-        self.label.setAlignment(Qt.AlignRight)
+        self.label = Label()
+        # self.label.setAlignment(Qt.AlignRight)
         self.label.setMinimumSize(800, 600)
         self.preview_capture_settings_layout.addWidget(self.label)
 
@@ -142,9 +140,6 @@ class CalibrateWidget(QWidget):
         self.capture_settings_layout.addWidget(self.timer_slider, 1, 2)
         self._set_auto_timer(20)  # Set default timer
 
-       
-
-
         # Initialize labels and states
         self.update_labels()
 
@@ -198,35 +193,27 @@ class CalibrateWidget(QWidget):
       
         if self.get_index() != -1:
             cam = self.cameras.camera_params[self.get_index()]
-            self.current_camera_label.setText(f"current camera: {cam['name']} id {cam['id']}")
+            self.label.setText(f"current camera: {cam['name']} id {cam['id']}")
         else:
-            self.current_camera_label.setText("current camera: None")
+            self.label.setText("current camera: None")
 
-        # if self.camera_thread._running:
-        #     self.open_btn.setText("Close The Camera")
-        # else:
-        #     self.open_btn.setText("Open The Camera")
         self.capture_btn.setEnabled(self.camera_thread._running and not self.camera_thread.auto_capture_state)
         self.sensitivity_slider.setEnabled(self.camera_thread._running )
         auto = self.camera_thread._running 
         self.auto_btn.setEnabled(auto)
         self.timer_slider.setEnabled(auto)
 
-        enough_captures = len(self.camera_thread.objpoints) >= self.min_num_captures
-        self.next_finish_btn.setEnabled(enough_captures)
+        # enough_captures = len(self.camera_thread.objpoints) >= self.min_num_captures
+        self.next_finish_btn.setEnabled(self.has_enough_captures)
         if self.get_index() != -1:
             idx = self.get_index()
-            # more_cameras = (idx < len(self.cameras.camera_params) - 1)
             if  not self.on_last_camera:
                 cam = self.cameras.camera_params[idx]
                 self.next_finish_btn.setText(f"next camera id: {cam["id"]}")
-               
-
-                # self.next_finish_btn.setEnabled(False)
             else:
                 self.next_finish_btn.setText(f"finish calibration")
-        self.progress_label.setText(f"{len(self.camera_thread.imgpoints)}/{self.min_num_captures}")
 
+        self.progress_label.setText(f"captures left {len(self.camera_thread.imgpoints)}/{self.min_num_captures}")
         self.settings_ui.update_labels()
         
 
@@ -243,8 +230,6 @@ class CalibrateWidget(QWidget):
         alert.exec()
         
         if alert.result() == alert.Accepted:
-            # self.camera_thread.stop()
-            # if self.parent is not None and hasattr(self.parent, "show_setup"):
             self.parent.show_setup()
 
     def get_index(self):
