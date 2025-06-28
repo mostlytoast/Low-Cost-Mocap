@@ -1,4 +1,3 @@
-import os
 import sys
 from PyQt5.QtWidgets import (
     QApplication,
@@ -20,7 +19,7 @@ from PyQt5 import QtWidgets, QtCore
 import numpy as np
 import file_mech
 # import openmesh as om
-
+import style
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -59,21 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.resize(640, 480)
         # TODO probs just include in this file and not as separate css
-        dirname = ""
-        # When accessing these files at runtime, use sys._MEIPASS to get the correct path if running as a bundled app.
-        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-            dirname = os.path.dirname(sys._MEIPASS)
-            dirname += "/_internal/api"
-            print("package", dirname)
-        else:
-            dirname = os.path.dirname(__file__)
-
-        # dirname = os.path.dirname(sys._MEIPASS)
-        filename = os.path.join(dirname, "style.css")
-        f = open(filename)
-        with open(filename) as style:
-            self.styleText = style.read()
-            self.setStyleSheet(self.styleText)
+        self.setStyleSheet(style.style)
+        
 
         self.init_ui()
 
@@ -114,9 +100,9 @@ class MainWindow(QtWidgets.QMainWindow):
         settings.addWidget(self.gain_slider, 1, 1)
         stream_preview.addLayout(settings)
 
-        # self.update_camera_btn = QPushButton("Update Camera Settings")
-        # self.update_camera_btn.clicked.connect(self.update_camera_settings)
-        # self.update_camera_btn.setFixedHeight(30)
+        self.update_camera_btn = QPushButton("Update Camera Settings")
+        self.update_camera_btn.clicked.connect(self.update_camera_settings)
+        self.update_camera_btn.setFixedHeight(30)
 
         stream_preview.addWidget(self.update_camera_btn)
         self.layout.addLayout(stream_preview)
@@ -210,40 +196,15 @@ class MainWindow(QtWidgets.QMainWindow):
         timer.timeout.connect(self.gl_widget.updateGL)
         timer.start()
         # wait till window exists to create grid (will error out other wise)
-        QtCore.QTimer.singleShot(0, self.gl_widget.create_grid)
-        QtCore.QTimer.singleShot(0, self.test_points)
-
+        
         self.update_enabled_states()
+    def startup(self):
+        QtCore.QTimer.singleShot(4, self.gl_widget.create_grid)
+        QtCore.QTimer.singleShot(4, self.test_points)
 
     def test_points(self):
-        # mesh = om.read_trimesh(
-        #     "computer_code/api/Untitled_Scan_17_01_20/textured_output.obj"
-        # )
-        # # Example: Rotate mesh 90 degrees around Z axis
-        # # Set rotation angles in degrees for x, y, z
-        # angle_x = np.radians(90)  # Change as needed
-
-        # # Rotation matrix around X axis
-        # Rx = np.array(
-        #     [
-        #         [1, 0, 0],
-        #         [0, np.cos(angle_x), -np.sin(angle_x)],
-        #         [0, np.sin(angle_x), np.cos(angle_x)],
-        #     ]
-        # )
-
-        # # Combined rotation: R = Rz @ Ry @ Rx
-        # rotation_matrix = Rx
-
-        # for vh in mesh.vertices():
-        #     v = mesh.point(vh)
-        #     rotated = rotation_matrix @ np.array([v[0], v[1], v[2]])
-        #     mesh.set_point(vh, rotated)
-
-        # self.gl_widget.set_mesh(mesh)
         self.gl_widget.add_point([0, 0, 1])
         self.gl_widget.add_point([0, 0, 2])
-
         self.gl_widget.add_point([0, 5, 0])
 
     def setup_scene(self, data):
@@ -264,15 +225,6 @@ class MainWindow(QtWidgets.QMainWindow):
             world_camera_transform = {"R": world_R, "t": world_t}
             self.gl_widget.add_camera(transform=world_camera_transform)
             # self.gl_widget.add_camera(transform=camera_transform)
-
-    # Function to get camera and setup config
-    # def openFile(self):
-    #     # TODO have to find way for this ro
-    #     fname = QtWidgets.QFileDialog.getOpenFileName(
-    #         self, "Open file", "", "Camera Configuration files (*.json)"
-    #     )
-    #     self.camera_thread.update_camera_params(filename=fname[0])
-    # Function to save camera and setup config
     
     
 

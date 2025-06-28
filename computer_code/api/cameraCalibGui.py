@@ -16,8 +16,8 @@ import numpy as np
 import alertWidget
 import calibrationWidget
 import setupWidget
-
-
+import style
+import viewapp   
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -82,16 +82,23 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
         # Apply a VS Code-like style using QSS
-        with open("computer_code/api/style.css") as style:
-            self.styleText = style.read()
-            self.setStyleSheet(self.styleText)
+        # with open("computer_code/api/style.css") as style:
+        #     self.styleText = style.read()
+        self.setStyleSheet(style.style)
+        
         self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
         # todo singleton for camera data
         self.setup_widget = setupWidget.setup_window(self)
         self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
         self.stacked_widget.addWidget(self.setup_widget)
+        self.app_widget_instance = viewapp.MainWindow()
+        self.stacked_widget.addWidget(self.app_widget_instance)
+
+        # self.stacked_widget.setCurrentIndex(2)
+        
         self.stacked_widget.setCurrentWidget(self.setup_widget)
+
         self.show_setup()
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_list()
@@ -124,6 +131,9 @@ class MainWindow(QMainWindow):
             print()
 
     def calib_single(self):
+        self.stacked_widget.setCurrentIndex(2)
+        self.app_widget_instance.startup()
+
         # todo ask to save when settings are un modified
         # calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
         # self.stacked_widget.addWidget(calibrate_widget_instance)
@@ -160,7 +170,7 @@ class MainWindow(QMainWindow):
         # TODO find way to have list update when open new file in calib view
 
         self.cameras.camera_params = camera_params
-        # self.setup_widget.data = camera_params
+    
         self.cameras.camera_poses = camera_poses
         self.cameras.to_world_coords_matrix = to_world_coords_matrix
         self.setup_widget.update_list()

@@ -44,3 +44,5 @@ venv/*
 test.spec
 dist/*
 computer_code/build/*
+computer_code/api/build/*
+computer_code/api/dist/*
