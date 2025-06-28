@@ -23,10 +23,11 @@ import style
 
 class MainWindow(QtWidgets.QMainWindow):
 
-    def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
         self.setWindowTitle("Low-Cost Mocap PyQt")
-
+        print("parent",parent)
+        self.parent = parent
         self.camera_stream_running = False
         self.camera_stream_thread = None
         self.has_world_calibration = False
@@ -195,8 +196,9 @@ class MainWindow(QtWidgets.QMainWindow):
         timer.setInterval(20)  # period, in milliseconds
         timer.timeout.connect(self.gl_widget.updateGL)
         timer.start()
-        # wait till window exists to create grid (will error out other wise)
-        
+        # wait till window exists to create grid and only if not a child to another window (will error out other wise)
+        if self.parent == None:
+            self.startup()
         self.update_enabled_states()
     def startup(self):
         QtCore.QTimer.singleShot(4, self.gl_widget.create_grid)

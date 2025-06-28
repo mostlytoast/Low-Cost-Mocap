@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
         self.stacked_widget.addWidget(self.setup_widget)
-        self.app_widget_instance = viewapp.MainWindow()
+        self.app_widget_instance = viewapp.MainWindow(self)
         self.stacked_widget.addWidget(self.app_widget_instance)
 
         # self.stacked_widget.setCurrentIndex(2)
