@@ -32,12 +32,12 @@ def get_calibration_images(camera_id, width, height):
     # todo have default to specific resolution of cameras
     count = 0
     while True:
-
+        name = "computer_code/api/calibImg" + str(count) + ".jpg" 
         ret, img = cap.read()
         cv2.imshow("img", img)
         if cv2.waitKey(20) & 0xFF == ord("c"):
             images.append(img)
-            # cv2.imwrite(name, img)
+            cv2.imwrite(name, img)
             cv2.imshow("img", img)
             count += 1
             # todo make it so you can quit whenever not just after you take a capture
@@ -259,8 +259,9 @@ def getCameraID():
 
 
 if __name__ == "__main__":
-
-    default_setup()
+    cam_id = get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-1.4):")
+    res = getResolution(cam_id)[0]
+    get_calibration_images(cam_id, res[0],res[1])
 # class detectCameraGUI(QtWidgets.QWidget):
 #     def __init__(self):
 #         super().__init__()

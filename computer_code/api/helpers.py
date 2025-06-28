@@ -87,15 +87,17 @@ class Cameras:
     def set_rotation(self, i, rot):
         # i = self.camera_list[i]
         cameras = Cameras.instance()
-        camera_params[i]["rotation"] = rot
+        cameras.camera_params[i]["rotation"] = rot
     def set_camera_settings(self, i,settings):
         """set the camera settings received from videosubsystem.getSettings()
 
         Args:
             settings (_type_): _description_
         """
+        cameras = Cameras.instance()
+        
         for key in ["max_exposure", "min_exposure", "manual_mode"]:
-            self.camera_params[i][key] = settings[key]
+            cameras.camera_params[i][key] = settings[key]
     def set_exposure(self, i, exposure):
         # convert system id to internal id 
         # i = self.camera_list[i]
@@ -343,6 +345,7 @@ def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
         # Timeout reached, stop thread (can't kill thread, just ignore result)
         pass
     if found[0]:
+        print("found it")
         cv.drawChessboardCorners(display_img, checkerboard, corners[0], True)
         return True, display_img,corners[0]
     return False, img,corners[0]

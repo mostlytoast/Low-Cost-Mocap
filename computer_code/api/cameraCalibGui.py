@@ -37,15 +37,15 @@ class MainWindow(QMainWindow):
         # TODO need new data structure that better supports edits
      
 
-        menubar = self.menuBar()
-        file_menu = menubar.addMenu("File")
-        calibrate_menu = menubar.addMenu("calibration")
+        self.menubar = self.menuBar()
+        file_menu = self.menubar.addMenu("File")
+        self.calibrate_menu = self.menubar.addMenu("calibration")
         # copy_menu = menubar.addMenu("copy")
         # todo add shortcuts?
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-
+        
         save_as_action = QAction("Save &as", self)
         save_as_action.triggered.connect(self.file.save_as)
         file_menu.addAction(save_as_action)
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
 
         self.calibrate_scratch_action = QAction("calibrate from scratch", self)
         self.calibrate_scratch_action.triggered.connect(self.calib_scratch)
-        calibrate_menu.addAction(self.calibrate_scratch_action)
+        self.calibrate_menu.addAction(self.calibrate_scratch_action)
         # self.calibrate_scratch_action.setShortcut("Ctrl+O")
         self.calibrate_scratch_action.setStatusTip(
             "Calibrate a system from scratch, ignores all previous configurations"
@@ -72,13 +72,13 @@ class MainWindow(QMainWindow):
 
         self.calibrate_single_action = QAction("calibrate single camera", self)
         self.calibrate_single_action.triggered.connect(self.calib_single)
-        calibrate_menu.addAction(self.calibrate_single_action)
+        self.calibrate_menu.addAction(self.calibrate_single_action)
         # self.calibrate_single_action.setShortcut("Ctrl+O")
         self.calibrate_single_action.setStatusTip("calibrate one camera")
 
         self.copy_calibration_action = QAction("copy calibration", self)
         self.copy_calibration_action.triggered.connect(self.calib_copy)
-        calibrate_menu.addAction(self.copy_calibration_action)
+        self.calibrate_menu.addAction(self.copy_calibration_action)
         # self.copy_calibration_action.setShortcut("Ctrl+O")
         self.copy_calibration_action.setStatusTip(
             "copies calibration from one camera to another"

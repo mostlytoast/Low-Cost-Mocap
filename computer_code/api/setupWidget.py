@@ -131,8 +131,8 @@ class setup_window(QWidget):
         self.webcam_settings_widget.setMinimumWidth(300)  # Minimum width
         self.webcam_settings_widget.setMaximumWidth(500)  # Optional: Maximum width
 
-        self.label = ViewportLabel.Label()
-   
+        # self.label = ViewportLabel.Label()
+        self.label = QLabel()
         # self.label.setAlignment(Qt.AlignRight)
         self.label.setMinimumSize(800, 600)
         # self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)

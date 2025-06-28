@@ -35,7 +35,7 @@ class CalibrateWidget(QWidget):
         self.parent = parent
         self.cameras = Cameras.instance()
         self.index = 0
-        self.min_num_captures = 16
+        self.min_num_captures = 9
         
         self.has_enough_captures = False
         self.on_last_camera=False

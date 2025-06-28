@@ -1,3 +1,4 @@
+import os
 import threading
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
@@ -43,6 +44,7 @@ class MyThread(QThread):
         self.prev_time = None
         self.auto_capture_state = False
         self.take_capture_state = False
+        self.count = 0 
         self.set_checkerboard()
         
     def set_checkerboard(self, checkerboard = (9, 6), dimension = 21.86):
@@ -66,17 +68,22 @@ class MyThread(QThread):
         cameras.camera_params[self.camera_id]["intrinsic_matrix"] = mtx.tolist()
         cameras.camera_params[self.camera_id]["distortion_coef"] = dist.tolist()
 
-    def _capture(self,corners):
+    def _capture(self,corners,img):
         if self.prev_time == None:
             self.prev_time = time.time()
         time_passed = time.time() - self.prev_time
         # take picture if a board is in view and either capture button clicked or auto auto capture says so 
         if ((time_passed >= self.auto_time and self.auto_capture_state) or self.take_capture_state):
+            folder = f'cam_{self.camera_id}'
+            os.makedirs(folder, exist_ok=True)
+            filename = f'cam_{self.camera_id}/image_{self.count}.jpg'
+            cv2.imwrite(str(filename),img)
             self.imgpoints.append(corners)
             print("imgpoints", len(self.imgpoints))
             self.take_capture_state = False
             self.prev_time = time.time()
             self.objpoints.append(self.objp)
+            self.count +=1
     
     def run(self):
         self._running = True
@@ -123,7 +130,7 @@ class MyThread(QThread):
             find, frame, corners = find_chessboard(frame,self.checkerboard,self.dimension, self.sensitivity)
             if find:
                 self.img = frame
-                self._capture(corners)
+                self._capture(corners,frame)
         return frame
     def stop(self):
         # # Send an empty frame (black image) through the signal
