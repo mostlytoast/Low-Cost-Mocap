@@ -19,7 +19,8 @@ source venv/bin/activate
 # Function to check and install a package if not present
 install_if_missing() {
     local pkg="$1"
-    if ! command -v "$pkg" &> /dev/null; then
+    local trg_pkg="$2" #name of package as used in command line
+    if ! command -v "$trg_pkg" &> /dev/null; then
         echo "$pkg not found, attempting to install..."
         if [ "$(uname)" == "Darwin" ]; then
             # macOS
@@ -46,13 +47,12 @@ install_if_missing() {
 }
 
 # install ffmpeg
-install_if_missing ffmpeg
+install_if_missing ffmpeg ffmpeg
 
 
 # install v4l2
-#TODO error never notices this is already installed because of command name vs install name diff
 #TODO install mac/windows alternatives based on system version 
-install_if_missing v4l-utils
+install_if_missing v4l-utils  v4l2-ctl 
 
 # Upgrade pip and install numpy
 pip install --upgrade pip

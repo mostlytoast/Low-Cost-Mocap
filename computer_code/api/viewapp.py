@@ -229,7 +229,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.gl_widget.add_camera(transform=camera_transform)
     
     
-
     def toggle_live_triangulation(self):
         self.is_triangulating_points = not self.is_triangulating_points
         self.camera_thread.live_mocap(
