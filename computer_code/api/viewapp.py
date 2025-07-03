@@ -1,3 +1,4 @@
+import math
 import sys
 from PyQt5.QtWidgets import (
     QApplication,
@@ -446,7 +447,8 @@ class MainWindow(QtWidgets.QMainWindow):
             and has_camera_poses
         )
         self.set_scale.setEnabled(self.has_origin and self.set_origin.isEnabled())
-        self.acquire_floor.setEnabled(self.has_scale and self.set_scale.isEnabled())
+        self.acquire_floor.setEnabled(self.camera_stream_running
+            and has_camera_poses)
 
         self.toggle_stream_btn.setEnabled(has_configuration)
         self.update_camera_btn.setEnabled(has_configuration)
@@ -496,8 +498,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @Slot(dict)
     def setData(self, data):
-        if data != {}:
-            print(data)
+        # if data != {}:
+        #     print(data)
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
 
@@ -508,6 +510,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if "object_points" in data:
             objects = data.get("object_points")[0]
             self.object_points.append(objects)
+            if len(objects) == 2:
+                print(math.dist(objects[0],objects[1]))
         if self.is_triangulating_points and "object_points" in data:
             self.gl_widget.points_list = []
             self.gl_widget.point_colors = []

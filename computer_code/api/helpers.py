@@ -350,7 +350,7 @@ def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
         # Timeout reached, stop thread (can't kill thread, just ignore result)
         pass
     if found[0]:
-        print("found it")
+        # print("found it")
         cv.drawChessboardCorners(display_img, checkerboard, corners[0], True)
         return True, display_img,corners[0]
     return False, img,corners[0]

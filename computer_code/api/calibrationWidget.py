@@ -148,16 +148,22 @@ class CalibrateWidget(QWidget):
         
         if not self.on_last_camera:
             self.index+=1
+            self.camera_thread.calc_calib()
+            self.camera_thread.set_camera_id(self.get_index())
+            self.camera_thread.start()
         else:
+            self.camera_thread.calc_calib()
             self._finish_calibration()
-            self.update_labels()
-            
+
+        self.camera_thread.clearData() 
+        self.update_labels()
+           
 
     def _finish_calibration(self):
-        self.camera_thread.calc_calib()
+        
         
         self.parent.show_setup()
-        print()
+        self.parent.update_labels()
     def _capture_toggle(self):
         self.camera_thread.take_capture_state = not self.camera_thread.take_capture_state
         self.update_labels()
@@ -189,7 +195,7 @@ class CalibrateWidget(QWidget):
             more_cameras = (idx < len(self.cameras.camera_params) - 1)
             self.on_last_camera = not more_cameras
         
-        self.has_enough_captures = (self.min_num_captures >= len(self.camera_thread.imgpoints))
+        self.has_enough_captures = (self.min_num_captures <= len(self.camera_thread.imgpoints))
       
         if self.get_index() != -1:
             cam = self.cameras.camera_params[self.get_index()]
@@ -207,7 +213,7 @@ class CalibrateWidget(QWidget):
         self.next_finish_btn.setEnabled(self.has_enough_captures)
         if self.get_index() != -1:
             idx = self.get_index()
-            if  not self.on_last_camera:
+            if not self.on_last_camera:
                 cam = self.cameras.camera_params[idx]
                 self.next_finish_btn.setText(f"next camera id: {cam["id"]}")
             else:

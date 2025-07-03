@@ -37,7 +37,11 @@ class MyThread(QThread):
         self.take_capture_state = False
         self.count = 0 
         self.set_checkerboard()
-        
+    def clearData(self):
+        self.imgpoints = []
+        self.objpoints = []
+        self.count = 0 
+
     def set_checkerboard(self, checkerboard = (9, 6), dimension = 21.86):
         self.checkerboard = checkerboard
         self.dimension = dimension
@@ -63,10 +67,10 @@ class MyThread(QThread):
         time_passed = time.time() - self.prev_time
         # take picture if a board is in view and either capture button clicked or auto auto capture says so 
         if ((time_passed >= self.auto_time and self.auto_capture_state) or self.take_capture_state):
-            folder = f'cam_{self.camera_id}'
-            os.makedirs(folder, exist_ok=True)
-            filename = f'cam_{self.camera_id}/image_{self.count}.jpg'
-            cv2.imwrite(str(filename),img)
+            # folder = f'cam_{self.camera_id}'
+            # os.makedirs(folder, exist_ok=True)
+            # filename = f'cam_{self.camera_id}/image_{self.count}.jpg'
+            # cv2.imwrite(str(filename),img)
             # if(corners != []):
             self.imgpoints.append(corners)
             print("imgpoints", len(self.imgpoints))

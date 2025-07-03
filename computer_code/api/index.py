@@ -119,6 +119,13 @@ class MyThread(QThread):
         new_to_world_coords_matrix = np.eye(4)
         new_to_world_coords_matrix[:3, :3] = R
         new_to_world_coords_matrix[:3, 3] = translation
+        rotate_180_x = np.array([
+            [1,  0,  0, 0],
+            [0, -1,  0, 0],
+            [0,  0, -1, 0],
+            [0,  0,  0, 1]
+        ])
+        new_to_world_coords_matrix = rotate_180_x @ new_to_world_coords_matrix
         cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
         self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
 
