@@ -21,7 +21,7 @@ To the right is the camera calibration page where users can use a predetermined 
 <img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20home%20page.png"  width="50%" /><img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20calib%20page.png"  width="50%" />
 
 ## Tracking app
-
+<img src="https://github.com/mostlytoast/Low-Cost-Mocap/blob/newGUI/computer_code/images/trackingapp.gif"  width="50%" />
 
 ## Dependencies
 
