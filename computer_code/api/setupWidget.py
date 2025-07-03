@@ -99,7 +99,7 @@ class setup_window(QWidget):
         self.delete_shortcut2.setContext(Qt.WidgetShortcut)
         self.delete_shortcut2.activated.connect(self.add_webcam)
 
-        self.open_btn = QPushButton("Open The Camera", clicked=self.open_camera)
+        self.open_btn = QPushButton("Open Camera", clicked=self.open_camera)
         self.webcam_settings_layout.addWidget(self.open_btn)
 
         self.settings_ui = settingsWidget.SettingsWidget(self)
