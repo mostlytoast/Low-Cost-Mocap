@@ -1,5 +1,4 @@
 import os
-import threading
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
 import cv2

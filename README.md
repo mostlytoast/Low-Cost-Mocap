@@ -10,7 +10,9 @@ In previous iterations of this system PlayStation Eye cameras were used which re
 
 ## Camera calibration
 
-Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system. This will also have a GUI version shortly
+Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system. 
+
+
 
 ## Dependencies
 
@@ -48,7 +50,7 @@ For 3d viewing i used the [PyQt5 Mesh Viewer](https://github.com/zishun/pyqt-mes
 
 ## Useful tools
 
-if you plan on working on the UI for this project consider using [ PyQtInspect](https://github.com/JezaChen/PyQtInspect-Open) which is a very useful tool to debug potential layout bugs. 
+if you plan on working on the UI for this project consider using [ PyQtInspect](https://github.com/JezaChen/PyQtInspect-Open) which is a very useful tool to debug potential layout bugs.
 
 `./computer_code/venv/bin/python3  -m PyQtInspect --direct --multiprocess --show-pqi-stack --qt-support=pyqt5 --file computer_code/api/cameraCalibGui.py `
 

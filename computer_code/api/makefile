@@ -1,5 +1,5 @@
 compileCalib:
-	pyinstaller cameraCalibGui.py --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
+	pyinstaller cameraCalibGui.py --onefile  --noconsole --clean --strip --hidden-import='scipy._cyutility'
 compileApp:
 	pyinstaller app.py --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
 
@@ -9,4 +9,4 @@ runCalib:
 runApp:
 	./dist/app
 size:
-	echo "app" ; du -h dist/app ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui
+	echo "app" ; du -h dist/app ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui | sort -h 

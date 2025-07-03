@@ -1,13 +1,7 @@
 
 from PyQt5.QtWidgets import (
-  
-    QListWidget,
-    # QListWidgetItem,
-    QShortcut,
-    QHBoxLayout,
     QVBoxLayout,
     QWidget,
-    QPushButton,
     QLabel,
     QComboBox,
     QLineEdit,
@@ -15,19 +9,15 @@ from PyQt5.QtWidgets import (
  
     QSlider,
 )
-from PyQt5.QtGui import QKeySequence, QImage, QPixmap
+
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore import pyqtSlot as Slot
 from helpers import Cameras
-import numpy as np
+
 
 # import sys
-import cameraThread
-import videoSubSystem
-from PyQt5.QtWidgets import QSplitter
-from PyQt5.QtGui import QIntValidator
 
-import alertWidget
+import videoSubSystem
+from PyQt5.QtGui import QIntValidator
 
 
 class SettingsWidget(QWidget):

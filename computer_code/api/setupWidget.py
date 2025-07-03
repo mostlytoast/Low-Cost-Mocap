@@ -1,28 +1,19 @@
-
-import time
 from PyQt5.QtWidgets import (
   
     QListWidget,
-    # QListWidgetItem,
     QShortcut,
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
     QPushButton,
     QLabel,
-    QComboBox,
-    QLineEdit,
     QGridLayout,
-    QSizePolicy,
 
-    QSlider,
 )
-from PyQt5.QtGui import QKeySequence, QImage, QPixmap, QPalette
+from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 from  ViewportLabel import Label
-
-# import sys
 
 from PyQt5.QtWidgets import QSplitter
 from helpers import  Cameras

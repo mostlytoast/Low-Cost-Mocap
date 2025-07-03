@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
 from cameraThread import MyThread
 from helpers import Cameras
 import file_mech
-import numpy as np
+
 
 # import sys
 

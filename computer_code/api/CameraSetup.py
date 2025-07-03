@@ -1,10 +1,8 @@
 
 from videoSubSystem import *
-from PyQt5 import QtWidgets, QtCore
 import cv2
 import numpy as np
 import json
-import sys
 checkerboard = (9,6)
 checkerboard_dimension= 21.86
 # todo document
