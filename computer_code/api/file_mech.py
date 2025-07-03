@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QMessageBox
 )
+import numpy as np
 from helpers import camera_pose_to_serializable, camera_pose_from_serializable, Cameras
 import json
 class file_dialog(QFileDialog):
@@ -93,7 +94,19 @@ class file_dialog(QFileDialog):
             # json.dump(data,f)
 
         try: 
-            data["camera_poses"] =camera_pose_to_serializable(self.cameras.camera_poses)
+            def serialize(pose):
+                out = []
+                for cam in pose: 
+                    if isinstance(cam['R'], np.ndarray):
+                        out.append({'R': cam['R'].tolist(),'t': cam['t']})
+                    else:
+                        out.append({'R': cam['R'],'t': cam['t']})
+
+                return out
+
+            data["camera_poses"] = serialize(self.cameras.camera_poses)
+
+            # data["camera_poses"] =camera_pose_to_serializable(self.cameras.camera_poses)
             # json.dump(data,f)
         except:
         # if (self.cameras.camera_poses != None):
@@ -101,7 +114,14 @@ class file_dialog(QFileDialog):
         # json.dump(data,f)
         # else: 
         #     data["camera_poses"] = []
+        # [{'R': array([[1., 0., 0.],
+    #    [0., 1., 0.],
+    #    [0., 0., 1.]]), 't': [...]}, {'R': array([[-0.58807735,  0.72425855, -0.36002024],
+    #    [-0.25896612,  0.25308268,  0.93214039],
+    #    [ 0.76622554,  0.6414037 ,  0.03872624]]), 't': [...]}]
         with open(self.save_path,"w") as f:
 
             json.dump(data,f)
+
+
     # TODO clean up by moving into app.py and camera calib GUI.py
