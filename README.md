@@ -4,13 +4,12 @@
 
 ## Goal of project
 
-This project was started to take an existing motion capture system made by [jyjblrd](https://github.com/jyjblrd/Low-Cost-Mocap) and improve it so it can become an easy to use and accessible system. Thus providing a low cost alternative for motion capture systems costing only a few hundred dollars, which is significantly cheaper to current commercial systems which can cost multiple thousands of dollars. 
-
-The main use case for this system is at smaller schools and hobbyists that need motion tracking systems for robotics and research applications.
+This project was started to take an existing motion capture system made by [jyjblrd](https://github.com/jyjblrd/Low-Cost-Mocap) and improve it so it can become an easy to use and accessible system. Thus providing a low cost alternative for motion capture systems costing only a few hundred dollars, which is significantly cheaper to current commercial systems which can cost multiple thousands of dollars. The main use case for this system is at smaller schools and hobbyists that need motion tracking systems for robotics and research applications.
+To achieve this many improvements were made to hardware and software which are detailed bellow.
 
 ## Cameras
 
-![img](https://github.com/mostlytoast/Low-Cost-Mocap/blob/no-cv-sfm/images/arducamov9281caseasmexplosion-ezgif.com-video-to-gif-converter-2.gif?raw=true)
+<img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/no-cv-sfm/images/arducamov9281caseasmexplosion-ezgif.com-video-to-gif-converter-2.gif"  width="60%"  style="display: block; margin-left: auto; margin-right: auto;"/>
 
 In previous iterations of this system PlayStation Eye cameras were used which required heavy modifications. This is no longer the case with a new and improved 3d printed case for the Arducam OV9281 usb webcam.
 
@@ -18,8 +17,8 @@ In previous iterations of this system PlayStation Eye cameras were used which re
 
 Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system, shown bellow.
 
-<img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20home%20page.png"  width="50%" /><img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20calib%20page.png"  width="50%" />
- On the left users add cameras they wish to use for their setup to the "added webcams" list using arrows or keyboard shortcuts. They can also select webcams and view a preview by clicking "Open Camera". Additionally settings can be edited and have an instant preview of their effects in the preview window. To the right is the camera calibration page where users can use a predetermined checkerboard to calibrate each camera. Once all cameras are calibrated the user can save the current configuration and use it with the tracking application
+`<img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20home%20page.png"  width="50%" /><img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20calib%20page.png"  width="50%" />`
+ On the left users add cameras they wish to use for their setup to the "added webcams" list using arrows or keyboard shortcuts. They can also select webcams and view a preview by clicking "Open Camera". Additionally settings can be edited and have an instant preview of their effects in the preview window. To the right is the camera calibration page where users can use a predetermined checkerboard to calibrate each camera. Once all cameras are calibrated the user can save the current configuration and use it with the tracking application.
 
 ## Tracking app
 

@@ -80,17 +80,28 @@ class file_dialog(QFileDialog):
         # return data["camera_params"], data["camera_poses"], data["to_world_coords_matrix"]
         # TODO how do we do camera poses 
     def save_config_params(self):
+        # todo have better error detection so when one portion cant be serialized then default val for that is saved and rest saved as normal 
         data = {}
         data["camera_params"] = self.cameras.camera_params
+        # json.dump(data,f)
         try:
-            data["to_world_coords_matrix"] = self.cameras.to_world_coords_matrix.tolist()
+
+            data["to_world_coords_matrix"] = self.cameras.to_world_coords_matrix
+            # json.dump(data,f)
         except:
             data["to_world_coords_matrix"]= []
-        if (self.cameras.camera_poses != None):
-            data["camera_poses"] = camera_pose_to_serializable(self.cameras.camera_poses)
-        else: 
-            data["camera_poses"] = []
+            # json.dump(data,f)
 
+        try: 
+            data["camera_poses"] =camera_pose_to_serializable(self.cameras.camera_poses)
+            # json.dump(data,f)
+        except:
+        # if (self.cameras.camera_poses != None):
+            data["camera_poses"] = (self.cameras.camera_poses)
+        # json.dump(data,f)
+        # else: 
+        #     data["camera_poses"] = []
         with open(self.save_path,"w") as f:
+
             json.dump(data,f)
     # TODO clean up by moving into app.py and camera calib GUI.py

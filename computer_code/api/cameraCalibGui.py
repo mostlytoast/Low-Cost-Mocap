@@ -82,8 +82,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
         # Apply a VS Code-like style using QSS
-        # with open("computer_code/api/style.css") as style:
-        #     self.styleText = style.read()
         self.setStyleSheet(style.style)
         
         self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
@@ -168,12 +166,11 @@ class MainWindow(QMainWindow):
             to_world_coords_matrix (_type_): _description_
         """
         # TODO find way to have list update when open new file in calib view
-
         self.cameras.camera_params = camera_params
-    
         self.cameras.camera_poses = camera_poses
         self.cameras.to_world_coords_matrix = to_world_coords_matrix
         self.setup_widget.update_list()
+        self.setup_widget.update_labels()
 
 
 if __name__ == "__main__":

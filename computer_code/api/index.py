@@ -174,13 +174,15 @@ class MyThread(QThread):
     # @socketio.on("acquire-floor")
 
     def set_origin(self,object_point, toWorldCoordsMatrix):
+        if toWorldCoordsMatrix == []:
+            toWorldCoordsMatrix = np.eye(4).tolist()
         cameras = Cameras.instance()
 
         object_point = np.array(object_point)
         to_world_coords_matrix = np.array(toWorldCoordsMatrix)
         transform_matrix = np.eye(4)
         transform_matrix[:3, 3] = -object_point
-
+       
         to_world_coords_matrix = transform_matrix @ to_world_coords_matrix
         cameras.to_world_coords_matrix = to_world_coords_matrix
         self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})

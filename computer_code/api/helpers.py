@@ -207,7 +207,11 @@ class Cameras:
                         # np.array([[-1,0,0],[0,-1,0],[0,0,1]]) @ 
                         new_object_point = object_point
                         new_object_point = np.concatenate((new_object_point, [1]))
-                        new_object_point = np.array(self.to_world_coords_matrix) @ new_object_point
+                        if self.to_world_coords_matrix == []:
+                            new_object_point = np.eye(4) @ new_object_point
+                        else:
+                       
+                            new_object_point = np.array(self.to_world_coords_matrix) @ new_object_point
                         new_object_point = new_object_point[:3] / new_object_point[3]
                         # new_object_point[1], new_object_point[2] = new_object_point[2], new_object_point[1]
                         object_points[i] = new_object_point
@@ -293,7 +297,7 @@ class Cameras:
     def stop_trangulating_points(self):
         self.is_capturing_points = False
         self.is_triangulating_points = False
-        self.camera_poses = None
+        # self.camera_poses = None
     # @profile
     def start_locating_objects(self):
         self.is_locating_objects = True
