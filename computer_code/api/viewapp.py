@@ -19,7 +19,7 @@ import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
 import file_mech
-
+import inspect
 # import openmesh as om
 import style
 
@@ -67,7 +67,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setStyleSheet(style.style)
 
         self.init_ui()
-
     def init_ui(self):
         stream_preview = QVBoxLayout()
         # Camera Stream Viewer
@@ -198,9 +197,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.menu()
             self.startup()
         self.update_enabled_states()
-
+      
     def menu(self):
         menubar = self.menuBar()
+        menubar.actions
         file_menu = menubar.addMenu("File")
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
@@ -532,7 +532,26 @@ class MainWindow(QtWidgets.QMainWindow):
             self.cameras.to_world_coords_matrix = data.get("to_world_coords_matrix")
             self.setup_scene(data=self.cameras.camera_poses)
             self.update_enabled_states()
-
+    def get_variable_name(self,obj):
+        """Returns the name of the variable pointing to the given object in the caller's scope."""
+        # if self == None:
+        #     return None
+        caller_frame = inspect.currentframe().f_back
+        caller_frame.f_code
+        if caller_frame:
+            for name, value in caller_frame.f_locals.items():
+                if value is obj:
+                    return name
+        for attr_name in dir(self):
+            # Skip built-in/private attributes
+            if attr_name.startswith('__'):
+                continue
+            try:
+                if getattr(self, attr_name) is obj:
+                    return attr_name
+            except AttributeError:
+                continue
+        return None
 
 def main() -> None:
     app = QApplication(sys.argv)
