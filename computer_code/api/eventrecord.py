@@ -1,88 +1,86 @@
-# # Example of using an event filter (conceptual)
-# import sys
-import viewapp 
-# from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
-# from PyQt6.QtCore import QObject, QEvent
-# import math
-import sys
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QPushButton,
-    QSlider,
-    QGridLayout,
-    QAction,
-)
-import inspect 
-from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtCore import Qt,QTimer,QObject,QEvent
-from PyQt5.QtGui import QPixmap, QImage
-import index
-from viewer3d import QGLControllerWidget
+import json
 import time
-from PyQt5 import QtWidgets, QtCore
-import numpy as np
-import file_mech
+import cameraCalibGui
+import sys
+from PyQt5.QtWidgets import QApplication, QAction
 
-# import openmesh as om
-import style
+from PyQt5.QtCore import Qt, QTimer, QObject, QEvent
 
-from helpers import Cameras
-# class MainWindow(QtWidgets.QMainWindow):
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt, QPoint
+import json
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot, QPoint
+from PyQt5.QtTest import QTest
+import json
+import time
 
-#     def __init__(self, parent=None):
-#         super(MainWindow, self).__init__(parent)
-#         self.setWindowTitle("Low-Cost Mocap PyQt")
-#         # print("parent",parent)
-#         self.parent = parent
-#         self.cameras = Cameras.instance()
-#         self.camera_stream_running = False
-#         self.camera_stream_thread = None
-#         self.has_world_calibration = False
-#         self.has_collected_points = False
-#         self.collecting_points = False
-#         self.is_triangulating_points = False
-#         self.is_locating_objects = False
-#         self.is_acquiring_floor = False
-#         self.is_acquiring_origin = False
-#         self.is_acquiring_scale= False
-#         self.has_origin = False
-#         self.has_scale = False
-#         # data variables
-#         self.captured_points_for_pose = []
-#         self.object_points = []
 
-#         self.last_time = 0
-#         # self.cameras.to_world_coords_matrix = [[0.9941338485260931,0.0986512964608827,-0.04433748889242502,0.9938296704767513],[-0.0986512964608827,0.659022672138982,-0.7456252673517598,2.593331619023365],[0.04433748889242498,-0.7456252673517594,-0.6648888236128887,2.9576262456228286],[0,0,0,1]]
-#         # self.cameras.to_world_coords_matrix = np.eye(4)
-#         # self.cameras.camera_poses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
+class PlaybackWorker(QObject):
+    finished = pyqtSignal()
+    play_event = pyqtSignal(dict)  # Emitted for each event to be played
 
-#         self.camera_thread = index.MyThread()
-#         # self.camera_thread.frame_signal.connect(self.setImage)
-#         # self.camera_thread.data_signal.connect(self.setData)
-#         self.file = file_mech.file_dialog(self)
-#         self.central_widget = QWidget()
-#         self.layout = QVBoxLayout()
-#         self.central_widget.setLayout(self.layout)
-#         self.setCentralWidget(self.central_widget)
+    def __init__(self, filename="recorded_events.json"):
+        super().__init__()
+        self.filename = filename
+        self._is_running = True
 
-#         # self.resize(640, 480)
-#         # TODO probs just include in this file and not as separate css
-#         self.setStyleSheet(style.style)
+    def stop(self):
+        self._is_running = False
+
+    @pyqtSlot()
+    def run(self):
+        with open(self.filename, "r") as f:
+            events = json.load(f)
+
+        start_time = time.time()
+        for event in events:
+            if not self._is_running:
+                break
+            self.play_event.emit(event)
+            time.sleep(0.2)  # mimic QTest.qWait(200)
+
+        self.finished.emit()
+
+class EventTypes:
+    """Stores a string name for each event type.
+
+    With PySide2 str() on the event type gives a nice string name,
+    but with PyQt5 it does not. So this method works with both systems.
+    https://stackoverflow.com/questions/62196835/how-to-get-string-name-for-qevent-in-pyqt5
+    """
+
+    def __init__(self):
+        """Create mapping for all known event types."""
+        self.string_name = {}
+        for name in vars(QEvent):
+            attribute = getattr(QEvent, name)
+            if type(attribute) == QEvent.Type:
+                self.string_name[attribute] = name
+
+    def as_string(self, event: QEvent.Type) -> str:
+        """Return the string name for this event."""
+        try:
+            return self.string_name[event]
+        except KeyError:
+            return f"UnknownEvent:{event}"
 
 
 class MyEventFilter(QObject):
-    
-    def __init__(self,parent = None):
+
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.events = [] 
-        self.view = viewapp
+        self.events = []
+        self.view = cameraCalibGui
         self.window = None
-    def set_window(self,window):
+        # self.tracked_events=[10,5,11,127,129,128,2,3]
+        self.tracked_events = [2, 3]
+
+        self.start_time = time.time()
+
+    def set_window(self, window):
         self.window = window
-    def get_variable_name(self,obj):
+
+    def get_variable_name(self, obj):
         """Returns the name of the variable pointing to the given object in the caller's scope."""
         cls = self.window
         if cls == None:
@@ -93,7 +91,7 @@ class MyEventFilter(QObject):
         #     for name, value in caller_frame.f_locals.items():
         #         if value is obj:
         #             return name
-        
+
         for attr_name in dir(cls):
             # Skip built-in/private attributes
             # if attr_name.startswith('__'):
@@ -104,56 +102,204 @@ class MyEventFilter(QObject):
             except AttributeError:
                 continue
         return None
-    # def print_child_widgets(self,parent):
-    #     for child in parent.findChildren(QWidget):
-    #         print(f"Class: {type(child).__name__}, ObjectName: {child.objectName()}")
-    def eventFilter(self, watched, event):
-        # self.print_child_widgets(self.view.MainWindow)
-        if event.type() not in self.events:
-            self.events.append(event.type())
-            
-            print(event)
-        # print(event)
-        if event.type() == QEvent.Type.KeyPress:
-            print(f"Key press event on {watched.objectName()}: {event.key()}")
-        # You can add more event types to log
-        if event.type() == QEvent.Type.MouseButtonPress:
-            if (watched.objectName() == "QMenuClassWindow"):
-                # watched.actions()
-                print()
-                # to cause crash put breakpoint on above line then run this script in debug mode, and click on file menu this causes system to hang 
-            else:
-                print(f"Key press event on {watched.objectName()}")
-            print(self.get_variable_name(watched))
 
-            
+    # def eventFilter(self, watched, event):
+    #     var_name = self.get_variable_name(watched)
+    #     event_str = EventTypes().as_string(event.type())
+    #     # self.print_child_widgets(self.view.MainWindow)
+    #     # if event.type() not in self.events:
+    #     #     self.events.append(event.type())
+
+    #     #     print(event)
+    #     # print(event)
+
+    #     if event.type() == QEvent.Type.KeyPress:
+    #         print(f"Key press event on {watched.objectName()}: {event.key()}")
+    #     # You can add more event types to log
+    #     if event.type() == QEvent.Type.MouseButtonPress:
+    #         if (watched.objectName() == "QMenuClassWindow"):
+    #             print()
+    #             # to cause crash put breakpoint on above line then run this script in debug mode, and click on file menu this causes system to hang
+    #         else:
+    #             print(f"Key press event on {watched.objectName()}")
+    #     if var_name != None:
+
+    #         print(var_name,watched.objectName(),event_str,event.type())
+
+    #     return super().eventFilter(watched, event)
+
+    def eventFilter(self, watched, event):
+        if event.type() in self.tracked_events:
+            event_data = {
+                "timestamp": time.time() - self.start_time,
+                "event_type": EventTypes().as_string(event.type()),
+                "type_code": int(event.type()),
+                "object_name": watched.objectName(),
+                "variable_name": self.get_variable_name(watched),
+            }
+
+            if event.type() == QEvent.KeyPress:
+                event_data.update(
+                    {"key": event.key(), "modifiers": int(event.modifiers())}
+                )
+
+            elif event.type() == QEvent.MouseButtonPress:
+                event_data.update(
+                    {
+                        "button": int(event.button()),
+                        "x": event.pos().x(),
+                        "y": event.pos().y(),
+                    }
+                )
+
+            self.events.append(event_data)
+            print("Recorded:", event_data)
 
         return super().eventFilter(watched, event)
 
-# class MainWindow(QMainWindow):
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("Event Filter Example")
-#         self.label = QLabel("Click or press a key")
-#         self.setCentralWidget(self.label)
-#         self.label.setObjectName("MyLabel")  # Set an object name to identify the widget
+    def save_events_to_file(self, filename="recorded_events.json"):
+        with open(filename, "w") as f:
+            json.dump(self.events, f, indent=2)
 
-if __name__ == '__main__':
+    def load_and_play_events(self, window, filename="recorded_events.json"):
+        with open(filename, "r") as f:
+            events = json.load(f)
+
+        var_map = {
+            self.get_variable_name(child): child
+            for child in window.findChildren(QObject)
+            if self.get_variable_name(child)
+        }
+        object_map = {
+            child.objectName(): child
+            for child in window.findChildren(QObject)
+            if child.objectName()
+        }
+        for event in events:
+            obj = var_map.get(event["variable_name"])
+            if not obj:
+                obj = object_map.get(event["object_name"])
+                if not obj:
+                    print(f"Skipped event, no object named '{event['variable_name']}'")
+
+                    print(f"Skipped event, no object named '{event['object_name']}'")
+                    continue
+
+            # ✅ Skip QAction objects
+            if isinstance(obj, QAction):
+                print(f"Skipped QAction object: {obj.objectName()}")
+                continue
+
+            # if event['type_code'] == QEvent.KeyPress:
+            #     QTest.keyClick(obj, Qt.Key(event['key']), Qt.KeyboardModifiers(event['modifiers']))
+
+            if event["type_code"] == QEvent.MouseButtonPress:
+                pos = QPoint(event["x"], event["y"])
+                QTest.mouseClick(
+                    obj, Qt.MouseButton(event["button"]), Qt.NoModifier, pos
+                )
+
+            QTest.qWait(200)  # Simulate slight delay between events
+    def connect_playback(self, window):
+        self.thread = QThread()
+        self.worker = PlaybackWorker("recorded_events.json")
+        self.worker.moveToThread(self.thread)
+
+        self.worker.play_event.connect(lambda evt: self.handle_event(window, evt))
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+
+        self.thread.start()
+    def handle_event(self, window, event):
+        var_map = {
+            self.get_variable_name(child): child
+            for child in window.findChildren(QObject)
+            if self.get_variable_name(child)
+        }
+        object_map = {
+            child.objectName(): child
+            for child in window.findChildren(QObject)
+            if child.objectName()
+        }
+
+        obj = var_map.get(event["variable_name"]) or object_map.get(event["object_name"])
+        if not obj or isinstance(obj, QAction):
+            print(f"Skipped event: {event}")
+            return
+
+        if event["type_code"] == QEvent.MouseButtonPress:
+            pos = QPoint(event["x"], event["y"])
+            QTest.mouseClick(
+                obj, Qt.MouseButton(event["button"]), Qt.NoModifier, pos
+            )
+
+
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     # global event_filter
+#     filt = MyEventFilter
+#     # event_filter = filt()
+#     # app.installEventFilter(event_filter)  # Install the filter on the application
+
+
+#     window =  cameraCalibGui.MainWindow()
+#     # event_filter.set_window(window)
+#     window.show()
+#     QTimer.singleShot(1000, lambda: MyEventFilter.load_and_play_events(window, 'recorded_events.json'))
+#     # try:
+#     sys.exit(app.exec())
+#     # finally:
+#     #     event_filter.save_events_to_file()
+def record():
     app = QApplication(sys.argv)
-    event_filter = MyEventFilter()
-    app.installEventFilter(event_filter)  # Install the filter on the application
 
-    
-    window =  viewapp.MainWindow()
+    # ✅ Instantiate the event filter
+    event_filter = MyEventFilter()
+    app.installEventFilter(event_filter)
+
+    # ✅ Create and set the window
+    window = cameraCalibGui.MainWindow()
     event_filter.set_window(window)
     window.show()
 
+    # ✅ Use the instance method, not the class method
+    # QTimer.singleShot(1000, lambda: event_filter.load_and_play_events(window, 'recorded_events.json'))
+
+    try:
+        sys.exit(app.exec())
+    finally:
+        event_filter.save_events_to_file()
+
+# def play():
+#     app = QApplication(sys.argv)
+#     event_filter = MyEventFilter()
+#     window = cameraCalibGui.MainWindow()
+#     event_filter.set_window(window)
+#     window.show()
+
+#     QTimer.singleShot(1000, lambda: event_filter.connect_playback(window))
+
+#     sys.exit(app.exec())
+def play():
+    app = QApplication(sys.argv)
+
+    # ✅ Instantiate the event filter
+    event_filter = MyEventFilter()
+    # app.installEventFilter(event_filter)
+
+    # ✅ Create and set the window
+    window = cameraCalibGui.MainWindow()
+    event_filter.set_window(window)
+    window.show()
+
+    # ✅ Use the instance method, not the class method
+    QTimer.singleShot(
+        1000, lambda: event_filter.load_and_play_events(window, "recorded_events.json")
+    )
+
     sys.exit(app.exec())
-# ```
 
-# **Important Considerations:**
 
-# *   **Performance:**  Logging every event can impact performance, so consider what level of detail is necessary.
-# *   **Purpose of recording:**  The best approach depends on why you need to record user actions (e.g., testing, debugging, user analysis).
-
-# By using one of these techniques, you can effectively record user actions in your PyQt application.
+if __name__ == "__main__":
+    # play()
+    record()

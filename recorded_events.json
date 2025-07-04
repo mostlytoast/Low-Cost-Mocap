@@ -1,0 +1,172 @@
+[
+  {
+    "timestamp": 5.055466890335083,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null,
+    "button": 1,
+    "x": 585,
+    "y": 59
+  },
+  {
+    "timestamp": 5.056026220321655,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "",
+    "variable_name": null,
+    "button": 1,
+    "x": 48,
+    "y": 21
+  },
+  {
+    "timestamp": 5.147866487503052,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null
+  },
+  {
+    "timestamp": 5.148139238357544,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "",
+    "variable_name": null
+  },
+  {
+    "timestamp": 6.955973863601685,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null,
+    "button": 1,
+    "x": 662,
+    "y": 59
+  },
+  {
+    "timestamp": 6.956489324569702,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "qt_scrollarea_viewport",
+    "variable_name": null,
+    "button": 1,
+    "x": 52,
+    "y": 20
+  },
+  {
+    "timestamp": 7.049950838088989,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null
+  },
+  {
+    "timestamp": 7.050244092941284,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "qt_scrollarea_viewport",
+    "variable_name": null
+  },
+  {
+    "timestamp": 7.415966510772705,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null,
+    "button": 1,
+    "x": 577,
+    "y": 98
+  },
+  {
+    "timestamp": 7.416341781616211,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "",
+    "variable_name": null,
+    "button": 1,
+    "x": 40,
+    "y": 21
+  },
+  {
+    "timestamp": 7.507978677749634,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null
+  },
+  {
+    "timestamp": 7.508296966552734,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "",
+    "variable_name": null
+  },
+  {
+    "timestamp": 9.431620359420776,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null,
+    "button": 1,
+    "x": 167,
+    "y": 59
+  },
+  {
+    "timestamp": 9.431988000869751,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "qt_scrollarea_viewport",
+    "variable_name": null,
+    "button": 1,
+    "x": 157,
+    "y": 20
+  },
+  {
+    "timestamp": 9.48998212814331,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null
+  },
+  {
+    "timestamp": 9.490271806716919,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "qt_scrollarea_viewport",
+    "variable_name": null
+  },
+  {
+    "timestamp": 10.00220012664795,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null,
+    "button": 1,
+    "x": 180,
+    "y": 181
+  },
+  {
+    "timestamp": 10.002622842788696,
+    "event_type": "MouseButtonPress",
+    "type_code": 2,
+    "object_name": "",
+    "variable_name": null,
+    "button": 1,
+    "x": 162,
+    "y": 17
+  },
+  {
+    "timestamp": 10.11000370979309,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "setup_windowClassWindow",
+    "variable_name": null
+  },
+  {
+    "timestamp": 10.110279560089111,
+    "event_type": "MouseButtonRelease",
+    "type_code": 3,
+    "object_name": "",
+    "variable_name": null
+  }
+]

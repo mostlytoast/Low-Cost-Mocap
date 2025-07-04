@@ -199,32 +199,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_enabled_states()
       
     def menu(self):
-        menubar = self.menuBar()
-        menubar.actions
-        file_menu = menubar.addMenu("File")
-        exit_action = QAction("Exit", self)
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
+        self.menubar = self.menuBar()
+        self.menubar.actions
+        self.file_menu = self.menubar.addMenu("File")
+        self.exit_action = QAction("Exit", self)
+        self.exit_action.triggered.connect(self.close)
+        self.file_menu.addAction(self.exit_action)
+        self.save_as_action = QAction("Save &as", self)
+        self.save_as_action.triggered.connect(self.file.save_as)
+        self.file_menu.addAction(self.save_as_action)
 
-        save_as_action = QAction("Save &as", self)
-        save_as_action.triggered.connect(self.file.save_as)
-        file_menu.addAction(save_as_action)
-
-        save_action = QAction("&Save", self)
-        save_action.triggered.connect(self.file.saveFile)
-        file_menu.addAction(save_action)
-        save_action.setShortcut("Ctrl+S")
-        save_action.setStatusTip("Save File")
+        self.save_action = QAction("&Save", self)
+        self.save_action.triggered.connect(self.file.saveFile)
+        self.file_menu.addAction(self.save_action)
+        self.save_action.setShortcut("Ctrl+S")
+        self.save_action.setStatusTip("Save File")
         def openFile():
             if self.camera_stream_running:
                 self.toggle_camera_stream()
             self.file.openFile()
 
-        open_action = QAction("&Open", self)
-        open_action.triggered.connect(openFile)
-        file_menu.addAction(open_action)
-        open_action.setShortcut("Ctrl+O")
-        open_action.setStatusTip("Open File")
+        self.open_action = QAction("&Open", self)
+        self.open_action.triggered.connect(openFile)
+        self.file_menu.addAction(self.open_action)
+        self.open_action.setShortcut("Ctrl+O")
+        self.open_action.setStatusTip("Open File")
 
     def startup(self):
         QtCore.QTimer.singleShot(4, self.gl_widget.create_grid)
