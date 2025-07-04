@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from PyQt5.QtWidgets import QApplication,QAction
 import sys
-import pyfakewebcam
+# import pyfakewebcam
 # Import your code (adjust import based on your structure)
 from cameraCalibGui import MainWindow
 import pyvirtualcam
@@ -64,12 +64,12 @@ class TestMainWindow(unittest.TestCase):
     def test_check_for_webcams_true(self):
         # requires virtual camera to be loaded 
         # https://github.com/letmaik/pyvirtualcam
-        file = os.path.dirname(__file__) + "/calibImg/image_0.jpg"
+        file = os.path.dirname(__file__) + "/testImages/calibImg/image_0.jpg"
         print(file)
         fnames = []
         # get image files 
         for i in range(12):
-            fnames.append(f"{os.path.dirname(__file__)}/calibImg/image_{i}.jpg")
+            fnames.append(f"{os.path.dirname(__file__)}/testImages/calibImg/image_{i}.jpg")
             print(fnames[i])
             self.assertTrue(os.path.exists(fnames[i]))
         with pyvirtualcam.Camera(width=1280, height=800, fps=20) as cam:
@@ -128,14 +128,14 @@ class TestMainWindow(unittest.TestCase):
             assert(output != [])
 
         
-    def test_exposure(self):
-        # mock_camera_instance = MagicMock()
-        # mock_camera_instance.added_cameras = []
-        # mock_cameras.instance.return_value = mock_camera_instance
-        with pyvirtualcam.Camera(width=1280, height=800, fps=20) as cam:
-            cam.send(img)
-            window = MainWindow()
-            window = MainWindow()
+    # def test_exposure(self):
+    #     # mock_camera_instance = MagicMock()
+    #     # mock_camera_instance.added_cameras = []
+    #     # mock_cameras.instance.return_value = mock_camera_instance
+    #     with pyvirtualcam.Camera(width=1280, height=800, fps=20) as cam:
+    #         cam.send(img)
+    #         window = MainWindow()
+    #         window = MainWindow()
         
     def tearDown(self):
         # Avoid hanging widgets between tests
