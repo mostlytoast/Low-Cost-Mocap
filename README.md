@@ -17,7 +17,8 @@ In previous iterations of this system PlayStation Eye cameras were used which re
 
 Another improvement is a dedicated app for camera calibration which provides intuitive steps for how to setup a system, shown bellow.
 
-`<img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20home%20page.png"  width="50%" /><img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20calib%20page.png"  width="50%" />`
+<img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20home%20page.png"  width="50%" /><img src="https://raw.githubusercontent.com/mostlytoast/Low-Cost-Mocap/refs/heads/newGUI/computer_code/images/calibration%20app%20calib%20page.png"  width="50%" />
+
  On the left users add cameras they wish to use for their setup to the "added webcams" list using arrows or keyboard shortcuts. They can also select webcams and view a preview by clicking "Open Camera". Additionally settings can be edited and have an instant preview of their effects in the preview window. To the right is the camera calibration page where users can use a predetermined checkerboard to calibrate each camera. Once all cameras are calibrated the user can save the current configuration and use it with the tracking application.
 
 ## Tracking app
