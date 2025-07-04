@@ -1,7 +1,6 @@
 import moderngl
 from PyQt5 import QtOpenGL, QtCore
 import numpy as np
-# import openmesh as om
 from pyrr import Matrix44
 from ArcBall import ArcBallUtil
 
