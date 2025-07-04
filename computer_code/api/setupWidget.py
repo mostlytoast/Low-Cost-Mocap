@@ -258,6 +258,7 @@ class setup_window(QWidget):
         self.settings_ui.update_labels()
         if self.get_index() == -1:
             self.current_camera_label.setText("camera view")
+        
 
     @Slot(QImage)
     def setImage(self, image):

@@ -78,7 +78,12 @@ class MainWindow(QMainWindow):
         self.copy_calibration_action.setStatusTip(
             "copies calibration from one camera to another"
         )
-
+        debug_menu = self.menubar.addMenu("Debug")
+        reload_all = QAction("&Reload", self)
+        reload_all.triggered.connect(self.update_all)
+        debug_menu.addAction(reload_all)
+        # reload_all.setShortcut("Ctrl+O")
+        reload_all.setStatusTip("reload")
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
         # Apply a VS Code-like style using QSS
@@ -100,7 +105,9 @@ class MainWindow(QMainWindow):
         self.show_setup()
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_list()
-
+    def update_all(self):
+        self.calibrate_widget_instance.update_labels()
+        self.setup_widget.update_labels()
     def check_for_webcams(self):
         """make sure that we have cameras to use for calib otherwise give error popup and return false"""
         if len(self.cameras.added_cameras) == 0:
@@ -153,9 +160,11 @@ class MainWindow(QMainWindow):
         # self.calibrate_widget_instance.camera_thread.stop()
         self.camera_thread = MyThread.instance()
         self.camera_thread.set_find_chessboard(False)
+        self.stacked_widget.setCurrentIndex(1)
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_labels()
-        self.stacked_widget.setCurrentIndex(1)
+        self.calibrate_widget_instance.update_labels()
+        self.setup_widget.update_labels()
 
     def updates_config(self, camera_params, camera_poses, to_world_coords_matrix):
         """_summary_ gets updated config data from file_mech  and updates the backend
