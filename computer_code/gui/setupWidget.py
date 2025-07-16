@@ -13,15 +13,15 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-from  ViewportLabel import Label
+from .ViewportLabel import Label
 
 from PyQt5.QtWidgets import QSplitter
-from helpers import  Cameras
+from api.helpers import  Cameras
         
-from cameraThread import MyThread
-import settingsWidget
-import videoSubSystem
-import alertWidget
+from .cameraThread import MyThread
+from .settingsWidget import *
+import api.videoSubSystem as videoSubSystem
+from .alertWidget import *
 
 
 class setup_window(QWidget):
@@ -102,7 +102,7 @@ class setup_window(QWidget):
         self.open_btn = QPushButton("Open Camera", clicked=self.open_camera)
         self.webcam_settings_layout.addWidget(self.open_btn)
 
-        self.settings_ui = settingsWidget.SettingsWidget(self)
+        self.settings_ui = SettingsWidget(self)
         
         
         def selection_update_labels():
@@ -278,7 +278,7 @@ class setup_window(QWidget):
             camera_id = int(videoSubSystem.get_id_from_name(name))
             if (camera_id) == -1:
                 print("stop")
-                alert = alertWidget.alert_widget(
+                alert = alert_widget(
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()
                 )
                 alert.exec()
@@ -291,7 +291,7 @@ class setup_window(QWidget):
             self.camera_thread.start()
             self.settings_ui.update_labels()
         except:
-            alert = alertWidget.alert_widget(
+            alert = alert_widget(
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()
             )
             alert.exec()

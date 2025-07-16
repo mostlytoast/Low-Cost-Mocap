@@ -5,28 +5,29 @@ from PyQt5.QtWidgets import (
     QAction,
     QStackedWidget,
 )
-
-from cameraThread import MyThread
-from helpers import Cameras
-import file_mech
+from .cameraThread import MyThread
+from api.helpers import Cameras
+from .file_mech import *  
 
 
 # import sys
 
-import alertWidget
-import calibrationWidget
-import setupWidget
-import style
-import viewapp   
+from .alertWidget import *
+from .calibrationWidget import *
+from .setupWidget  import *
+from .style  import *
+# import viewapp 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-
-        self.file = file_mech.file_dialog(self)
+        print("a")
+        
+        self.file = file_dialog(self)
         self.cameras = Cameras.instance()
         self.save_path = ""
         self.stacked_widget = QStackedWidget(self)
         self.setCentralWidget(self.stacked_widget)
+        print("a")
         self.initUI()
 
     def initUI(self):
@@ -87,16 +88,16 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Camera calibration")
         self.setGeometry(300, 300, 400, 300)
         # Apply a VS Code-like style using QSS
-        self.setStyleSheet(style.style)
+        self.setStyleSheet(style)
         
-        self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
+        self.calibrate_widget_instance = CalibrateWidget(self)
         # todo singleton for camera data
-        self.setup_widget = setupWidget.setup_window(self)
+        self.setup_widget = setup_window(self)
         self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
         self.stacked_widget.addWidget(self.setup_widget)
-        self.app_widget_instance = viewapp.MainWindow(self)
-        self.stacked_widget.addWidget(self.app_widget_instance)
+        # self.app_widget_instance = viewapp.MainWindow(self)
+        # self.stacked_widget.addWidget(self.app_widget_instance)
 
         # self.stacked_widget.setCurrentIndex(2)
         
@@ -111,7 +112,7 @@ class MainWindow(QMainWindow):
     def check_for_webcams(self):
         """make sure that we have cameras to use for calib otherwise give error popup and return false"""
         if len(self.cameras.added_cameras) == 0:
-            alert = alertWidget.alert_widget(
+            alert = alert_widget(
                 "you need to add cameras to the 'added cameras list' before you can start calibration",
                 "ok",
                 "",
@@ -136,11 +137,11 @@ class MainWindow(QMainWindow):
             print()
 
     def calib_single(self):
-        self.stacked_widget.setCurrentIndex(2)
-        self.app_widget_instance.startup()
+        # self.stacked_widget.setCurrentIndex(2)
+        # self.app_widget_instance.startup()
 
         # todo ask to save when settings are un modified
-        # calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
+        # calibrate_widget_instance = calibrate_widget(self)
         # self.stacked_widget.addWidget(calibrate_widget_instance)
         # self.stacked_widget.setCurrentWidget(calibrate_widget_instance)
         # calibrate_widget_instance.single_ui()
@@ -148,7 +149,7 @@ class MainWindow(QMainWindow):
 
     def calib_copy(self):
         # todo ask to save when settings are un modified
-        # calibrate_widget_instance = calibrationWidget.calibrate_widget(self)
+        # calibrate_widget_instance = calibrate_widget(self)
         # self.stacked_widget.addWidget(calibrate_widget_instance)
         # self.stacked_widget.setCurrentWidget(calibrate_widget_instance)
         print()
@@ -182,7 +183,7 @@ class MainWindow(QMainWindow):
         self.setup_widget.update_labels()
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication([])
 
     window = MainWindow()

@@ -23,11 +23,12 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-from cameraThread import MyThread
-from  ViewportLabel import Label
-import settingsWidget
-import alertWidget, videoSubSystem
-from helpers import Cameras
+from .cameraThread import MyThread
+from  .ViewportLabel import Label
+from .settingsWidget import *
+from .alertWidget import *
+import api.videoSubSystem as videoSubSystem
+from api.helpers import Cameras
 # TODO have singleton for camera with a current camera param that stores current camera setting and 
 # todo maybe also have this be singleton for setup data with a param for if it has been modified since saving 
 class CalibrateWidget(QWidget):
@@ -67,7 +68,7 @@ class CalibrateWidget(QWidget):
         self.webcam_settings_widget.setLayout(self.webcam_settings_layout)
 
         # Settings UI
-        self.settings_ui = settingsWidget.SettingsWidget(self)
+        self.settings_ui = SettingsWidget(self)
         self.webcam_settings_layout.addWidget(self.settings_ui)
 
         self.back_btn = QPushButton("go back", clicked=self.go_back)
@@ -229,7 +230,7 @@ class CalibrateWidget(QWidget):
     
 
     def go_back(self):
-        alert = alertWidget.alert_widget(
+        alert = alert_widget(
                 "are you sure you want to leave calibration ", "yes", "no", style=self.styleSheet(),
                 title="exit before finishing?")
         alert.exec()
@@ -252,7 +253,7 @@ class CalibrateWidget(QWidget):
         camera_id = int(videoSubSystem.get_id_from_name(name))
         if (camera_id) == -1:
             print("stop")
-            alert = alertWidget.alert_widget(
+            alert = alert_widget(
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()
             )
             alert.exec()

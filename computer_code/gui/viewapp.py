@@ -10,20 +10,21 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QAction,
 )
+import alertWidget
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QPixmap, QImage
-import index
+import api.index as index
 from viewer3d import QGLControllerWidget
 import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
-import file_mech
+import file_mech as file_mech
 import inspect
 # import openmesh as om
 import style
 
-from helpers import Cameras
+from api.helpers import Cameras
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
@@ -531,6 +532,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.cameras.to_world_coords_matrix = data.get("to_world_coords_matrix")
             self.setup_scene(data=self.cameras.camera_poses)
             self.update_enabled_states()
+        if "error" in data:
+            alert = alertWidget.alert_widget(
+               msg =  data.get("error_message", "there was an error"), accept_msg = "ok",  style=self.styleSheet(),
+                title=data.get("error","Error"))
+            alert.exec()
+        
+            # if alert.result() == alert.Accepted:
+
     def get_variable_name(self,obj):
         """Returns the name of the variable pointing to the given object in the caller's scope."""
         # if self == None:

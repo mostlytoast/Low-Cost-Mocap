@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-import videoSubSystem
+from computer_code.api import videoSubSystem
 import cv2
 
 class TestVideoSubSystem(unittest.TestCase):
@@ -26,8 +26,8 @@ class TestVideoSubSystem(unittest.TestCase):
         mock_completed_process = mock.Mock()
         mock_completed_process.stdout = mock_output
 
-        with patch("videoSubSystem.input", side_effect=["", ""]), patch(
-            "videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
+        with patch("computer_code.api.videoSubSystem.input", side_effect=["", ""]), patch(
+            "computer_code.api.videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
         ):
             output = videoSubSystem.find_camera()
             assert output == [
@@ -42,8 +42,8 @@ class TestVideoSubSystem(unittest.TestCase):
         result_with_cam = [
             ["Integrated Webcam: Integrated_Webcam_HD (usb-0000:00:14.0-5)", 0],
         ]
-        with patch("videoSubSystem.input", side_effect=["", ""]), patch(
-            "videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
+        with patch("computer_code.api.videoSubSystem.input", side_effect=["", ""]), patch(
+            "computer_code.api.videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
         ):
             output = videoSubSystem.find_camera()
             assert output == []
@@ -64,8 +64,8 @@ class TestVideoSubSystem(unittest.TestCase):
 
         # use the patch function from Python’s unittest.mock module to temporarily replace
         #  videoSubSystem.input and videoSubSystem.listWebcams.
-        with patch("videoSubSystem.input", side_effect=["", ""]), patch(
-            "videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
+        with patch("computer_code.api.videoSubSystem.input", side_effect=["", ""]), patch(
+            "computer_code.api.videoSubSystem.listWebcams", side_effect=[result_no_cam, result_with_cam]
         ):
             output = videoSubSystem.find_camera()
             assert output == [
