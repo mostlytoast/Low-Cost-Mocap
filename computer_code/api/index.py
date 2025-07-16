@@ -226,6 +226,12 @@ class MyThread(QThread):
             camera2_image_points = np.take(camera2_image_points, not_none_indicies, axis=0).astype(np.float32)
 
             F, _ = cv.findFundamentalMat(camera1_image_points, camera2_image_points, cv.FM_RANSAC, 1, 0.99999)
+            if not F: 
+                RED = '\033[91m'  # ANSI code for red text
+                RESET = '\033[0m' # ANSI code to reset formatting
+                # TODO put proper error message for this in the gui 
+                error_message = "Error: Unable to find a fundamental matrix, try again ensuring no points are obstructed!"
+                print(f"{RED}{error_message}{RESET}")
             # E = cv.sfm.essentialFromFundamental(F, cameras.get_camera_params(0)["intrinsic_matrix"], cameras.get_camera_params(1)["intrinsic_matrix"])
             E = essential_from_fundamental(F, cameras.get_camera_params(0)["intrinsic_matrix"], cameras.get_camera_params(1)["intrinsic_matrix"])
             possible_Rs, possible_ts = motion_from_essential(E)
