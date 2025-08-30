@@ -31,7 +31,7 @@ The application provides the user with a clutter free experience showing them on
 
 ## Dependencies
 
-The only dependency required is Python 3.12. and has only been tested to be fully working on linux. On MacOS only the camera calibration app works due to mac not fully supporting OpenGL, in future I plan on switching to a graphics platform thats better supported. Support for windows remains untested but could work if [windows subsystem for linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) is used.
+The only dependency required is Python 3.12. and has only been tested to be fully working on linux. Unfortunatly, on MacOS, only the camera calibration app works due to mac not fully supporting OpenGL. I plan on switching to a more universal graphics platform for future versions. Support for windows remains unimplemented as the videoSubsystem needs to be modified to support it.
 
 ## Running the code
 
