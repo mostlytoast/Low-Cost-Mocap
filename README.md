@@ -1,4 +1,4 @@
-# Low Cost Mocap (for drones)
+# Low Cost Mocap For all!
 
 ### An extention to a cheap open source motion capture system with improved tools and cameras
 
