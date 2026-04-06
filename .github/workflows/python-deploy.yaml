@@ -1,0 +1,48 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "newGUI" ]
+    tags:
+      - "v*"   # triggers on version tags like v1.0.0
+
+permissions:
+  contents: write  # required to create releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          make install
+  
+      - name: Build executable
+        run: |
+          make compileCalib
+
+      - name: Rename artifact
+        run: |
+          mv computer_code/api/dist/cameraCalibGui dist/cameraCalib
+
+      - name: Upload artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cameraCalib
+          path: dist/cameraCalib
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/cameraCalib
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

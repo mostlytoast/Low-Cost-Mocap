@@ -56,7 +56,7 @@ install_if_missing v4l-utils  v4l2-ctl
 
 # Upgrade pip and install numpy
 pip install --upgrade pip
-pip install numpy scipy flask Flask-SocketIO Ruckig flask-cors scikit-spatial line-profiler PyQt6 opencv-python-headless imutils pyvirtualcam
+pip install numpy scipy flask Flask-SocketIO Ruckig flask-cors scikit-spatial line-profiler PyQt5 opencv-python-headless imutils pyvirtualcam pyinstaller
 
 echo "Virtual environment ready and numpy installed."  
 

@@ -16,3 +16,5 @@ trackingEXE:
 	cd computer_code/api && ./dist/app
 size:
 	echo "app" ; du -h dist/app ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui | sort -h 
+
+	
