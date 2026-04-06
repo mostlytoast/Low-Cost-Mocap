@@ -2,9 +2,9 @@ SHELL := /bin/bash
 install:
 	cd computer_code && chmod +x install.sh && ./install.sh && pwd && source venv/bin/activate
 compileCalib:
-	cd computer_code/api && pyinstaller cameraCalibGui.py --onefile  --noconsole --clean --strip --hidden-import='scipy._cyutility'
+	cd computer_code && source venv/bin/activate && pip install pyinstaller && pyinstaller api/cameraCalibGui.py --onefile  --noconsole --clean --strip --hidden-import='scipy._cyutility'
 compileTracking:
-	cd computer_code/api && pyinstaller app.py --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
+	cd computer_code && source venv/bin/activate && pip install pyinstaller && pyinstaller api/app.py --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
 
     #  --upx-dir /path/to/upx 
 calib:
