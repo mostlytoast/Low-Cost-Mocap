@@ -1,5 +1,5 @@
 install:
-	cd computer_code && chmod +x install.sh && ./install.sh && source venv/bin/activate
+	cd computer_code && chmod +x install.sh && ./install.sh && pwd && source venv/bin/activate
 compileCalib:
 	cd computer_code/api && pyinstaller cameraCalibGui.py --onefile  --noconsole --clean --strip --hidden-import='scipy._cyutility'
 compileTracking:
