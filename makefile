@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 install:
 	cd computer_code && chmod +x install.sh && ./install.sh && pwd && source venv/bin/activate
 compileCalib:
