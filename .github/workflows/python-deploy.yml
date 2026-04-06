@@ -18,6 +18,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Ensure tag exists
+        run: |
+          if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
+            echo "This workflow must be run on a tag."
+            exit 1
+          fi
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -38,7 +44,7 @@ jobs:
         run: |
           mkdir -p dist/cameraCalibGui && mv computer_code/dist/cameraCalibGui dist/cameraCalibGui
 
-      - name: Upload artifact (optional)
+      - name: Upload artifact 
         uses: actions/upload-artifact@v4
         with:
           name: cameraCalibGui
@@ -47,6 +53,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/cameraCalibGui
+          files: dist/cameraCalibGui/cameraCalibGui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
