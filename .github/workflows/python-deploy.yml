@@ -36,17 +36,17 @@ jobs:
 
       - name: Rename artifact
         run: |
-          mv computer_code/api/dist/cameraCalibGui dist/cameraCalib
+          mkdir -p dist/cameraCalibGui && mv computer_code/dist/cameraCalibGui dist/cameraCalibGui
 
       - name: Upload artifact (optional)
         uses: actions/upload-artifact@v4
         with:
-          name: cameraCalib
-          path: dist/cameraCalib
+          name: cameraCalibGui
+          path: dist/cameraCalibGui
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/cameraCalib
+          files: dist/cameraCalibGui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
