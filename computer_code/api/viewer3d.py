@@ -1,19 +1,27 @@
 import moderngl
-from PyQt5 import QtOpenGL, QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QOpenGLWidget
+from PyQt5.QtCore import QTimer
+
 import numpy as np
 from pyrr import Matrix44
 from ArcBall import ArcBallUtil
 
 
-class QGLControllerWidget(QtOpenGL.QGLWidget):
+class QGLControllerWidget(QOpenGLWidget):
 
     def __init__(self, parent=None):
         self.parent = parent
+        super().__init__(parent)
+        self.ctx = None
         super(QGLControllerWidget, self).__init__(parent)
         
 
     def initializeGL(self):
-        
+        QTimer.singleShot(0, self.init_mgl)
+
+    def init_mgl(self):
+        self.makeCurrent()
         self.ctx = moderngl.create_context()
 
         self.prog = self.ctx.program(
@@ -252,6 +260,8 @@ class QGLControllerWidget(QtOpenGL.QGLWidget):
         self.center = 0.5*(bbmax+bbmin)
         self.scale = np.linalg.norm(bbmax-self.center)
     def paintGL(self):
+        if self.ctx is None:
+            return
         self.ctx.clear(1.0, 1.0, 1.0)
         self.ctx.enable(moderngl.DEPTH_TEST)
 
@@ -320,6 +330,8 @@ class QGLControllerWidget(QtOpenGL.QGLWidget):
     #     self.vao.render()
 
     def resizeGL(self, width, height):
+        if self.ctx is None:
+            return
         width = max(2, width)
         height = max(2, height)
         self.ctx.viewport = (0, 0, width, height)

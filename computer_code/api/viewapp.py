@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QSurfaceFormat
+
+
 import index
 from viewer3d import QGLControllerWidget
 import time
@@ -190,7 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         timer = QtCore.QTimer(self)
         timer.setInterval(20)  # period, in milliseconds
-        timer.timeout.connect(self.gl_widget.updateGL)
+        timer.timeout.connect(self.gl_widget.update)
         timer.start()
         # wait till window exists to create grid and only if not a child to another window (will error out other wise) also prevent duplicate file menu options
         if self.parent == None:
@@ -553,6 +556,10 @@ class MainWindow(QtWidgets.QMainWindow):
         return None
 
 def main() -> None:
+    fmt = QSurfaceFormat()
+    fmt.setVersion(3, 3)
+    fmt.setProfile(QSurfaceFormat.CoreProfile)
+    QSurfaceFormat.setDefaultFormat(fmt)
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
