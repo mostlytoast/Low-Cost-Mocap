@@ -214,7 +214,7 @@ class CalibrateWidget(QWidget):
             idx = self.get_index()
             if not self.on_last_camera:
                 cam = self.cameras.camera_params[idx]
-                self.next_finish_btn.setText(f"next camera id: {cam["id"]}")
+                self.next_finish_btn.setText(f"next camera id: {cam['id']}")
             else:
                 self.next_finish_btn.setText(f"finish calibration")
 
