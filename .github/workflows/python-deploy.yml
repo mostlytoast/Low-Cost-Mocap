@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest windows-latest macos-latest]
 
     steps:
       - name: Ensure tag exists
@@ -69,5 +69,6 @@ jobs:
           files: |
             dist/viewapp/viewapp
             dist/cameraCalibGui/cameraCalibGui
+          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
