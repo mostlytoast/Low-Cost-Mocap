@@ -21,7 +21,7 @@ jobs:
       - name: Ensure tag exists
         run: |
           if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
-            echo "This workflow must be run on a tag."
+            echo "This workflow must be run on a tag. use this command `git tag v1.0.0 && git push origin v1.0.0`"
             exit 1
           fi
       - name: Checkout repo
