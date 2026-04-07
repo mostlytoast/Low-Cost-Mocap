@@ -4,7 +4,7 @@ install:
 compileCalib:
 	cd computer_code/api && ../venv/bin/pip install pyinstaller && ../venv/bin/python -c "import calibrationWidget; print('OK')" && ../venv/bin/pyinstaller cameraCalibGui.py --paths . --onefile  --noconsole --clean --strip --hidden-import='scipy._cyutility' 
 compileTracking:
-	cd computer_code/api && ../venv/bin/pip install pyinstaller && ../venv/bin/pyinstaller app.py --paths . --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
+	cd computer_code/api && ../venv/bin/pip install pyinstaller && ../venv/bin/pyinstaller viewapp.py --paths . --onefile --noconsole --clean --strip --hidden-import='scipy._cyutility'
 calib:
 	./computer_code/venv/bin/python3 computer_code/api/cameraCalibGui.py
 tracking:
@@ -12,6 +12,6 @@ tracking:
 calibEXE:
 	cd computer_code/api/dist && ./cameraCalibGui
 trackingEXE:
-	cd computer_code/api/dist && ./app
+	cd computer_code/api/dist && ./viewapp
 size:
-	echo "app" ; du -h dist/app ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui | sort -h 
+	echo "viewapp" ; du -h dist/viewapp ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui | sort -h 

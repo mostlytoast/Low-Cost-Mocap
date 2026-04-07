@@ -49,9 +49,27 @@ jobs:
           name: cameraCalibGui
           path: dist/cameraCalibGui
 
+     
+
+      - name: Build executable for camera calib app 
+        run: |
+          make trackingEXE
+
+      - name: Rename artifact
+        run: |
+          mkdir -p dist/viewapp && mv computer_code/api/dist/viewapp dist/viewapp
+
+      - name: Upload artifact 
+        uses: actions/upload-artifact@v4
+        with:
+          name: viewapp
+          path: dist/viewapp
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/cameraCalibGui/cameraCalibGui
+          files: |
+            dist/viewapp/viewapp
+            dist/cameraCalibGui/cameraCalibGui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
