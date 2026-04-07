@@ -36,13 +36,16 @@ jobs:
         run: |
           make install
   
-      - name: Build executable
+      - name: Build executable for camera calib app 
         run: |
           make compileCalib
+      - name: Build executable for tracking view app 
+        run: |
+          make compileTracking
 
       - name: Rename artifact
         run: |
-          mkdir -p dist/cameraCalibGui && mv computer_code/dist/cameraCalibGui dist/cameraCalibGui
+          mkdir -p dist/cameraCalibGui && mv computer_code/api/dist/cameraCalibGui dist/cameraCalibGui
 
       - name: Upload artifact 
         uses: actions/upload-artifact@v4

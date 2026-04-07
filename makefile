@@ -12,8 +12,8 @@ calib:
 tracking:
 	./computer_code/venv/bin/python3 computer_code/api/viewapp.py
 calibEXE:
-	cd computer_code && ./dist/cameraCalibGui
+	cd computer_code/api/dist && ./cameraCalibGui
 trackingEXE:
-	cd computer_code && ./dist/app
+	cd computer_code/api/dist && ./app
 size:
 	echo "app" ; du -h dist/app ; echo "cameraCalibGui" ; du -h dist/cameraCalibGui | sort -h 
