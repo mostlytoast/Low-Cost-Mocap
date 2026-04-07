@@ -49,11 +49,9 @@ jobs:
           name: cameraCalibGui
           path: dist/cameraCalibGui
 
-     
-
       - name: Build executable for camera calib app 
         run: |
-          make trackingEXE
+          make compileTracking
 
       - name: Rename artifact
         run: |
