@@ -1,8 +1,9 @@
-from computer_code.api.helpers import camera_pose_to_serializable, calculate_reprojection_errors, bundle_adjustment, Cameras, triangulate_points, essential_from_fundamental, motion_from_essential
+
+from computer_code.api.cameras import Cameras, camera_pose_to_serializable, bundle_adjustment, triangulate_points, essential_from_fundamental, motion_from_essential, calculate_reprojection_errors
+
 import cv2 as cv
 import numpy as np
-from scipy import linalg
-import json
+
 from PyQt5.QtCore import QThread, pyqtSignal as Signal
 from PyQt5.QtGui import QImage
 import cv2
@@ -12,7 +13,7 @@ from skspatial.objects import Plane, Points
 
 cameras_init = False
 num_objects = 2
-class MyThread(QThread):
+class Thread(QThread):
     """separate thread to handle camera input 
 
     Args:
@@ -75,7 +76,7 @@ class MyThread(QThread):
  
     def acquire_floor(self,object_points):
         cameras = Cameras.instance()
-        # object_points = data["objectPoints"]
+
         object_points = np.array([item for sublist in object_points for item in sublist])
         print("\nobject_points",object_points.tolist())
         print("cameras.to_world_coords_matrix",cameras.to_world_coords_matrix )

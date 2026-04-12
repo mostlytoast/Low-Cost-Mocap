@@ -2,37 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": "-m",
-            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
-
-        },
-        {
-            "name": "Python Debugger: Current File with Arguments 2",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": "-m -v ",
-            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
-        },
-        {
-            "name": "Python Debugger: index",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "computer_code/api/index.py",
-            "console": "integratedTerminal",
-            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
-        },
-        {
-             "name": "Python: Module",
+             "name": "Python: cameraCalibGui",
             "type": "debugpy",
             "request": "launch",
             "module": "computer_code.Ui.cameraCalibGui",
+            "justMyCode": true,
+            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
+        },
+        {
+             "name": "Python: trackingGui",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "computer_code.Ui.trackingGui",
             "justMyCode": true,
             "python": "${workspaceFolder}/computer_code/venv/bin/python3"
         }

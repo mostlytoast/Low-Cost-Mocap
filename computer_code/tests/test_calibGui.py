@@ -15,7 +15,7 @@ import pyvirtualcam
 import cv2
 import colorsys
 from PyQt5.QtTest import QTest
-from computer_code.Ui.cameraThread import MyThread
+from computer_code.api.cameraThread import Thread
 
 class TestMainWindow(unittest.TestCase):
     @classmethod
@@ -52,7 +52,7 @@ class TestMainWindow(unittest.TestCase):
         # mock_camera_instance.added_cameras = []
         # mock_cameras.instance.return_value = mock_camera_instance
 
-        with patch("alertWidget.alert_widget") as mock_alert:
+        with patch("computer_code.Ui.alertWidget.alert_widget") as mock_alert:
             mock_alert_instance = MagicMock()
             mock_alert.return_value = mock_alert_instance
 
@@ -103,7 +103,7 @@ class TestMainWindow(unittest.TestCase):
             #         break
 
             # print(window.stacked_widget.currentIndex())
-            thread = MyThread.instance()
+            thread = Thread.instance()
             # modify settings 
             window.calibrate_widget_instance.cameras.camera_params[cam_index]["exposure"]=12
             window.calibrate_widget_instance.cameras.camera_params[cam_index]["gain"]=39

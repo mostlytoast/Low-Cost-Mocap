@@ -12,11 +12,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-from computer_code.Ui.cameraThread import MyThread
+from computer_code.api.cameraThread import Thread
 from  computer_code.Ui.ViewportLabel import Label
 import computer_code.Ui.settingsWidget as settingsWidget
 import computer_code.Ui.alertWidget as alertWidget, computer_code.api.videoSubSystem as videoSubSystem
-from computer_code.api.helpers import Cameras
+from computer_code.api.cameras import Cameras
 # TODO have singleton for camera with a current camera param that stores current camera setting and 
 # todo maybe also have this be singleton for setup data with a param for if it has been modified since saving 
 class CalibrateWidget(QWidget):
@@ -30,7 +30,7 @@ class CalibrateWidget(QWidget):
         self.has_enough_captures = False
         self.on_last_camera=False
         # Camera thread setup
-        self.camera_thread = MyThread.instance()
+        self.camera_thread = Thread.instance()
 
         self.camera_thread.frame_signal.connect(self.setImage)
         self.camera_thread.set_find_chessboard(True)

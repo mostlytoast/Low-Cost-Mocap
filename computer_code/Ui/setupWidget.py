@@ -16,9 +16,9 @@ from PyQt5.QtCore import pyqtSlot as Slot
 from  computer_code.Ui.ViewportLabel import Label
 
 from PyQt5.QtWidgets import QSplitter
-from computer_code.api.helpers import  Cameras
+from computer_code.api.cameras import Cameras
         
-from computer_code.Ui.cameraThread import MyThread
+from computer_code.api.cameraThread import Thread
 import computer_code.Ui.settingsWidget as settingsWidget
 import computer_code.api.videoSubSystem as videoSubSystem
 import computer_code.Ui.alertWidget as alertWidget
@@ -29,7 +29,7 @@ class setup_window(QWidget):
 
         super(setup_window, self).__init__(parent)
 
-        self.camera_thread = MyThread.instance()
+        self.camera_thread = Thread.instance()
         self.camera_thread.frame_signal.connect(self.setImage)
         # self.camera_thread.set_find_chessboard(False)
         self.current_index = -1
@@ -137,7 +137,7 @@ class setup_window(QWidget):
 
         self.webcam_preview_layout.addWidget(splitter)
 
-        # self.camera_thread = cameraThread.MyThread(0)
+        # self.camera_thread = cameraThread.Thread(0)
         # self.camera_thread.frame_signal.connect(self.setImage)
         self.main_layout.addLayout(self.webcam_preview_layout)
         # Set main_layout on a QWidget and set as central widget

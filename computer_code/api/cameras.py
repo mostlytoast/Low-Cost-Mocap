@@ -1,34 +1,23 @@
-import threading
+
 import numpy as np
-from scipy import linalg, optimize #, signal
-from scipy.spatial.transform import Rotation
-import copy
-import json
-# import os
-import time
 import cv2 as cv
 from computer_code.api.KalmanFilter import KalmanFilter
 from computer_code.api.Singleton import Singleton
 import computer_code.api.videoSubSystem as videoSubSystem 
-# import sys
-# from time import sleep
-# from line_profiler import profile
+import numpy as np
+from scipy import linalg, optimize #, signal
+from scipy.spatial.transform import Rotation
+import copy
+import cv2 as cv
+import threading
+# from computer_code.api.imageProcessing import  calculate_reprojection_errors
 
-# class Params:
-#     def __init__(self):
-#         self.camera_id = 0
-#         self.width= 800
-#         self.height = 600
-#         self.exposure = 0
-#         self.gain = 0 
-#         self.name = ""
-#         self.system_id 
-#         self.intrinsic_matrix
-#         self.distortion_coef
-#         self.rotation 
-
+# import computer_code.api.structureFromMotion import find_point_correspondance_and_object_points, locate_objects, make_square
+# import computer_code.api.structureFromMotion find_point_correspondance_and_object_points
 @Singleton
 class Cameras:
+    # TODO maybe combine with cameraThread??
+    # TODO make more flexible to use camera apis beyond CV2 
     # @profile
     def __init__(self):
         
@@ -123,13 +112,13 @@ class Cameras:
     def set_resolution(self, i, width, height):
         # convert system id to internal id 
         # i = self.camera_list[i]
-
+        if i > len(self.cameras):
+            return
         cameras = Cameras.instance()
         cameras.camera_params[i]["height"] = height
         cameras.camera_params[i]["width"] = width
 
-        if i > len(self.cameras):
-            return
+        
 
         if cameras.cameras[i] is not None and cameras.cameras[i].isOpened():
             cameras.cameras[i].set(cv.CAP_PROP_FRAME_WIDTH, float(width))
@@ -222,18 +211,19 @@ class Cameras:
                         objects = locate_objects(object_points, errors)
                         filtered_objects = self.kalman_filter.predict_location(objects)
                         
-                        if len(filtered_objects) != 0:
-                            for filtered_object in filtered_objects:
-                                if self.drone_armed[filtered_object['droneIndex']]:
-                                    filtered_object["heading"] = round(filtered_object["heading"], 4)
+                        # if len(filtered_objects) != 0:
+                        #     for filtered_object in filtered_objects:
 
-                                    serial_data = { 
-                                        "pos": [round(x, 4) for x in filtered_object["pos"].tolist()] + [filtered_object["heading"]],
-                                        "vel": [round(x, 4) for x in filtered_object["vel"].tolist()]
-                                    }
-                                    with self.serialLock:
-                                        self.ser.write(f"{filtered_object['droneIndex']}{json.dumps(serial_data)}".encode('utf-8'))
-                                        time.sleep(0.001)
+                                # if self.drone_armed[filtered_object['droneIndex']]:
+                                #     filtered_object["heading"] = round(filtered_object["heading"], 4)
+
+                                #     serial_data = { 
+                                #         "pos": [round(x, 4) for x in filtered_object["pos"].tolist()] + [filtered_object["heading"]],
+                                #         "vel": [round(x, 4) for x in filtered_object["vel"].tolist()]
+                                #     }
+                                #     with self.serialLock:
+                                #         self.ser.write(f"{filtered_object['droneIndex']}{json.dumps(serial_data)}".encode('utf-8'))
+                                #         time.sleep(0.001)
                             
                         for filtered_object in filtered_objects:
                             filtered_object["vel"] = filtered_object["vel"].tolist()
@@ -318,6 +308,7 @@ class Cameras:
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
 
+
 def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
     # while self._running:
     #     with self._lock:
@@ -393,6 +384,93 @@ def calculate_reprojection_error(image_points, object_point, camera_poses):
         errors = np.concatenate([errors, (image_points_t[i]-projected_img_point).flatten() ** 2])
     
     return errors.mean()
+
+# @profile
+def find_point_correspondance_and_object_points(image_points, camera_poses, frames):
+    cameras = Cameras.instance()
+
+    for image_points_i in image_points:
+        try:
+            image_points_i.remove([None, None])
+        except:
+            pass
+
+    # [object_points, possible image_point groups, image_point from camera]
+    correspondances = [[[i]] for i in image_points[0]]
+
+    Ps = [] # projection matricies
+    for i, camera_pose in enumerate(camera_poses):
+        RT = np.c_[camera_pose["R"], camera_pose["t"]]
+        P = cameras.camera_params[i]["intrinsic_matrix"] @ RT
+        Ps.append(P)
+
+    root_image_points = [{"camera": 0, "point": point} for point in image_points[0]]
+
+    for i in range(1, len(camera_poses)):
+        epipolar_lines = []
+        for root_image_point in root_image_points:
+            # F = cv.sfm.fundamentalFromProjections(Ps[root_image_point["camera"]], Ps[i])
+            F = fundamental_from_projections(Ps[root_image_point["camera"]], Ps[i])
+            line = cv.computeCorrespondEpilines(np.array([root_image_point["point"]], dtype=np.float32), 1, F)
+            epipolar_lines.append(line[0,0].tolist())
+            frames[i] = drawlines(frames[i], line[0])
+
+        not_closest_match_image_points = np.array(image_points[i])
+        points = np.array(image_points[i])
+
+        for j, [a, b, c] in enumerate(epipolar_lines):
+            distances_to_line = np.array([])
+            if len(points) != 0:
+                distances_to_line = np.abs(a*points[:,0] + b*points[:,1] + c) / np.sqrt(a**2 + b**2)
+
+            possible_matches = points[distances_to_line < 5].copy()
+
+            # Commenting out this code produces more points, but more garbage points too
+            # delete closest match from future consideration
+            # if len(points) != 0:
+            #     points = np.delete(points, np.argmin(distances_to_line), axis=0)
+
+            # sort possible matches from smallest to largest
+            distances_to_line = distances_to_line[distances_to_line < 5]
+            possible_matches_sorter = distances_to_line.argsort()
+            possible_matches = possible_matches[possible_matches_sorter]
+    
+            if len(possible_matches) == 0:
+                for possible_group in correspondances[j]:
+                    possible_group.append([None, None])
+            else:
+                not_closest_match_image_points = [row for row in not_closest_match_image_points.tolist() if row != possible_matches.tolist()[0]]
+                not_closest_match_image_points = np.array(not_closest_match_image_points)
+                
+                new_correspondances_j = []
+                for possible_match in possible_matches:
+                    temp = copy.deepcopy(correspondances[j])
+                    for possible_group in temp:
+                        possible_group.append(possible_match.tolist())
+                    new_correspondances_j += temp
+                correspondances[j] = new_correspondances_j
+
+        for not_closest_match_image_point in not_closest_match_image_points:
+            root_image_points.append({"camera": i, "point": not_closest_match_image_point})
+            temp = [[[None, None]] * i]
+            temp[0].append(not_closest_match_image_point.tolist())
+            correspondances.append(temp)
+
+    object_points = []
+    errors = []
+    for image_points in correspondances:
+        object_points_i = triangulate_points(image_points, camera_poses)
+
+        if np.all(object_points_i == None):
+            continue
+
+        errors_i = calculate_reprojection_errors(image_points, object_points_i, camera_poses)
+
+        object_points.append(object_points_i[np.argmin(errors_i)])
+        errors.append(np.min(errors_i))
+
+    return np.array(errors), np.array(object_points), frames
+
 
 """
 Original license for opencv sfm functions (applies to essential_from_fundamental, fundamental_from_projections, and motion_from_essential):

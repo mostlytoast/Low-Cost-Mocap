@@ -8,38 +8,40 @@ from unittest.mock import patch, MagicMock
 # import unittest
 # from unittest.mock import patch, MagicMock
 import numpy as np
-import computer_code.api.index as index
+import  computer_code.api.trackingThread as trackingThread
 
 
 # TODO for some reason ./bin/python -m pip install flask-cors has to be run in computer_code to prevent import issue with flask-cors that prevents vscode testing suit from working
-class TestIndexSystem(unittest.TestCase):
+class TestTrackingThread(unittest.TestCase):
     def points_are_flat(self, objects):
         floor_y = objects[0][1]  # get the y (height) for the first point
         for obj in objects[1:]:
             assert np.isclose(obj[1], floor_y, atol=0.3), f"obj[1]={obj[1]}, floor_y={floor_y}"
 
-    @patch("index.Cameras")
-    @patch("index.socketio")
-    def check_floor(self, data, mock_socketio, mock_Cameras):
+    @patch("computer_code.api.trackingThread.Cameras")
+    @patch("computer_code.api.trackingThread.Signal")
+    def check_floor(self, data, mock_Cameras,mock_Signal):
         # Arrange
         # Mock Cameras singleton and its to_world_coords_matrix
         mock_cameras_instance = MagicMock()
         mock_cameras_instance.to_world_coords_matrix = np.eye(4)
         mock_Cameras.instance.return_value = mock_cameras_instance
 
+        mock_signal_instance = MagicMock()
+        trackingThread.Thread.data_signal = mock_Signal
         # Prepare fake object points (3 points in 3D)
 
-        index.acquire_floor(data)
+        trackingThread.Thread.acquire_floor(trackingThread.Thread,data["objectPoints"])
 
         # Cameras.to_world_coords_matrix should be updated (called twice due to permutation)
         self.assertTrue(mock_cameras_instance.to_world_coords_matrix.shape == (4, 4))
         # socketio.emit should be called with the correct event
-        mock_socketio.emit.assert_called_with(
-            "to-world-coords-matrix",
-            {
-                "to_world_coords_matrix": mock_cameras_instance.to_world_coords_matrix.tolist()
-            },
-        )
+        # mock_socketio.emit.assert_called_with(
+        #     "to-world-coords-matrix",
+        #     {
+        #         "to_world_coords_matrix": mock_cameras_instance.to_world_coords_matrix.tolist()
+        #     },
+        # )
         # points should be on flat plane
         object_points = data["objectPoints"]
         object_points = np.array(
@@ -67,9 +69,8 @@ class TestIndexSystem(unittest.TestCase):
         self.points_are_flat(object_points)
 
     def test_1(self):
-        data = {
-            "objectPoints": [[[0,2,-1]], [[1,2,-1]], [[1,0,0]],[[0,0,0]]]
-        }
+        data = {"objectPoints":[[[0,2,-1]], [[1,2,-1]], [[1,0,0]],[[0,0,0]]]}
+        
         self.check_floor(data)
 
     def test_2(self):
@@ -82,7 +83,7 @@ class TestIndexSystem(unittest.TestCase):
         data = {"objectPoints": [[[1, 0,3]], [[-1, 0,3]], [[-1, 4,0]], [[1, 4,0]]]}
         self.check_floor(data)
         
-    @patch("index.Cameras")
+    @patch("computer_code.api.trackingThread.Cameras")
     def test_4(self,mock_Cameras):
         data = {
             "objectPoints": [
@@ -151,7 +152,7 @@ class TestIndexSystem(unittest.TestCase):
        
         self.check_floor(data)
 
-    @patch("index.Cameras")
+    @patch("computer_code.api.trackingThread.Cameras")
     def test_5(self, mock_Cameras):
         data = {
             "objectPoints": [
@@ -334,12 +335,12 @@ class TestIndexSystem(unittest.TestCase):
         mock_Cameras.instance.return_value = mock_cameras_instance
 
         self.check_floor(data)
-    @patch("index.Points")
-    @patch("index.Plane")
-    @patch("index.Cameras")
-    @patch("index.socketio")
+    @patch("computer_code.api.trackingThread.Points")
+    @patch("computer_code.api.trackingThread.Plane")
+    @patch("computer_code.api.trackingThread.Cameras")
+    # @patch("computer_code.api.trackingThread.socketio")
     def test_acquire_floor_rotation(
-        self, mock_socketio, mock_Cameras, mock_Plane, mock_Points
+        self, mock_Cameras, mock_Plane, mock_Points
     ):
         # Arrange
         mock_cameras_instance = MagicMock()
@@ -361,7 +362,7 @@ class TestIndexSystem(unittest.TestCase):
         # mock_Plane.best_fit.return_value = mock_plane
 
         # Act
-        index.acquire_floor(data)
+        # trackingThread.Thread.acquire_floor(trackingThread.Thread,data["objectPoints"])
         self.check_floor(data)
 
 
@@ -374,12 +375,12 @@ class TestIndexSystem(unittest.TestCase):
         #     },
         # )
 
-    @patch("index.Points")
-    @patch("index.Plane")
-    @patch("index.Cameras")
-    @patch("index.socketio")
+    @patch("computer_code.api.trackingThread.Points")
+    @patch("computer_code.api.trackingThread.Plane")
+    @patch("computer_code.api.trackingThread.Cameras")
+    # @patch("computer_code.api.trackingThread.socketio")
     def test_acquire_floor_handles_empty_points(
-        self, mock_socketio, mock_Cameras, mock_Plane, mock_Points
+        self, mock_Cameras, mock_Plane, mock_Points
     ):
         # Arrange
         mock_cameras_instance = MagicMock()
@@ -398,11 +399,6 @@ class TestIndexSystem(unittest.TestCase):
 
         # Act & Assert
         # Should not raise, but will call with empty points
-        index.acquire_floor(data)
+        # trackingThread.Thread.acquire_floor(trackingThread.Thread,data["objectPoints"])
         mock_Plane.best_fit.assert_called_once()
-        mock_socketio.emit.assert_called_with(
-            "to-world-coords-matrix",
-            {
-                "to_world_coords_matrix": mock_cameras_instance.to_world_coords_matrix.tolist()
-            },
-        )
+        

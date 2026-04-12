@@ -55,19 +55,19 @@ jobs:
 
       - name: Rename artifact
         run: |
-          mkdir -p dist/viewapp && mv computer_code/api/dist/viewapp dist/viewapp
+          mkdir -p dist/trackingApp && mv computer_code/api/dist/trackingGui dist/trackingApp
 
       - name: Upload artifact 
         uses: actions/upload-artifact@v4
         with:
-          name: viewapp
-          path: dist/viewapp
+          name: trackingApp
+          path: dist/trackingApp
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/viewapp/viewapp
+            dist/trackingApp/trackingGui
             dist/cameraCalibGui/cameraCalibGui
           
         env:

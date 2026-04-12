@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import Qt
-from computer_code.api.helpers import Cameras
+from computer_code.api.cameras import Cameras
 
 
 # import sys

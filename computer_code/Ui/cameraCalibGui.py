@@ -6,9 +6,9 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
 )
 
-import computer_code.Ui.file_mech as file_mech
-from computer_code.api.helpers import Cameras
-from computer_code.Ui.cameraThread import MyThread
+import computer_code.Ui.fileMech as fileMech
+from computer_code.api.cameras import Cameras
+from computer_code.api.cameraThread import Thread
 
 
 # import sys
@@ -17,12 +17,12 @@ import computer_code.Ui.alertWidget as alertWidget
 import computer_code.Ui.calibrationWidget as calibrationWidget
 import computer_code.Ui.setupWidget as setupWidget
 import computer_code.Ui.style as style
-# import computer_code.Ui.viewapp as viewapp   
+# import computer_code.Ui.trackingGui as trackingGui   
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.file = file_mech.file_dialog(self)
+        self.file = fileMech.file_dialog(self)
         self.cameras = Cameras.instance()
         self.save_path = ""
         self.stacked_widget = QStackedWidget(self)
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
         self.stacked_widget.addWidget(self.setup_widget)
-        # self.app_widget_instance = viewapp.MainWindow(self)
+        # self.app_widget_instance = trackingGui.MainWindow(self)
         # self.stacked_widget.addWidget(self.app_widget_instance)
 
         # self.stacked_widget.setCurrentIndex(2)
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
             self.calibrate_widget_instance.update_labels()
             self.setup_widget.update_labels()
             self.stacked_widget.setCurrentIndex(0)
-            self.camera_thread = MyThread.instance()
+            self.camera_thread = Thread.instance()
             self.camera_thread.set_find_chessboard(True)
             self.calibrate_widget_instance.open_camera()
             # self.stacked_widget.setCurrentWidget(self.calibrate_widget_instance)
@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
     def show_setup(self):
 
         # self.calibrate_widget_instance.camera_thread.stop()
-        self.camera_thread = MyThread.instance()
+        self.camera_thread = Thread.instance()
         self.camera_thread.set_find_chessboard(False)
         self.stacked_widget.setCurrentIndex(1)
         self.calibrate_widget_instance.update_labels()

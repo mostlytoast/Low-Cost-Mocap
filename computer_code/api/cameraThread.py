@@ -12,15 +12,17 @@ import numpy as np
 Returns:
     _type_: _description_ signal image 
 """
-from computer_code.api.helpers import find_chessboard, Cameras
+
+from computer_code.api.cameras import Cameras, find_chessboard
+
 import time
 @Singleton
-class MyThread(QThread):
+class Thread(QThread):
     frame_signal = Signal(QImage)
 
     def __init__(self):
         super().__init__()
-        
+        #TODO use the camera type from helpers??
         self.camera_id = 0
         self.cap = None
         self._running = False

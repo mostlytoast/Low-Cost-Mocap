@@ -16,17 +16,17 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtGui import QSurfaceFormat
 
 
-import computer_code.api.index as index
+import computer_code.api.trackingThread as trackingThread
 from computer_code.Ui.viewer3d import QGLControllerWidget
 import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
-import computer_code.Ui.file_mech as file_mech
+import computer_code.Ui.fileMech as fileMech
 import inspect
 # import openmesh as om
 import computer_code.Ui.style as style
 
-from computer_code.api.helpers import Cameras
+from computer_code.api.cameras import Cameras
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
@@ -56,10 +56,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.cameras.to_world_coords_matrix = np.eye(4)
         # self.cameras.camera_poses = ([{"R":[[1,0,0],[0,1,0],[0,0,1]],"t":[0,0,0]},{"R":[[-0.13639683654819235,0.5218092394166619,-0.8420872998917929],[-0.4139150519535063,0.7422608899144861,0.5269944032621987],[0.9000390173464546,0.42043297796766566,0.11474266116518528]],"t":[0.26932272217012254,-0.5101944343371594,0.89286825065571]}])
 
-        self.camera_thread = index.MyThread()
+        self.camera_thread = trackingThread.Thread()
         self.camera_thread.frame_signal.connect(self.setImage)
         self.camera_thread.data_signal.connect(self.setData)
-        self.file = file_mech.file_dialog(self)
+        self.file = fileMech.file_dialog(self)
         self.central_widget = QWidget()
         self.layout = QVBoxLayout()
         self.central_widget.setLayout(self.layout)

@@ -1,8 +1,6 @@
 import unittest
 from unittest import mock
-import numpy as np
-import sys
-import computer_code.Ui.CameraSetup as CameraSetup
+import computer_code.Ui.CLCameraSetup as CLCameraSetup
 import json
 import glob
 
@@ -11,10 +9,6 @@ import glob
 import cv2
 
 import unittest
-import sys
-from io import StringIO
-from contextlib import redirect_stdout
-
 
 class TestGenerateCalibrationData(unittest.TestCase):
     # @mock.patch("CameraSetup.glob.glob")
@@ -59,7 +53,7 @@ class TestGenerateCalibrationData(unittest.TestCase):
 
     def test_resolutions(self):
         with mock.patch("builtins.input", return_value="2"):
-            print(CameraSetup.getResolution(4))
+            print(CLCameraSetup.getResolution(4))
         # buffer = StringIO()
         # with redirect_stdout(buffer):
         #     print("Hello, stdout!")
@@ -92,7 +86,7 @@ class TestGenerateCalibrationData(unittest.TestCase):
             img = cv2.imread(fname)
             images.append(img)
 
-        mtx, dist = CameraSetup.generate_calibration_data(
+        mtx, dist = CLCameraSetup.generate_calibration_data(
             images, checkerboard=(5, 6), dimension=30
         )
         output = []
