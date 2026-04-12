@@ -4,7 +4,7 @@
 
 ## Goal of project
 
-This project was started to take an existing motion capture system made by [jyjblrd](https://github.com/jyjblrd/Low-Cost-Mocap) and improve it so it can become an easy to use and accessible system. Thus providing a low cost alternative for motion capture systems costing only a few hundred dollars, which is significantly cheaper to current commercial systems which can cost multiple thousands of dollars. The main use case for this system is at smaller schools and hobbyists that need motion tracking systems for robotics and research applications.
+This project was started to take an existing motion capture system made by [jyjblrd](https://github.com/jyjblrd/Low-Cost-Mocap) and improve it so it can become an easy to use and accessible system. Thus providing a low cost alternative for motion capture systems costing only a few hundred dollars, which is significantly cheaper to current multi thousand dollar commercial systems. The main use case for this system is at smaller schools and hobbyists that need motion tracking systems for robotics and research applications.
 To achieve this many improvements were made to hardware and software which are detailed bellow.
 
 ## Cameras
@@ -31,7 +31,7 @@ The application provides the user with a clutter free experience showing them on
 
 ## Dependencies
 
-The only dependency required is Python 3.12. and has only been tested to be fully working on linux. Unfortunatly, on MacOS, only the camera calibration app works due to mac not fully supporting OpenGL. I plan on switching to a more universal graphics platform for future versions. Support for windows remains unimplemented as the videoSubsystem needs to be modified to support it.
+The only dependency required is Python 3.12. and has only been tested to be fully working on linux. Full support for Windows and MacOS remains unimplemented as the videoSubsystem needs to be modified to support it, and platforms like MacOS limit control for usb cameras meaning exposure can not be set for cameras.
 
 ## Running the code
 
@@ -44,9 +44,8 @@ $ source venv/bin/activate
 
 Then run either the calibration or tracking app by running `make calib` or `make tracking` respectively.
 
-## Compile to binary
+## Compile to binaryne of the main reasons for removing JavaScript from this project was so PyInstaller could be used to create a portable executable making the project more accessible to normal users. Currently the binary has to be compiled manually which can be done by running `make compileCalib` and then `make compileTracking` to generate the exe for each. The executable for each can be found in computer_code/api/dist and can be run using commands `make calibEXE` and then `make trackingEXE`.
 
-One of the main reasons for removing JavaScript from this project was so PyInstaller could be used to create a portable executable making the project more accessible to normal users. Currently the binary has to be compiled manually which can be done by running `make compileCalib` and then `make compileTracking` to generate the exe for each. The executable for each can be found in computer_code/api/dist and can be run using commands `make calibEXE` and then `make trackingEXE`.
     Currently work is being done to combine both of these programs into one application which would reduce file sizes for the installer.
 
 ## Other repositories used
@@ -58,6 +57,10 @@ For 3d viewport in the tracking application I used the [PyQt5 Mesh Viewer](https
 if you plan on working on the UI for this project consider using [ PyQtInspect](https://github.com/JezaChen/PyQtInspect-Open) which is a very useful tool to debug potential layout bugs.
 
 `./computer_code/venv/bin/python3  -m PyQtInspect --direct --multiprocess --show-pqi-stack --qt-support=pyqt5 --file computer_code/api/cameraCalibGcomputer_code.Ui.py `
+
+## Pushing releases
+
+releases are compiled by pushing to the main branch with a version tag greater then currently released version. It will be automatically packaged and shown on the releases tab when the push is accepted.
 
 ## Documentation
 
