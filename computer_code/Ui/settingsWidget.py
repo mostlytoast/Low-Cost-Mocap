@@ -11,12 +11,12 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import Qt
-from helpers import Cameras
+from computer_code.api.helpers import Cameras
 
 
 # import sys
 
-import videoSubSystem
+import computer_code.api.videoSubSystem as videoSubSystem
 from PyQt5.QtGui import QIntValidator
 
 

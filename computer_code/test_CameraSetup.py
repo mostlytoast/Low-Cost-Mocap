@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 import numpy as np
 import sys
-import CameraSetup
+import computer_code.Ui.CameraSetup as CameraSetup
 import json
 import glob
 

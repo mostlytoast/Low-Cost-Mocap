@@ -2,18 +2,25 @@ import platform
 import subprocess
 import re
 
+def get_id_from_v4l2(device_line):
+    match = re.search(r"/dev/video(\d+)", device_line)
+    return match.group(1) if match else None
+
 
 def listWebcams():
     """_summary_ returns list of attached webcams plus their ids
     Returns:
     list : [<system name>, device_id]
     """
-    # TODO get alternative versions working for different operating systems
     output = []
-    if platform.system().lower() == "linux":
+    system = platform.system().lower()
+
+    if system == "linux":
         result = (
             subprocess.run(
-                "v4l2-ctl --list-devices", shell=True, stdout=subprocess.PIPE
+                "v4l2-ctl --list-devices",
+                shell=True,
+                stdout=subprocess.PIPE,
             )
             .stdout.decode("utf-8")
             .split("\n")
@@ -22,18 +29,54 @@ def listWebcams():
 
         for i, line in enumerate(result):
             if ("\t" not in line) and (i < len(result) - 1):
-                # camera name found
-                # todo get error checking working
-                # Extract the last number from the next line (device id)
                 device_line = result[i + 1]
-                # Extract the device id from a line like '\t/dev/video4'
                 device_id_str = get_id_from_v4l2(device_line)
-                device_id = int(device_id_str)
-                output.append([line, device_id])
-                # should this include the id of the camera? this could change immediately after running this code
-    # todo get working for macos
-    return output
 
+                if device_id_str is not None:
+                    device_id = int(device_id_str)
+                    output.append([line.strip(), device_id])
+
+        # Sort by device_id to keep consistent ordering
+        output.sort(key=lambda x: x[1])
+
+    elif system == "darwin":  # macOS
+        result = (
+            subprocess.run(
+                ["system_profiler", "SPCameraDataType"],
+                stdout=subprocess.PIPE,
+            )
+            .stdout.decode("utf-8")
+        )
+
+        cameras = []
+        current_name = None
+        unique_id = None
+
+        for line in result.split("\n"):
+            line = line.strip()
+
+            # Camera name (no indentation level marker like Linux, but ends with ":")
+            if line.endswith(":") and "Model ID" not in line:
+                current_name = line.replace(":", "")
+                unique_id = None
+
+            # Extract a stable identifier (UID)
+            if "Unique ID:" in line:
+                unique_id = line.split("Unique ID:")[-1].strip()
+                print(current_name, unique_id)
+            if current_name and unique_id:
+                cameras.append((current_name, unique_id))
+                current_name = None
+                unique_id = None
+
+        # Sort by unique_id to keep stable ordering across runs
+        cameras.sort(key=lambda x: x[1])
+
+        # Assign stable indices
+        for idx, (name, uid) in enumerate(cameras):
+            output.append([f"{name}, {uid}", idx])
+
+    return output
 
 def find_camera():
     """_summary_
@@ -64,10 +107,6 @@ def find_camera():
     #     time.sleep(0.5)
     return [x for x in result_with_cam if x not in result_no_cam]
 
-
-def get_id_from_v4l2(device_line):
-    device_id_str = device_line.strip().split("/")[-1].replace("video", "")
-    return int(device_id_str)
 
 
 def get_id_from_name(name):
@@ -178,6 +217,13 @@ def getSettings(camera_id):
             "min_exposure": 1,
             "max_exposure": 100
         }
+    return {
+        "manual_mode" : 0,
+        "auto_exposure_mode": 0,
+        # todo seams that everything defaults to 1 to 100
+        "min_exposure": 1,
+        "max_exposure": 100
+    }
 
 if __name__ == "__main__":
     print("test")

@@ -1,33 +1,22 @@
 import json
 from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QListWidget,
-    # QListWidgetItem,
-    QShortcut,
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
-    QAction,
     QPushButton,
     QLabel,
-    QComboBox,
-    QLineEdit,
     QGridLayout,
-    QFileDialog,
-    QStackedWidget,
     QSlider,
     QSplitter,
-    QDialogButtonBox
 )
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-from cameraThread import MyThread
-from  ViewportLabel import Label
-import settingsWidget
-import alertWidget, videoSubSystem
-from helpers import Cameras
+from computer_code.Ui.cameraThread import MyThread
+from  computer_code.Ui.ViewportLabel import Label
+import computer_code.Ui.settingsWidget as settingsWidget
+import computer_code.Ui.alertWidget as alertWidget, computer_code.api.videoSubSystem as videoSubSystem
+from computer_code.api.helpers import Cameras
 # TODO have singleton for camera with a current camera param that stores current camera setting and 
 # todo maybe also have this be singleton for setup data with a param for if it has been modified since saving 
 class CalibrateWidget(QWidget):
@@ -220,6 +209,7 @@ class CalibrateWidget(QWidget):
 
         self.progress_label.setText(f"captures left {len(self.camera_thread.imgpoints)}/{self.min_num_captures}")
         self.settings_ui.update_labels()
+
         
 
    

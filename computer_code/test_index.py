@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 # import unittest
 # from unittest.mock import patch, MagicMock
 import numpy as np
-import index
+import computer_code.api.index as index
 
 
 # TODO for some reason ./bin/python -m pip install flask-cors has to be run in computer_code to prevent import issue with flask-cors that prevents vscode testing suit from working

@@ -13,15 +13,15 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeySequence, QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
-from  ViewportLabel import Label
+from  computer_code.Ui.ViewportLabel import Label
 
 from PyQt5.QtWidgets import QSplitter
-from helpers import  Cameras
+from computer_code.api.helpers import  Cameras
         
-from cameraThread import MyThread
-import settingsWidget
-import videoSubSystem
-import alertWidget
+from computer_code.Ui.cameraThread import MyThread
+import computer_code.Ui.settingsWidget as settingsWidget
+import computer_code.api.videoSubSystem as videoSubSystem
+import computer_code.Ui.alertWidget as alertWidget
 
 
 class setup_window(QWidget):
@@ -108,6 +108,7 @@ class setup_window(QWidget):
         def selection_update_labels():
             if not self.camera_thread._running:
                 self.settings_ui.update_labels()
+
 
         self.added_webcam_list.itemSelectionChanged.connect(selection_update_labels)
         self.webcam_settings_layout.addWidget(self.settings_ui)
@@ -207,7 +208,7 @@ class setup_window(QWidget):
 
         # TODO have to find way of adding newly added cameras in system to list
         def add_camera(attached_webcam):
-            cam_id = videoSubSystem.get_id_from_name(attached_webcam[0])
+            cam_id = attached_webcam[1]
             
             res = videoSubSystem.getResolution(cam_id)
             if len(res) > 0:
@@ -236,6 +237,7 @@ class setup_window(QWidget):
         # TODO find better way of doing this
         if self.cameras.camera_params == []:
             for attached_webcam in attached_webcams:
+                print(attached_webcam)
                 add_camera(attached_webcam)
             
         # self.update_list()
@@ -256,6 +258,7 @@ class setup_window(QWidget):
         self.update_list()
     def update_labels(self):
         self.settings_ui.update_labels()
+
         if self.get_index() == -1:
             self.current_camera_label.setText("camera view")
         
@@ -290,6 +293,7 @@ class setup_window(QWidget):
             
             self.camera_thread.start()
             self.settings_ui.update_labels()
+
         except:
             alert = alertWidget.alert_widget(
                 "this camera could not be accessed", "ok", "", style=self.styleSheet()

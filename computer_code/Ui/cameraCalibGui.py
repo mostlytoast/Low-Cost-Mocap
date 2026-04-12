@@ -6,18 +6,18 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
 )
 
-from cameraThread import MyThread
-from helpers import Cameras
-import file_mech
+import computer_code.Ui.file_mech as file_mech
+from computer_code.api.helpers import Cameras
+from computer_code.Ui.cameraThread import MyThread
 
 
 # import sys
 
-import alertWidget
-import calibrationWidget
-import setupWidget
-import style
-import viewapp   
+import computer_code.Ui.alertWidget as alertWidget
+import computer_code.Ui.calibrationWidget as calibrationWidget
+import computer_code.Ui.setupWidget as setupWidget
+import computer_code.Ui.style as style
+# import computer_code.Ui.viewapp as viewapp   
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -27,11 +27,36 @@ class MainWindow(QMainWindow):
         self.save_path = ""
         self.stacked_widget = QStackedWidget(self)
         self.setCentralWidget(self.stacked_widget)
+        self.initMenu()
         self.initUI()
+        self.show_setup()
+        self.calibrate_widget_instance.update_labels()
+        self.setup_widget.update_list()
 
     def initUI(self):
+        
         # TODO need new data structure that better supports edits
+        self.setWindowTitle("Camera calibration")
+        self.setGeometry(300, 300, 400, 300)
+        # Apply a VS Code-like style using QSS
+        self.setStyleSheet(style.style)
+        
+        self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
+        # todo singleton for camera data
+        self.setup_widget = setupWidget.setup_window(self)
+        self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
+        self.stacked_widget.addWidget(self.setup_widget)
+        # self.app_widget_instance = viewapp.MainWindow(self)
+        # self.stacked_widget.addWidget(self.app_widget_instance)
+
+        # self.stacked_widget.setCurrentIndex(2)
+        
+        self.stacked_widget.setCurrentWidget(self.setup_widget)
+
+        
+
+    def initMenu(self):
         self.menubar = self.menuBar()
         file_menu = self.menubar.addMenu("File")
         self.calibrate_menu = self.menubar.addMenu("calibration")
@@ -84,27 +109,7 @@ class MainWindow(QMainWindow):
         debug_menu.addAction(reload_all)
         # reload_all.setShortcut("Ctrl+O")
         reload_all.setStatusTip("reload")
-        self.setWindowTitle("Camera calibration")
-        self.setGeometry(300, 300, 400, 300)
-        # Apply a VS Code-like style using QSS
-        self.setStyleSheet(style.style)
-        
-        self.calibrate_widget_instance = calibrationWidget.CalibrateWidget(self)
-        # todo singleton for camera data
-        self.setup_widget = setupWidget.setup_window(self)
-        self.stacked_widget.addWidget(self.calibrate_widget_instance)
 
-        self.stacked_widget.addWidget(self.setup_widget)
-        self.app_widget_instance = viewapp.MainWindow(self)
-        self.stacked_widget.addWidget(self.app_widget_instance)
-
-        # self.stacked_widget.setCurrentIndex(2)
-        
-        self.stacked_widget.setCurrentWidget(self.setup_widget)
-
-        self.show_setup()
-        self.calibrate_widget_instance.update_labels()
-        self.setup_widget.update_list()
     def update_all(self):
         self.calibrate_widget_instance.update_labels()
         self.setup_widget.update_labels()

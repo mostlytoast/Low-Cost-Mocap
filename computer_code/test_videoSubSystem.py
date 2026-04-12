@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-import videoSubSystem
+import computer_code.api.videoSubSystem as videoSubSystem
 import cv2
 
 class TestVideoSubSystem(unittest.TestCase):

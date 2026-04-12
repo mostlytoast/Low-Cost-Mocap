@@ -1,6 +1,6 @@
 import json
 import time
-import cameraCalibGui
+import computer_code.Ui.cameraCalibGui as cameraCalibGui
 import sys
 from PyQt5.QtWidgets import QApplication, QAction
 
@@ -242,7 +242,7 @@ class MyEventFilter(QObject):
 #     # app.installEventFilter(event_filter)  # Install the filter on the application
 
 
-#     window =  cameraCalibGui.MainWindow()
+#     window =  cameraCalibGcomputer_code.Ui.MainWindow()
 #     # event_filter.set_window(window)
 #     window.show()
 #     QTimer.singleShot(1000, lambda: MyEventFilter.load_and_play_events(window, 'recorded_events.json'))
@@ -258,7 +258,7 @@ def record():
     app.installEventFilter(event_filter)
 
     # ✅ Create and set the window
-    window = cameraCalibGui.MainWindow()
+    window = cameraCalibGcomputer_code.Ui.MainWindow()
     event_filter.set_window(window)
     window.show()
 
@@ -273,7 +273,7 @@ def record():
 # def play():
 #     app = QApplication(sys.argv)
 #     event_filter = MyEventFilter()
-#     window = cameraCalibGui.MainWindow()
+#     window = cameraCalibGcomputer_code.Ui.MainWindow()
 #     event_filter.set_window(window)
 #     window.show()
 
@@ -288,7 +288,7 @@ def play():
     # app.installEventFilter(event_filter)
 
     # ✅ Create and set the window
-    window = cameraCalibGui.MainWindow()
+    window = cameraCalibGcomputer_code.Ui.MainWindow()
     event_filter.set_window(window)
     window.show()
 

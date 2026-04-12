@@ -10,12 +10,12 @@ from PyQt5.QtWidgets import QApplication,QAction
 import sys
 # import pyfakewebcam
 # Import your code (adjust import based on your structure)
-from cameraCalibGui import MainWindow
+from computer_code.Ui.cameraCalibGui import MainWindow
 import pyvirtualcam
 import cv2
 import colorsys
 from PyQt5.QtTest import QTest
-from cameraThread import MyThread
+from computer_code.Ui.cameraThread import MyThread
 
 class TestMainWindow(unittest.TestCase):
     @classmethod

@@ -57,7 +57,7 @@ For 3d viewport in the tracking application I used the [PyQt5 Mesh Viewer](https
 
 if you plan on working on the UI for this project consider using [ PyQtInspect](https://github.com/JezaChen/PyQtInspect-Open) which is a very useful tool to debug potential layout bugs.
 
-`./computer_code/venv/bin/python3  -m PyQtInspect --direct --multiprocess --show-pqi-stack --qt-support=pyqt5 --file computer_code/api/cameraCalibGui.py `
+`./computer_code/venv/bin/python3  -m PyQtInspect --direct --multiprocess --show-pqi-stack --qt-support=pyqt5 --file computer_code/api/cameraCalibGcomputer_code.Ui.py `
 
 ## Documentation
 

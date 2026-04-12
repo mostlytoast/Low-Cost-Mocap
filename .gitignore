@@ -46,4 +46,4 @@ dist/*
 computer_code/build/*
 computer_code/api/build/*
 computer_code/api/dist/*
-computer_code/api/cameraCalibGui.spec
+computer_code/api/cameraCalibGcomputer_code.Ui.spec

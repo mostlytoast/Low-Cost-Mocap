@@ -1,16 +1,15 @@
 import threading
 import numpy as np
 from scipy import linalg, optimize #, signal
-import cv2 as cv
 from scipy.spatial.transform import Rotation
 import copy
 import json
 # import os
 import time
 import cv2 as cv
-from KalmanFilter import KalmanFilter
-from Singleton import Singleton
-import videoSubSystem 
+from computer_code.api.KalmanFilter import KalmanFilter
+from computer_code.api.Singleton import Singleton
+import computer_code.api.videoSubSystem as videoSubSystem 
 # import sys
 # from time import sleep
 # from line_profiler import profile
@@ -318,6 +317,7 @@ class Cameras:
         
         if distortion_coef is not None:
             self.camera_params[camera_num]["distortion_coef"] = distortion_coef
+
 def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
     # while self._running:
     #     with self._lock:
@@ -344,7 +344,6 @@ def find_chessboard(img,checkerboard, checkerboard_dimension, timeout):
     # todo maybe dynamic for timeout DO WITH SENSITIVITY SLIDER 
     thread = threading.Thread(target=detect_chessboard)
     thread.start()
-    # print("time",timeout)
     thread.join(timeout)
     if thread.is_alive():
         # Timeout reached, stop thread (can't kill thread, just ignore result)

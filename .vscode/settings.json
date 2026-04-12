@@ -7,8 +7,5 @@
         "test_*.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true,
-    "python.REPL.enableREPLSmartSend": false,
-    // "python.envFile": "${workspaceFolder}/.env",
-    // "python.envFile": "${workspaceFolder}/computer_code/venv/bin/python3"
+    "python.testing.unittestEnabled": true
 }

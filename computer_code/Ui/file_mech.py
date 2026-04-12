@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QMessageBox
 )
 import numpy as np
-from helpers import camera_pose_to_serializable, camera_pose_from_serializable, Cameras
+from computer_code.api.helpers import camera_pose_to_serializable, camera_pose_from_serializable, Cameras
 import json
 class file_dialog(QFileDialog):
     """provides a uniform way for both the camera calibration and normal app to access saved data 
@@ -124,4 +124,4 @@ class file_dialog(QFileDialog):
             json.dump(data,f)
 
 
-    # TODO clean up by moving into app.py and camera calib GUI.py
+    # TODO clean up by moving into app.py and camera calib Gcomputer_code.Ui.py

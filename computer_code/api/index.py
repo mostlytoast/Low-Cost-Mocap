@@ -1,4 +1,4 @@
-from helpers import camera_pose_to_serializable, calculate_reprojection_errors, bundle_adjustment, Cameras, triangulate_points, essential_from_fundamental, motion_from_essential
+from computer_code.api.helpers import camera_pose_to_serializable, calculate_reprojection_errors, bundle_adjustment, Cameras, triangulate_points, essential_from_fundamental, motion_from_essential
 import cv2 as cv
 import numpy as np
 from scipy import linalg
@@ -72,9 +72,6 @@ class MyThread(QThread):
           
         # TODO return fps
         return gen(cameras)
-
-
-
  
     def acquire_floor(self,object_points):
         cameras = Cameras.instance()
@@ -128,58 +125,7 @@ class MyThread(QThread):
         new_to_world_coords_matrix = rotate_180_x @ new_to_world_coords_matrix
         cameras.to_world_coords_matrix =  cameras.to_world_coords_matrix @ new_to_world_coords_matrix
         self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-
-
-    # # @socketio.on("acquire-floor")
-    # def acquire_floor(self,object_points):
-    #     cameras = Cameras.instance()
-    #     # object_points = data["objectPoints"]
-    #     object_points = np.array([item for sublist in object_points for item in sublist])
-
-    #     tmp_A = []
-    #     tmp_b = []
-    #     for i in range(len(object_points)):
-    #         tmp_A.append([object_points[i,0], object_points[i,1], 1])
-    #         tmp_b.append(object_points[i,2])
-    #     b = np.matrix(tmp_b).T
-    #     A = np.matrix(tmp_A)
-
-    #     fit, residual, rnk, s = linalg.lstsq(A, b)
-    #     fit = fit.T[0]
-
-    #     plane_normal = np.array([[fit[0]], [fit[1]], [-1]])
-    #     plane_normal = plane_normal / linalg.norm(plane_normal)
-    #     up_normal = np.array([[0],[0],[1]], dtype=np.float32)
-
-    #     plane = np.array([fit[0], fit[1], -1, fit[2]])
-
-    #     # https://math.stackexchange.com/a/897677/1012327
-    #     G = np.array([
-    #         [np.dot(plane_normal.T,up_normal)[0][0], -linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), 0],
-    #         [linalg.norm(np.cross(plane_normal.T[0],up_normal.T[0])), np.dot(plane_normal.T,up_normal)[0][0], 0],
-    #         [0, 0, 1]
-    #     ])
-    #     F = np.array([plane_normal.T[0], ((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal)/linalg.norm((up_normal-np.dot(plane_normal.T,up_normal)[0][0]*plane_normal))).T[0], np.cross(up_normal.T[0],plane_normal.T[0])]).T
-    #     R = F @ G @ linalg.inv(F)
-
-    #     # R = R @ [[1,0,0],[0,-1,0],[0,0,1]] # i dont fucking know why
-    #     # Remove translation component from R by ensuring it's a pure rotation matrix
-    #     U, _, Vt = np.linalg.svd(R[:3, :3])
-    #     R = U @ Vt
-    #     # # Swap y and z axes in the rotation matrix
-    #     # swap_yz = np.array([
-    #     #     [1, 0, 0],
-    #     #     [0, 0, 1],
-    #     #     [0, 1, 0]
-    #     # ])
-    #     # R = R @ swap_yz
-    #     cameras.to_world_coords_matrix = np.array(np.vstack((np.c_[R, [0,0,0]], [[0,0,0,1]])))
-    #     self.data_signal.emit({"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-
-        # socketio.emit("to-world-coords-matrix", {"to_world_coords_matrix": cameras.to_world_coords_matrix.tolist()})
-
-    # @socketio.on("acquire-floor")
-
+        
     def set_origin(self,object_point, toWorldCoordsMatrix):
         if toWorldCoordsMatrix == []:
             toWorldCoordsMatrix = np.eye(4).tolist()

@@ -5,7 +5,7 @@ from PyQt5.QtCore import QTimer
 
 import numpy as np
 from pyrr import Matrix44
-from ArcBall import ArcBallUtil
+from computer_code.Ui.ArcBall import ArcBallUtil
 
 
 class QGLControllerWidget(QOpenGLWidget):
@@ -161,41 +161,6 @@ class QGLControllerWidget(QOpenGLWidget):
             raise IndexError("Camera index out of range")
 
         size = 0.1  # Default size; you may want to store per-camera size if needed
-        # base = np.array([
-        #     [-size, -size, size],
-        #     [ size, -size, size],
-        #     [ size,  size, size],
-        #     [-size,  size, size]
-        # ])
-        # apex = np.array([0, 0, 0])
-        # lines = []
-        # for i in range(4):
-        #     lines.append(apex)
-        #     lines.append(base[i])
-        #     lines.append(base[i])
-        #     lines.append(base[(i+1)%4])
-        # camera_vertices = np.array(lines, dtype='f4')
-        # # Apply transformation if provided
-        # if transform is not None:
-        #     if isinstance(transform, dict) and 'R' in transform and 't' in transform:
-        #         # Compose 4x4 matrix from R and t
-        #         R = np.asarray(transform['R'], dtype='f4')
-        #         t = np.asarray(transform['t'], dtype='f4').reshape(3)
-        #         mat = np.eye(4, dtype='f4')
-        #         mat[:3, :3] = R
-        #         mat[:3, 3] = t
-        #         transform_mat = mat
-        #     elif isinstance(transform, np.ndarray) and transform.shape == (4, 4):
-        #         transform_mat = transform
-        #     else:
-        #         raise ValueError("transform must be a 4x4 numpy array or a dict with 'R' and 't'")
-        #     # Homogeneous coordinates for transformation
-        #     ones = np.ones((camera_vertices.shape[0], 1), dtype='f4')
-        #     verts_hom = np.hstack([camera_vertices, ones])
-        #     camera_vertices = (transform_mat @ verts_hom.T).T[:, :3]
-        # else:
-        #     # Apply translation by position if no transform
-        #     camera_vertices += np.array(position, dtype='f4')
         camera_vertices = self.camera_helper(position, size, transform)
 
         self.camera_vertices_list[index] = camera_vertices
@@ -303,31 +268,7 @@ class QGLControllerWidget(QOpenGLWidget):
             self.color.value = (1.0, 1.0, 1.0, 0.8)
             if hasattr(self, 'vao'):
                 self.vao.render()
-    # original painGL
-    # def paintGL(self):
-    #     self.ctx.clear(1.0, 1.0, 1.0)
-    #     self.ctx.enable(moderngl.DEPTH_TEST)
 
-    #     if self.mesh is None:
-    #         return
-
-    #     self.aspect_ratio = self.width()/max(1.0, self.height())
-    #     proj = Matrix44.perspective_projection(60.0, self.aspect_ratio,
-    #                                            0.1, 1000.0)
-    #     lookat = Matrix44.look_at(
-    #         (0.0, 0.0, 2.0),  # eye
-    #         (0.0, 0.0, 0.0),  # target
-    #         (0.0, 1.0, 0.0),  # up
-    #     )
-
-    #     self.light.value = (1.0, 1.0, 1.0)
-    #     self.color.value = (1.0, 1.0, 1.0, 0.8)
-    #     self.arc_ball.Transform[3, :3] = \
-    #         -self.arc_ball.Transform[:3, :3].T@self.center
-    #     self.mvp.write(
-    #         (proj * lookat * self.arc_ball.Transform).astype('f4'))
-
-    #     self.vao.render()
 
     def resizeGL(self, width, height):
         if self.ctx is None:
@@ -356,34 +297,3 @@ class QGLControllerWidget(QOpenGLWidget):
             delta = event.angleDelta().y()
             self.arc_ball.onScroll(delta)
 
-
-# class MainWindow(QtWidgets.QMainWindow):
-
-#     def __init__(self):
-#         QtWidgets.QMainWindow.__init__(self)
-#         self.resize(640, 480)
-#         self.setWindowTitle('Mesh Viewer')
-#         self.gl = QGLControllerWidget(self)
-
-#         self.setCentralWidget(self.gl)
-#         self.menu = self.menuBar().addMenu("&File")
-#         self.menu.addAction('&Open', self.openFile)
-
-#         timer = QtCore.QTimer(self)
-#         timer.setInterval(20)  # period, in milliseconds
-#         timer.timeout.connect(self.gl.updateGL)
-#         timer.start()
-
-#     def openFile(self):
-#         fname = QtWidgets.QFileDialog.getOpenFileName(
-#             self, 'Open file', '', "Mesh files (*.obj *.off *.stl *.ply)")
-#         mesh = om.read_trimesh(fname[0])
-#         self.gl.set_mesh(mesh)
-
-
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication([])
-#     win = MainWindow()
-
-#     win.show()
-#     app.exec()

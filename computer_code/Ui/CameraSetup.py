@@ -1,5 +1,5 @@
 
-from videoSubSystem import *
+from computer_code.api.videoSubSystem import *
 import cv2
 import numpy as np
 import json
@@ -260,92 +260,3 @@ if __name__ == "__main__":
     cam_id = get_id_from_name("Arducam OV9281 USB Camera: Ardu (usb-0000:08:00.3-1.4):")
     res = getResolution(cam_id)[0]
     get_calibration_images(cam_id, res[0],res[1])
-# class detectCameraGUI(QtWidgets.QWidget):
-#     def __init__(self):
-#         super().__init__()
-
-#         # self.setWindowTitle("HELLO!")
-
-#         # QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-
-#         # self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-#         # self.buttonBox.accepted.connect(self.accept)
-#         # self.buttonBox.rejected.connect(self.reject)
-
-#         # layout = QtWidgets.QVBoxLayout()
-#         # message = QtWidgets.QLabel("Something happened, is that OK?")
-#         # layout.addWidget(message)
-#         # layout.addWidget(self.buttonBox)
-#         # self.setLayout(layout)
-#         self.setup_button = QtWidgets.QPushButton(" from scratch")
-#         # self.setup_button.clicked.connect(self.setup)
-#         self.layout1.addWidget(self.setup_button)
-
-#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-#         # self.setup_button.clicked.connect(self.handle_option)
-#         # self.layout1.addWidget(self.setup_button)
-        
-#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-#         # self.setup_button.clicked.connect(self.handle_option)
-#         # self.layout1.addWidget(self.setup_button)
-#         # self.output_text = QtWidgets.QTextEdit()
-#         # self.output_text.setReadOnly(True)
-#         # self.layout1.addWidget(self.output_text)
-
-#         self.setLayout(self.layout1)
-# class CameraSetupGUI(QtWidgets.QWidget):
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("Camera Setup")
-#         self.layout1 = QtWidgets.QHBoxLayout()
-        
-#         # self.option_label = QtWidgets.QLabel("Choose option:")
-#         # self.layout1.addWidget(self.option_label)
-
-#         # self.option_combo = QtWidgets.QComboBox()
-#         # self.option_combo.addItems([
-#         #     "1. Setup from scratch",
-#         #     "2. Add camera to existing setup",
-#         #     "3. Recalibrate existing camera"
-#         # ])
-#         # self.layout1.addWidget(self.option_combo)
-
-#         self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-#         self.setup_button.clicked.connect(self.setup)
-#         self.layout1.addWidget(self.setup_button)
-
-#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-#         # self.setup_button.clicked.connect(self.handle_option)
-#         # self.layout1.addWidget(self.setup_button)
-        
-#         # self.setup_button = QtWidgets.QPushButton("Setup from scratch")
-#         # self.setup_button.clicked.connect(self.handle_option)
-#         # self.layout1.addWidget(self.setup_button)
-#         # self.output_text = QtWidgets.QTextEdit()
-#         # self.output_text.setReadOnly(True)
-#         # self.layout1.addWidget(self.output_text)
-
-#         self.setLayout(self.layout1)
-
-#     def setup(self):
-#         # # Remove the old layout and replace it with a new one
-#         # QtWidgets.QWidget().setLayout(self.layout())  # Detach old layout
-#         # self.layout1 = QtWidgets.QHBoxLayout()        # Create a new layout
-#         # self.setLayout(self.layout1)                  # Set the new layout
-#         # self.setWindowTitle("scratch")
-#         # self.alert =  QtWidgets.QDialog()
-#         # self.layout1.addWidget(self.setup_button)
-#         dlg = QtWidgets.QDialog(self)
-#         dlg.setWindowTitle("HELLO!")
-#         dlg.exec()
-#     # add camera to existing 
-#     # recalibrate camera 
-#     # reconfigure connections (usb id's)
-
-       
-
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     window = CameraSetupGUI()
-#     window.show()
-#     sys.exit(app.exec_())

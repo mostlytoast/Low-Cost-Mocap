@@ -16,17 +16,17 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtGui import QSurfaceFormat
 
 
-import index
-from viewer3d import QGLControllerWidget
+import computer_code.api.index as index
+from computer_code.Ui.viewer3d import QGLControllerWidget
 import time
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
-import file_mech
+import computer_code.Ui.file_mech as file_mech
 import inspect
 # import openmesh as om
-import style
+import computer_code.Ui.style as style
 
-from helpers import Cameras
+from computer_code.api.helpers import Cameras
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
@@ -230,7 +230,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def startup(self):
         QtCore.QTimer.singleShot(4, self.gl_widget.create_grid)
-        QtCore.QTimer.singleShot(4, self.test_points)
+        # QtCore.QTimer.singleShot(4, self.test_points)
 
     def test_points(self):
         self.gl_widget.add_point([0, 0, 1])
@@ -281,8 +281,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_enabled_states()
 
     def toggle_set_scale(self):
-
-       
         self.is_acquiring_scale = not self.is_acquiring_scale
         self.camera_thread.live_mocap(
         "start" if self.is_acquiring_scale else "stop",
@@ -305,11 +303,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def toggle_acquire_floor(self):
         # starts collecting points and when finished (button is clicked again) it starts calculating floor position 
         self.is_acquiring_floor = not self.is_acquiring_floor
-        self.camera_thread.live_mocap(
-        "start" if self.is_acquiring_floor else "stop",
-        self.cameras.camera_poses,
-        self.cameras.to_world_coords_matrix,
-        )
+        self.camera_thread.live_mocap("start" if self.is_acquiring_floor else "stop",self.cameras.camera_poses,self.cameras.to_world_coords_matrix,)
         self.acquire_floor.setText(
             "Stop" if self.is_acquiring_floor else "Start"
         )
@@ -344,35 +338,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.is_acquiring_origin: 
             self.object_points = [] 
 
-        # if not self.is_acquiring_origin:
-        #     self.camera_thread.live_mocap(
-        #     "start",
-        #     self.cameras.camera_poses,
-        #     self.cameras.to_world_coords_matrix,
-        #     )
-        #     self.set_origin.setText(
-        #         "Stop" 
-        #     )
-        #     self.is_acquiring_origin = True
-            
-        # if self.is_acquiring_origin and len(self.object_points) >0:
-        #     if len(self.object_points[-1]) >0:
-        #         # finished capturing points 
-        #         self.camera_thread.set_origin(
-        #         self.object_points[-1], self.cameras.to_world_coords_matrix
-        #     )
-        #         self.is_acquiring_origin = False
-        #         self.has_origin = True
-        #         self.camera_thread.live_mocap(
-        #         "stop",
-        #         self.cameras.camera_poses,
-        #         self.cameras.to_world_coords_matrix,
-        #         )
-        #         self.set_origin.setText(
-        #             "Start" 
-        #         )
-        #         self.object_points = []
-        #         self.update_enabled_states()
 
             
     
@@ -500,8 +465,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @Slot(dict)
     def setData(self, data):
-        # if data != {}:
-        #     print(data)
         if self.collecting_points and "image-points" in data:
             self.captured_points_for_pose.append(data.get("image-points"))
 

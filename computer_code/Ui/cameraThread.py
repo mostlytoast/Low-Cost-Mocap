@@ -4,7 +4,7 @@ from PyQt5.QtGui import QImage
 import cv2
 
 from threading import Lock
-from Singleton import Singleton
+from computer_code.api.Singleton import Singleton
 import numpy as np
 
 """_summary_ separate thread to get video from webcam 
@@ -12,7 +12,7 @@ import numpy as np
 Returns:
     _type_: _description_ signal image 
 """
-from helpers import find_chessboard, Cameras
+from computer_code.api.helpers import find_chessboard, Cameras
 import time
 @Singleton
 class MyThread(QThread):
