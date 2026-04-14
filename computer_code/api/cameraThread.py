@@ -87,13 +87,14 @@ class Thread(QThread):
         self.cap = cameras.cameras[self.camera_id]
         while self._running:
             with self._lock:
-   
                 if self._pending_camera_id is not None:
+                    self.cap.release()
                     self.camera_id = self._pending_camera_id
                     self.cap = cameras.cameras[self.camera_id]
                     self._pending_camera_id = None
 
                 if self.cap is not None and self.cap.isOpened():
+                    # should have this be apart of different thread? 
                     ret, frame = self.cap.read()
                     if ret:
                         frame = self.chessboard(frame)

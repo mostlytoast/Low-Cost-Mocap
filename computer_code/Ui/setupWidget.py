@@ -85,6 +85,7 @@ class setup_window(QWidget):
 
         self.main_layout.addLayout(self.webcam_list_layout)
         # Shortcuts for deleting items in each list
+        # TODO should this function be else where?
         self.update_list()
 
         self.delete_shortcut1 = QShortcut(

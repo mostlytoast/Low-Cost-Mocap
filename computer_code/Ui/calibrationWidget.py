@@ -1,4 +1,3 @@
-import json
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
@@ -9,7 +8,7 @@ from PyQt5.QtWidgets import (
     QSlider,
     QSplitter,
 )
-from PyQt5.QtGui import QKeySequence, QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 from computer_code.api.cameraThread import Thread
@@ -254,8 +253,3 @@ class CalibrateWidget(QWidget):
         # self.update_labels()
         self.settings_ui.update_labels()
         self.update_labels()
-
-        
-
-   
-        

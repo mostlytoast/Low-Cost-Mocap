@@ -1,0 +1,417 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1" pages="2">
+  <diagram name="UML" id="SXAwoaBTWxmQuCQaMofY">
+    <mxGraphModel dx="1999" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-18" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CameraDataSubSystem&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ field: Type&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getCameras&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Names&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;(): {system_Name: string, system_Id: int}&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- (&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;getCameras&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Names&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;variants for mac windows and linux)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;+ getCameraSettings(&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;system_Name: string, system_Id: int&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;): { resolution_list:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;[(width:int, height:int)], min_exposure: int, max_exposure: int, auto_exposure_mode_value, manual_mode_value}&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- (getCameraSettings&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;variants for mac windows and linux)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;- functionPicker(??) generic funtion that selects the correct function for accessing data?&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="300" width="300" x="70" y="-70" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-19" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;Class&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ field: Type&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ method(): Type&lt;/p&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="580" y="-130" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-20" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;Camera&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- width: int&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- height: int&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- exposure: int&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- roatation: int&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- gain: int&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- auto: bool&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- system_Name: string&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- system_Id: int (for opencv)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- resoultion_List: [(width:int, height:int)]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;lt;&amp;lt;constructor&amp;gt;&amp;gt; + Camera(system_Name)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;lt;&amp;lt;getters and setters&amp;gt;&amp;gt;&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ setResolution(int): Void&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getPossibleResoultions():&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;resoultion_List: [(width:int, height:int)]&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ setExposure(int 1-100): bool (suscess)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ setGain(int 1-100): bool (suscess)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getSystemName(): string&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getSystemId(): int&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getFrame()&lt;/p&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="370" width="340" x="70" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-21" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="The constructor takes just the system name (same as one from videoSubSystem) then uses videoSubSystem to get all params and settings for that camera" vertex="1">
+          <mxGeometry height="240" width="240" x="-230" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-22" edge="1" parent="1" source="OXMqLf5pVUJphFbXXSzR-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.568;entryY=1.011;entryDx=0;entryDy=0;entryPerimeter=0;" target="OXMqLf5pVUJphFbXXSzR-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-23" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CameraProcess&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- camera: Camera&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- frameQueue&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- mode: bool (true process oldest frame in queue after finish false process newest frame in queue)&amp;nbsp;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- captureThread(): Type&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- processingThread(): ??&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;-findDotThread()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;-findChessboardThread()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;-&amp;nbsp;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ cameraProcess()&amp;nbsp;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="290" width="230" x="530" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="cameraProcess a per camera process with two threads one handles the capture of the frame (captureThread) and the processingThread computes the camera matrix transforms and dot detection (if needed), they comunicate with the frameQueue" vertex="1">
+          <mxGeometry height="150" width="190" x="540" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-25" edge="1" parent="1" source="OXMqLf5pVUJphFbXXSzR-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.999;entryY=0.391;entryDx=0;entryDy=0;entryPerimeter=0;" target="OXMqLf5pVUJphFbXXSzR-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-26" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;cameraSync&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ data_signal: Signal(dict)&amp;nbsp;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ run(): (start cameraProcess)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ calculateFloor(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;object_points&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;):&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ calculateOrigin()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ calculateCameraPose()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ calculateScale()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ toggleLocateObjects()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ toggleLiveMocap()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ changeAllCameraSettings()&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ cangeOneCameraSettings()&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getAllCameraFrames()&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getOneCameraFrame&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;-mutex()&lt;/p&gt;" vertex="1">
+          <mxGeometry height="350" width="220" x="1140" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-27" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Handles combining data between all cameras and running the mocap processes on that data" vertex="1">
+          <mxGeometry height="170" width="220" x="950" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-28" edge="1" parent="1" source="OXMqLf5pVUJphFbXXSzR-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1.011;entryY=0.402;entryDx=0;entryDy=0;entryPerimeter=0;" target="OXMqLf5pVUJphFbXXSzR-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" value="figure out communitation and spawing threads/processes" vertex="1">
+          <mxGeometry height="60" width="120" x="775" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-30" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" value="figure out hardware for frame sync? need microcontroller and investigate if code needs control over this" vertex="1">
+          <mxGeometry height="80" width="130" x="770" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-31" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LowPassFilter&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ field: Type&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ method(): Type&lt;/p&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="870" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-32" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;KalmanFilter&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ field: Type&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ method(): Type&lt;/p&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="870" y="-130" as="geometry" />
+        </mxCell>
+        <mxCell id="OXMqLf5pVUJphFbXXSzR-33" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" value="Need a way to track the frame that data came from (between threads and processes" vertex="1">
+          <mxGeometry height="80" width="135" x="575" y="790" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="eFXb-HqW00p5HAbwBSe4" name="State machine">
+    <mxGraphModel dx="3322" dy="988" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-3" edge="1" parent="1" source="umjx2YU6GIP_yWLhmsi6-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="160" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="-1170" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="720" y="570" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-10" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="click tracking button&amp;nbsp;&lt;div&gt;(stop calib)&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0478" y="1" as="geometry">
+            <mxPoint x="-1" y="-4" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-6" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="calibration" vertex="1">
+          <mxGeometry height="840" width="1240" x="-520" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-15" parent="umjx2YU6GIP_yWLhmsi6-6" style="swimlane;whiteSpace=wrap;html=1;" value="camera selecter" vertex="1">
+          <mxGeometry height="270" width="900" x="95" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-13" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-14" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="add cameras to list" vertex="1">
+          <mxGeometry relative="1" x="-0.109" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-11" parent="umjx2YU6GIP_yWLhmsi6-15" style="rounded=0;whiteSpace=wrap;html=1;" value="cant start calib" vertex="1">
+          <mxGeometry height="60" width="120" x="115" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-54" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-55" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-54" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="removed all cameras" vertex="1">
+          <mxGeometry relative="1" x="0.3395" y="2" as="geometry">
+            <mxPoint x="16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-12" parent="umjx2YU6GIP_yWLhmsi6-15" style="rounded=0;whiteSpace=wrap;html=1;" value="able to start calib" vertex="1">
+          <mxGeometry height="60" width="120" x="400" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-48" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-45" parent="umjx2YU6GIP_yWLhmsi6-15" style="rounded=0;whiteSpace=wrap;html=1;" value="has calib" vertex="1">
+          <mxGeometry height="60" width="120" x="705" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-50" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-49" parent="umjx2YU6GIP_yWLhmsi6-15" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="15" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-52" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.994;entryY=0.089;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-53" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-52" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="remove camera&lt;div&gt;&amp;nbsp;(still left with atleast onecam)&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.3106" as="geometry">
+            <mxPoint x="5" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-62" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.438;entryY=1.024;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="umjx2YU6GIP_yWLhmsi6-11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="165" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-63" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-62" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;div&gt;no cams active&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.499" y="-1" as="geometry">
+            <mxPoint x="-24" y="16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-56" parent="umjx2YU6GIP_yWLhmsi6-15" style="rounded=0;whiteSpace=wrap;html=1;" value="reload cameras" vertex="1">
+          <mxGeometry height="60" width="120" x="195" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-57" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.094;exitY=1.005;exitDx=0;exitDy=0;entryX=0.993;entryY=0.185;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-58" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-57" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="hit reload" vertex="1">
+          <mxGeometry relative="1" x="0.4539" y="-1" as="geometry">
+            <mxPoint x="9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-60" edge="1" parent="umjx2YU6GIP_yWLhmsi6-15" source="umjx2YU6GIP_yWLhmsi6-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.204;entryY=1.048;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-61" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-60" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="still have atleast one&amp;nbsp;&lt;div&gt;cams active&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.6096" as="geometry">
+            <mxPoint x="20" y="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-17" parent="umjx2YU6GIP_yWLhmsi6-6" style="swimlane;whiteSpace=wrap;html=1;" value="calib" vertex="1">
+          <mxGeometry height="200" width="940" x="50" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-20" edge="1" parent="umjx2YU6GIP_yWLhmsi6-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.02;entryY=0.227;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-31">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="70" as="sourcePoint" />
+            <mxPoint x="167.24000000000024" y="74.62000000000012" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-21" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Capture + board in view" vertex="1">
+          <mxGeometry relative="1" x="-0.0792" y="1" as="geometry">
+            <mxPoint x="4" y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-19" parent="umjx2YU6GIP_yWLhmsi6-17" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="30" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-35" edge="1" parent="umjx2YU6GIP_yWLhmsi6-17" source="umjx2YU6GIP_yWLhmsi6-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.182;entryY=1.069;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.883;exitY=1.069;exitDx=0;exitDy=0;exitPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-31">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="246" y="160" />
+              <mxPoint x="162" y="160" />
+            </Array>
+            <mxPoint x="160" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-36" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-35" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Capture + board in view" vertex="1">
+          <mxGeometry relative="1" x="0.0503" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-37" edge="1" parent="umjx2YU6GIP_yWLhmsi6-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.007;entryY=0.407;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-33">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="100" />
+              <mxPoint x="510" y="100" />
+              <mxPoint x="510" y="90" />
+              <mxPoint x="521" y="90" />
+            </Array>
+            <mxPoint x="310" y="50" as="sourcePoint" />
+            <mxPoint x="520" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-38" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-37" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="9 pictures, has no next next camera&amp;nbsp;&lt;div&gt;and clicks finish&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0615" y="-1" as="geometry">
+            <mxPoint x="-12" y="19" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-31" parent="umjx2YU6GIP_yWLhmsi6-17" style="rounded=0;whiteSpace=wrap;html=1;" value="take picture" vertex="1">
+          <mxGeometry height="60" width="120" x="190" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-33" parent="umjx2YU6GIP_yWLhmsi6-17" style="rounded=0;whiteSpace=wrap;html=1;" value="process and generate config" vertex="1">
+          <mxGeometry height="60" width="120" x="530" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-32" edge="1" parent="umjx2YU6GIP_yWLhmsi6-17" source="umjx2YU6GIP_yWLhmsi6-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1.005;exitY=0.397;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-41">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-34" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="9 pictures, has next next camera&amp;nbsp;&lt;div&gt;and clicks next camera&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.2967" y="-2" as="geometry">
+            <mxPoint x="18" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-42" edge="1" parent="umjx2YU6GIP_yWLhmsi6-17" source="umjx2YU6GIP_yWLhmsi6-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-19">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="590" y="30" />
+              <mxPoint x="20" y="30" />
+              <mxPoint x="20" y="72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-41" parent="umjx2YU6GIP_yWLhmsi6-17" style="rounded=0;whiteSpace=wrap;html=1;" value="queue next camera" vertex="1">
+          <mxGeometry height="60" width="120" x="530" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-16" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="umjx2YU6GIP_yWLhmsi6-17">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-22" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="click calibrate from scratch" vertex="1">
+          <mxGeometry relative="1" x="-0.7197" y="3" as="geometry">
+            <mxPoint x="42" y="38" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-26" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-27" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Yes" vertex="1">
+          <mxGeometry relative="1" x="-0.1667" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-25" parent="umjx2YU6GIP_yWLhmsi6-6" style="rounded=0;whiteSpace=wrap;html=1;" value="ask if they want to go back" vertex="1">
+          <mxGeometry height="60" width="120" x="290" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-23" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.436;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.599;entryY=1.042;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-24" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-23" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Go back" vertex="1">
+          <mxGeometry relative="1" x="0.1746" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-28" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.231;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-29" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="No" vertex="1">
+          <mxGeometry relative="1" x="0.2761" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-44" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="umjx2YU6GIP_yWLhmsi6-45">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="850" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-39" edge="1" parent="umjx2YU6GIP_yWLhmsi6-6" source="umjx2YU6GIP_yWLhmsi6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.56;entryY=0.001;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.623;exitY=1.009;exitDx=0;exitDy=0;exitPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="220" />
+              <mxPoint x="720" y="220" />
+              <mxPoint x="720" y="400" />
+              <mxPoint x="576" y="400" />
+              <mxPoint x="576" y="480" />
+            </Array>
+            <mxPoint x="640" y="281.98" as="sourcePoint" />
+            <mxPoint x="752.7399999999998" y="569.5800000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-40" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-39" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="click calibrate single camera" vertex="1">
+          <mxGeometry relative="1" x="-0.4331" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-64" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="700" />
+            </Array>
+            <mxPoint x="860" y="680" as="sourcePoint" />
+            <mxPoint x="720" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-65" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-64" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="click calib button&lt;div&gt;&amp;nbsp;(stop tracking)&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.6788" as="geometry">
+            <mxPoint x="44" y="20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-7" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="tracking" vertex="1">
+          <mxGeometry height="820" width="1350" x="860" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-69" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.01;entryY=0.448;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-72">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="65" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-70" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-69" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="load valid calib file" vertex="1">
+          <mxGeometry relative="1" x="0.0732" y="-2" as="geometry">
+            <mxPoint x="-21" y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-68" parent="umjx2YU6GIP_yWLhmsi6-7" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="80" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-79" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-72" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-81">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-80" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-79" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="start mocap" vertex="1">
+          <mxGeometry relative="1" x="-0.3004" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-86" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-72" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.001;entryY=0.429;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.992;exitY=0.634;exitDx=0;exitDy=0;exitPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-85" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-88" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-86" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="set Origin" vertex="1">
+          <mxGeometry relative="1" x="0.0009" y="-4" as="geometry">
+            <mxPoint x="-36" y="-62" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-72" parent="umjx2YU6GIP_yWLhmsi6-7" style="rounded=0;whiteSpace=wrap;html=1;" value="has valid calib for cameras, origin, scale, floor" vertex="1">
+          <mxGeometry height="100" width="250" x="440" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-73" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-75">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="60" y="65" />
+            </Array>
+            <mxPoint x="60" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-74" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-73" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="load non valid&amp;nbsp;&lt;div&gt;calib file&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.1248" y="-1" as="geometry">
+            <mxPoint x="-9" y="3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-76" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-68">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="90" y="95" />
+              <mxPoint x="89" y="95" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-75" parent="umjx2YU6GIP_yWLhmsi6-7" style="rounded=0;whiteSpace=wrap;html=1;" value="display load error message" vertex="1">
+          <mxGeometry height="60" width="120" x="30" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-81" parent="umjx2YU6GIP_yWLhmsi6-7" style="rounded=0;whiteSpace=wrap;html=1;" value="Tracking&amp;nbsp;" vertex="1">
+          <mxGeometry height="110" width="120" x="1090" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-82" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-81" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1.008;entryY=0.211;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-72">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-83" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-82" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="stop mocap" vertex="1">
+          <mxGeometry relative="1" x="-0.083" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-89" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-85" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" target="umjx2YU6GIP_yWLhmsi6-72">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="295" />
+              <mxPoint x="850" y="115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-85" parent="umjx2YU6GIP_yWLhmsi6-7" style="rounded=0;whiteSpace=wrap;html=1;" value="get new origin" vertex="1">
+          <mxGeometry height="100" width="120" x="1070" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-90" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-72" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.001;entryY=0.429;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="umjx2YU6GIP_yWLhmsi6-93" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="688" y="250" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-91" connectable="0" parent="umjx2YU6GIP_yWLhmsi6-90" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="getFloor" vertex="1">
+          <mxGeometry relative="1" x="0.0009" y="-4" as="geometry">
+            <mxPoint x="15" y="-94" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-93" parent="umjx2YU6GIP_yWLhmsi6-7" style="rounded=0;whiteSpace=wrap;html=1;" value="get floor" vertex="1">
+          <mxGeometry height="100" width="120" x="1070" y="367" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-94" edge="1" parent="umjx2YU6GIP_yWLhmsi6-7" source="umjx2YU6GIP_yWLhmsi6-93" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.856;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="umjx2YU6GIP_yWLhmsi6-72">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="umjx2YU6GIP_yWLhmsi6-67" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="have it remember past state" vertex="1">
+          <mxGeometry height="30" width="60" x="760" y="380" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
