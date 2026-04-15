@@ -1,6 +1,5 @@
 
 import numpy as np
-import cv2 as cv
 from computer_code.api.KalmanFilter import KalmanFilter
 from computer_code.api.Singleton import Singleton
 import computer_code.api.videoSubSystem as videoSubSystem 
@@ -68,6 +67,15 @@ class Cameras:
             print("res",camera_data["width"],camera_data["height"])
             cap.set(cv.CAP_PROP_FRAME_WIDTH, float(camera_data["width"]))
             cap.set(cv.CAP_PROP_FRAME_HEIGHT, float(camera_data["height"]))
+            if (camera_data["intrinsic_matrix"] and camera_data["distortion_coef"]):
+                camera_data["cam map"] = cv.initUndistortRectifyMap(
+                np.array(camera_data["intrinsic_matrix"]),
+                np.array(camera_data["distortion_coef"]),
+                None,
+                np.array(camera_data["intrinsic_matrix"]),
+                (camera_data["width"], camera_data["height"]),
+                cv.CV_16SC2
+                )   
             # cap.set(cv.CAP_PROP_FPS, 120)  # Set desired FPS
 
             self.cameras.append(cap)
@@ -163,7 +171,9 @@ class Cameras:
             frames[i] = np.rot90(frames[i], k=self.camera_params[i]["rotation"])
             # TODO should we be squaring images? might be causing issues 
             frames[i] = make_square(frames[i])
-            frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
+            map1, map2 = self.camera_params[i]["cam map"]
+            frames[i] = cv.remap(frames[i], map1, map2, interpolation=cv.INTER_LINEAR)
+            # frames[i] = cv.undistort(frames[i], self.get_camera_params(i)["intrinsic_matrix"], self.get_camera_params(i)["distortion_coef"])
             frames[i] = cv.GaussianBlur(frames[i], (21, 21), 0)
             kernel = np.array([[-2,-1,-1,-1,-2],
                                [-1,1,3,1,-1],
