@@ -164,6 +164,7 @@ def getResolution(camera_id):
         resolutions.sort()
         return resolutions
     return [(1920, 1080)]
+    
 def getSettings(camera_id):
     """returns low lying information about a camera such as max min exposure and auto_exposure settings for manual and auto
 

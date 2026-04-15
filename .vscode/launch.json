@@ -16,6 +16,14 @@
             "module": "computer_code.Ui.trackingGui",
             "justMyCode": true,
             "python": "${workspaceFolder}/computer_code/venv/bin/python3"
+        },
+        {
+             "name": "Python: cameraProcess",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "computer_code.api.cameraProcess",
+            "justMyCode": true,
+            "python": "${workspaceFolder}/computer_code/venv/bin/python3"
         }
     ]
 }
